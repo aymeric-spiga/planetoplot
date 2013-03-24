@@ -1019,11 +1019,10 @@ class onerequest():
             if c in self.f.dimensions.keys():
              self.name_t = c
           try:
-            # speed up: only get first value, last one, and step.
+            # speed up: only get first value, last one.
             dafirst = self.f.variables[self.name_t][0]
             dalast = self.f.variables[self.name_t][self.dim_t-1]
-            step = self.f.variables[self.name_t][1] - dafirst
-            self.field_t = np.arange(dafirst,dalast,step)
+            self.field_t = np.linspace(dafirst,dalast,num=self.dim_t)
             if dafirst == dalast: self.field_t = np.array([dafirst])
           except:
             # ... or if a problem encountered, define a simple time axis
