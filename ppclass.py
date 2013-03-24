@@ -747,7 +747,6 @@ class pp():
     # REQUIRED: attributes of opt must be the same as in the pp object
     ###########################################################
     def getopt(self,opt):
-        self.superpose = opt.superpose
         # -- if only one, or less than the number of plots --> we take the first one
         # -- if as many as number of plots --> OK, each plot has its own setting
         # (except a few cases such as trans)

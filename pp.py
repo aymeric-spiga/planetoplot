@@ -5,6 +5,7 @@
 ##############################################
 from optparse import OptionParser ### TBR by argparse
 from ppclass import pp, inspect
+import sys
 ##############################################
 
 # NB: this is a convenient command-line script
@@ -31,6 +32,8 @@ parser.add_option('-i','--vecx',action='store',dest='vecx',type="string",default
 parser.add_option('-j','--vecy',action='store',dest='vecy',type="string",default=None,help='')
 parser.add_option('-m','--mult',action='store',dest='mult',type="float",default=None,help='')
 parser.add_option('-a','--add',action='store',dest='add',type="float",default=None,help='')
+parser.add_option('-o','--output',action='store',dest='filename',type="string",default="myplot",help='')
+parser.add_option('-d','--directory',action='store',dest='folder',type="string",default=None,help='')
 # plot --> upper case
 # -- generic
 parser.add_option('-T','--title',action='append',dest='title',type="string",default=None,help='')
@@ -38,7 +41,8 @@ parser.add_option('-X','--xlabel',action='append',dest='xlabel',type="string",de
 parser.add_option('-Y','--ylabel',action='append',dest='ylabel',type="string",default=None,help='')
 parser.add_option('-D','--div',action='store',dest='div',type="int",default=20,help='')
 parser.add_option('-H','--trans',action='store',dest='trans',type="float",default=1.0,help='')
-parser.add_option('-O','--logy',action='store_true',dest='logy',default=False,help='')
+parser.add_option('-Z','--logy',action='store_true',dest='logy',default=False,help='')
+parser.add_option('-O','--save',action='store',dest='out',type="string",default="gui",help='')
 # -- 1D plot
 parser.add_option('-L','--lstyle',action='append',dest='lstyle',type="string",default=None,help='')
 parser.add_option('-S','--superpose',action='store_true',dest='superpose',default=False,help='')
@@ -83,9 +87,22 @@ user.retrieve()
 # some possible operations
 if opt.add is not None: user = user + opt.add
 if opt.mult is not None: user = user * opt.mult
+# get some options
+user.superpose = opt.superpose
+user.filename = opt.filename
+user.folder = opt.folder
+user.out = opt.out
 # define plot
 user.defineplot()
 # user-defined plot settings
 user.getopt(opt)
 # make plot
 user.makeplot()
+
+####################################
+# save a .sh file with the command #
+####################################
+command = ""
+for arg in sys.argv: command = command + arg + ' '
+f = open(opt.filename+'.sh', 'w')
+f.write(command)
