@@ -1,0 +1,11 @@
+##############################################
+## set_file.txt
+## prefix ; suffix ; name ; proj ; vecx ; vecy
+##############################################
+diagfi ; .nc ; LMD_GCM ; cyl ; u ; v 
+dyn_hist ; .nc ; LMDz5 ; cyl ; vitu ; vitv
+wrfout ; 00 ; LMD_MMM ; merc ; U ; V
+wrfout ; _zabg ; LMD_MMM_ALS ; merc ; Um ; Vm
+wrfout ; _z ; LMD_MMM_AMR ; merc ; U ; V
+wrfout_d01_9999 ; 00 ; LMD_LES ; cyl ; U ; V
+geo_em ; .nc ; INIT ; merc ; nowind ; nowind 

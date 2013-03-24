@@ -1,0 +1,15 @@
+###
+### set_ppclass.txt
+###
+  # x-axis: possible names to search for. add in the line with a separating ;
+  #
+longitude;longi;Longitude;lon;XLONG;XLONG_M
+  # y-axis: possible names to search for. add in the line with a separating ;
+  #
+latitude;lati;Latitude;lat;XLAT;XLAT_M
+  # z-axis: possible names to search for. add in the line with a separating ;
+  #
+altitude;Alt;vert;presnivs;bottom_top;altitude_abg
+  # t-axis: possible names to search for. add in the line with a separating ;
+  #
+Times;time;Time;time_counter

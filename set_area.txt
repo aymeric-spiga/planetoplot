@@ -1,0 +1,26 @@
+###################################
+## set_area.txt
+## name, wlat1, wlat2, wlon1, wlon2
+###################################
+Whole_No_High ; -60 ; 60 ; -180 ; 180
+Tropics ; -30 ; 30 ; -180 ; 180
+Europe ; 20 ; 80 ; -50 ; 50
+Central_America ; -10 ; 40 ; 230 ; 300
+Africa ; -20 ; 50 ; -50 ; 50
+Southern_Hemisphere ; -90 ; 60 ; -180 ; 180
+Northern_Hemisphere ; -60 ; 90 ; -180 ; 180
+Tharsis_alt ; -30 ; 60 ; 190 ; 350
+Tharsis ; -30 ; 60 ; -170 ; -10
+Chryse ; -60 ; 60 ; -60 ; 60
+North_Pole ; 50 ; 90 ; -180 ; 180
+Close_North_Pole ; 75 ; 90 ; -180 ; 180
+Far_South_Pole ; -90 ; -40 ; -180 ; 180
+South_Pole ; -90 ; -50 ; -180 ; 180
+Close_South_Pole ; -90 ; -75 ; -180 ; 180
+Sirenum_Crater_large ; -46 ; -34 ; -166 ; -151
+Sirenum_Crater_small ; -36 ; -26 ; -168 ; -156
+Rupes ; 72 ; 90 ; -120 ; -20
+Rupes2 ; 80 ; 85 ; -90 ; -60
+Xanadu ; -40 ; 20 ; 40 ; 120
+Hyperboreae ; 80 ; 87 ; -70 ; -10
+VM_alt ; -15 ; 0 ; 270 ; 300

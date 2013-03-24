@@ -1,0 +1,12 @@
+
+- persistent plot settings in ppclass (valid for all plots)
+
+- a plot3d() class for 3D plots /planeto/tnalmd/runs/newref/isoline.py
+
+- movies
+        ## POUR ALLER PLUS VITE : http://matplotlib.org/users/shell.html
+        ## POUR AVOIR UN MOVIE : http://matplotlib.1069221.n5.nabble.com/calling-show-twice-in-a-row-td22682.html
+
+- tiles (pcolor)
+
+- more complicated computations: derivatives, histograms, spectra, etc...

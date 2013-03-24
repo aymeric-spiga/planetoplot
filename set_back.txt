@@ -1,0 +1,27 @@
+#######################
+## set_back.txt
+## name, link, colorvec
+#######################
+thermalday ; http://www.lmd.jussieu.fr/~aslmd/maps/thermalday.jpg
+thermalnight ; http://www.lmd.jussieu.fr/~aslmd/maps/thermalnight.jpg
+tesalbedo ; http://www.lmd.jussieu.fr/~aslmd/maps/tesalbedo.jpg
+vis ; http://www.lmd.jussieu.fr/~aslmd/maps/mar0kuu2.jpg
+vishires ; http://www.lmd.jussieu.fr/~aslmd/maps/MarsMap_2500x1250.jpg
+geolocal ; http://www.lmd.jussieu.fr/~aslmd/maps/geolocal.jpg
+mola ; http://www.lmd.jussieu.fr/~aslmd/maps/mars-mola-2k.jpg
+molabw ; http://www.lmd.jussieu.fr/~aslmd/maps/MarsElevation_2500x1250.jpg
+bw ; http://www.lmd.jussieu.fr/~aslmd/maps/EarthElevation_2500x1250.jpg
+contrast ; http://www.lmd.jussieu.fr/~aslmd/maps/EarthMapAtmos_2500x1250.jpg
+nice ; http://www.lmd.jussieu.fr/~aslmd/maps/earthmap1k.jpg
+clouds ; http://www.johnstonsarchive.net/spaceart/marswcloudmap.jpg
+jupiter ; http://www.mmedia.is/~bjj/data/jupiter_css/jupiter_css.jpg
+jupiter_voy ; http://www.mmedia.is/~bjj/data/jupiter/jupiter_vgr2.jpg
+blue ; http://eoimages.gsfc.nasa.gov/ve/2430/land_ocean_ice_2048.jpg
+blueclouds ; http://eoimages.gsfc.nasa.gov/ve/2431/land_ocean_ice_cloud_2048.jpg
+justclouds ; http://eoimages.gsfc.nasa.gov/ve/2432/cloud_combined_2048.jpg
+pluto ; http://www.boulder.swri.edu/~buie/pluto/pluto_all.png
+triton ; http://laps.noaa.gov/albers/sos/neptune/triton/triton_rgb_cyl_www.jpg
+titan ; http://laps.noaa.gov/albers/sos/saturn/titan/titan_rgb_cyl_www.jpg
+titanuni ; http://maps.jpl.nasa.gov/pix/sat6fss1.jpg
+venus ; http://laps.noaa.gov/albers/sos/venus/venus4/venus4_rgb_cyl_www.jpg
+cosmic ; http://laps.noaa.gov/albers/sos/universe/wmap/wmap_rgb_cyl_www.jpg
