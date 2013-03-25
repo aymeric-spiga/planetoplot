@@ -33,7 +33,7 @@ parser.add_option('-j','--vecy',action='store',dest='vecy',type="string",default
 parser.add_option('-m','--mult',action='store',dest='mult',type="float",default=None,help='')
 parser.add_option('-a','--add',action='store',dest='add',type="float",default=None,help='')
 parser.add_option('-o','--output',action='store',dest='filename',type="string",default="myplot",help='')
-parser.add_option('-d','--directory',action='store',dest='folder',type="string",default=None,help='')
+parser.add_option('-d','--directory',action='store',dest='folder',type="string",default="./",help='')
 # plot --> upper case
 # -- generic
 parser.add_option('-T','--title',action='append',dest='title',type="string",default=None,help='')
