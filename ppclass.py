@@ -200,12 +200,22 @@ class pp():
           print "!! ERROR !! The operand is neither a pp class nor an integer or a float." ; exit()
         return isnum
 
-    # define the operation + on two objects. or with an int/float.
-    def __add__(self,other):
-        if self.status == "definedplot":
-            self.status = "retrieved" # to release a warning so that .defineplot() is done before .makeplot() 
-                                      # ... otherwise operated fields will not be displayed
-        isnum = self.checktwo(other)
+    # define a selective copy of a pp() object for operations
+    # ... copy.copy() is not conservative (still acts like a pointer)
+    # ... copy.deepcopy() does not work with netCDF objects
+    # so what is done here is a copy of everything except
+    # (to avoid sharing with self and therefore modifying self through operations)
+    # - request attribute of pp() object
+    # - field attribute of the onerequest() objects
+    def selective_copy(self):
+        if self.status in ["init","defined"]:
+            print "!! ERROR !! Please use .retrieve to get fields for the object you want to copy from." ; exit()
+        the_clone = pp()
+        for k, v in vars(self).items():
+           if k != "request":
+               setattr(the_clone,k,v)
+        the_clone.verbose = False
+        the_clone.define()
         for i in range(self.nfin):
          for j in range(self.nvin):
           for t in range(self.nplott):
@@ -213,82 +223,148 @@ class pp():
             for y in range(self.nploty):
              for x in range(self.nplotx):
               obj = self.request[i][j][t][z][y][x]
-              if not isnum:   obj2 = other.request[i][j][t][z][y][x]
-              else:           obj2 = other
+              for k, v in vars(obj).items():
+               if k != "field":
+                setattr(the_clone,k,v)
+        the_clone.status = "retrieved"
+        return the_clone
+
+    # define the operation + on two objects. or with an int/float.
+    # ... with selective_copy the self object is not modified.
+    def __add__(self,other):
+        isnum = self.checktwo(other)
+        the_clone = self.selective_copy()
+        for i in range(self.nfin):
+         for j in range(self.nvin):
+          for t in range(self.nplott):
+           for z in range(self.nplotz):
+            for y in range(self.nploty):
+             for x in range(self.nplotx):
+              obj = the_clone.request[i][j][t][z][y][x]
+              obj_ref = self.request[i][j][t][z][y][x]
+              if not isnum:   
+                  ope = other.request[i][j][t][z][y][x].field
+                  if obj_ref.field.shape != ope.shape:
+                    print "!! ERROR !! The two fields for operation do not have the same shape.",self.field.shape,other.field.shape
+                    exit()
+              else:           
+                  ope = other
               if "vector" in self.vargoal[j] + self.filegoal[i]:
-                  exit() # we do not operate on vectors yet.
+                  print "!! ERROR !! we do not operate on vectors yet."
+                  exit()
               else:
-                  obj = obj + obj2
-        return self
+                  obj.field = obj_ref.field + ope
+        return the_clone
 
     # define the operation - on two objects. or with an int/float.
+    # ... with selective_copy the self object is not modified.
     def __sub__(self,other):
-        if self.status == "definedplot":
-            self.status = "retrieved" # to release a warning so that .defineplot() is done before .makeplot() 
-                                      # ... otherwise operated fields will not be displayed        
         isnum = self.checktwo(other)
+        the_clone = self.selective_copy()
         for i in range(self.nfin):
          for j in range(self.nvin):
           for t in range(self.nplott):
            for z in range(self.nplotz):
             for y in range(self.nploty):
              for x in range(self.nplotx):
-              obj = self.request[i][j][t][z][y][x]
-              if not isnum:   obj2 = other.request[i][j][t][z][y][x]
-              else:           obj2 = other
-              if "vector" in self.vargoal[j] + self.filegoal[i]:
-                  exit() # we do not operate on vectors yet.
+              obj = the_clone.request[i][j][t][z][y][x]
+              obj_ref = self.request[i][j][t][z][y][x]
+              if not isnum:
+                  ope = other.request[i][j][t][z][y][x].field
+                  if obj_ref.field.shape != ope.shape:
+                    print "!! ERROR !! The two fields for operation do not have the same shape.",self.field.shape,other.field.shape
+                    exit()
               else:
-                  obj = obj - obj2
-        return self
+                  ope = other
+              if "vector" in self.vargoal[j] + self.filegoal[i]:
+                  print "!! ERROR !! we do not operate on vectors yet."
+                  exit()
+              else:
+                  obj.field = obj_ref.field - ope
+        return the_clone
 
     # define the operation * on two objects. or with an int/float.
+    # ... with selective_copy the self object is not modified.
     def __mul__(self,other):
-        if self.status == "definedplot":
-            self.status = "retrieved" # to release a warning so that .defineplot() is done before .makeplot() 
-                                      # ... otherwise operated fields will not be displayed
         isnum = self.checktwo(other)
+        the_clone = self.selective_copy()
         for i in range(self.nfin):
          for j in range(self.nvin):
           for t in range(self.nplott):
            for z in range(self.nplotz):
             for y in range(self.nploty):
              for x in range(self.nplotx):
-              obj = self.request[i][j][t][z][y][x]
-              if not isnum:   obj2 = other.request[i][j][t][z][y][x]
-              else:           obj2 = other
-              if "vector" in self.vargoal[j] + self.filegoal[i]:
-                  exit() # we do not operate on vectors yet.
+              obj = the_clone.request[i][j][t][z][y][x]
+              obj_ref = self.request[i][j][t][z][y][x]
+              if not isnum:
+                  ope = other.request[i][j][t][z][y][x].field
+                  if obj_ref.field.shape != ope.shape:
+                    print "!! ERROR !! The two fields for operation do not have the same shape.",self.field.shape,other.field.shape
+                    exit()
               else:
-                  obj = obj * obj2
-        return self
+                  ope = other
+              if "vector" in self.vargoal[j] + self.filegoal[i]:
+                  print "!! ERROR !! we do not operate on vectors yet."
+                  exit()
+              else:
+                  obj.field = obj_ref.field * ope
+        return the_clone
 
     # define the operation / on two objects. or with an int/float.
+    # ... with selective_copy the self object is not modified.
     def __div__(self,other):
-        if self.status == "definedplot":
-            self.status = "retrieved" # to release a warning so that .defineplot() is done before .makeplot() 
-                                      # ... otherwise operated fields will not be displayed
         isnum = self.checktwo(other)
+        the_clone = self.selective_copy()
         for i in range(self.nfin):
          for j in range(self.nvin):
           for t in range(self.nplott):
            for z in range(self.nplotz):
             for y in range(self.nploty):
              for x in range(self.nplotx):
-              obj = self.request[i][j][t][z][y][x]
-              if not isnum:   obj2 = other.request[i][j][t][z][y][x]
-              else:           obj2 = other
-              if "vector" in self.vargoal[j] + self.filegoal[i]:
-                  exit() # we do not operate on vectors yet.
+              obj = the_clone.request[i][j][t][z][y][x]
+              obj_ref = self.request[i][j][t][z][y][x]
+              if not isnum:
+                  ope = other.request[i][j][t][z][y][x].field
+                  if obj_ref.field.shape != ope.shape:
+                    print "!! ERROR !! The two fields for operation do not have the same shape.",self.field.shape,other.field.shape
+                    exit()
               else:
-                  obj = obj / obj2
-        return self
+                  ope = other
+              if "vector" in self.vargoal[j] + self.filegoal[i]:
+                  print "!! ERROR !! we do not operate on vectors yet."
+                  exit()
+              else:
+                  obj.field = obj_ref.field / ope
+        return the_clone
+
+    # define the reverse operation float/int + object
+    def __radd__(self,other):
+        isnum = self.checktwo(other)
+        if not isnum: print "!! ERROR !! Operand should be a number" ; exit()
+        return self.__add__(other)
+
+    # define the reverse operation float/int - object
+    def __rsub__(self,other):
+        isnum = self.checktwo(other)
+        if not isnum: print "!! ERROR !! Operand should be a number" ; exit()
+        return self.__sub__(other)
+
+    # define the reverse operation float/int * object
+    def __rmul__(self,other):
+        isnum = self.checktwo(other)
+        if not isnum: print "!! ERROR !! Operand should be a number" ; exit()
+        return self.__mul__(other)
+
+    # define the reverse operation float/int / object
+    def __rdiv__(self,other):
+        isnum = self.checktwo(other)
+        if not isnum: print "!! ERROR !! Operand should be a number" ; exit()
+        return self.__div__(other)
 
     # define the operation ** on one object.
+    # ... with selective_copy the self object is not modified.
     def __pow__(self,num):
-        if self.status == "definedplot":
-            self.status = "retrieved" # to release a warning so that .defineplot() is done before .makeplot() 
-                                      # ... otherwise operated fields will not be displayed
+        the_clone = self.selective_copy()
         if isinstance(num,int) or isinstance(num,float):
             for i in range(self.nfin):
              for j in range(self.nvin):
@@ -296,19 +372,21 @@ class pp():
                for z in range(self.nplotz):
                 for y in range(self.nploty):
                  for x in range(self.nplotx):
-                  obj  = self.request[i][j][t][z][y][x]
+                  obj  = the_clone.request[i][j][t][z][y][x]
+                  obj_ref = self.request[i][j][t][z][y][x]
                   if "vector" in self.vargoal[j] + self.filegoal[i]:
-                      exit() # we do not operate on vectors yet.
+                      print "!! ERROR !! we do not operate on vectors yet."
+                      exit()
                   else:
-                      obj = obj ** num
+                      obj.field = obj_ref.field ** num
         else:
             print "!! ERROR !! To define a power, either an int or a float is needed." ; exit()
-        return self
+        return the_clone
 
     # define the operation <<
     # ... e.g. obj2 << obj1
     # ... means: get init for pp object obj2 from another pp object obj1
-    # ... (this should solve the affectation trap)
+    # ... (this should solve the affectation trap obj2 = obj1)
     def __lshift__(self,other):
         if other.__class__.__name__ == "pp":
             self.file = other.file
@@ -664,10 +742,20 @@ class pp():
             if pl.superpose:
                 if self.n == 0: 
                     self.fig.add_subplot(1,1,1,axisbg=pl.axisbg) # define one subplot (still needed for user-defined font sizes)
-                    sav = pl.xlabel,pl.ylabel,pl.title,pl.swaplab # save titles and labels
+                    sav = pl.xlabel,pl.ylabel,pl.xcoeff,pl.ycoeff,pl.title,pl.swaplab # save titles and labels
                 else: 
                     pl.invert = False ; pl.lstyle = None # don't invert again axis
-                    pl.xlabel,pl.ylabel,pl.title,pl.swaplab = sav # set saved titles and labels
+                    # set saved titles and labels
+                    if self.plotin is None:
+                        pl.xlabel,pl.ylabel,pl.xcoeff,pl.ycoeff,pl.title,pl.swaplab = sav 
+                    else:
+                        prev_plot = self.plotin.p[self.n-1]
+                        pl.xlabel = prev_plot.xlabel
+                        pl.ylabel = prev_plot.ylabel
+                        pl.xcoeff = prev_plot.xcoeff
+                        pl.ycoeff = prev_plot.ycoeff
+                        pl.title = prev_plot.title
+                        pl.swaplab = prev_plot.swaplab
             else:
                 self.fig.add_subplot(self.subv,self.subh,self.n+1,axisbg=pl.axisbg)
             if self.verbose: print "**** Done subplot %i / %i " %( self.n+1,self.howmanyplots ) 
@@ -849,80 +937,6 @@ class onerequest():
         self.verbose = True
         self.swap_axes = False ; self.invert_axes = False
         self.compute = None
-
-    # redefine the + operation. works with objects or numbers.
-    # -------------------------------
-    def __add__(self,other):
-       if isinstance(other,int) or isinstance(other,float):
-           self.field = self.field + other
-       elif other.__class__.__name__ == "onerequest":
-           if self.field.shape != other.field.shape:
-              print "!! ERROR !! The two objects you want to add do not have the same shape.",self.field.shape,other.field.shape
-              exit()
-           else:
-              self.field = self.field + other.field
-              if self.file != other.file: self.file = self.file + "_+_" + other.file
-              if self.var != other.var: self.var = self.var + "_+_" + other.var
-       else:
-           print "!! ERROR !! Operation is being made on objects of the wrong type." ; exit()
-
-    # redefine the - operation. works with objects or numbers.
-    # -------------------------------
-    def __sub__(self,other):
-       if isinstance(other,int) or isinstance(other,float):
-           self.field = self.field - other
-       elif other.__class__.__name__ == "onerequest":
-           if self.field.shape != other.field.shape:
-              print "!! ERROR !! The two objects you want to add do not have the same shape.",self.field.shape,other.field.shape
-              exit()
-           else:
-              self.field = self.field - other.field
-              if self.file != other.file: self.file = self.file + "_-_" + other.file
-              if self.var != other.var: self.var = self.var + "_-_" + other.var
-       else:
-           print "!! ERROR !! Operation is being made on objects of the wrong type." ; exit()
-
-    # redefine the * operation. works with objects or numbers.
-    # -------------------------------
-    def __mul__(self,other):
-       if isinstance(other,int) or isinstance(other,float):
-           self.field = self.field * other
-       elif other.__class__.__name__ == "onerequest":
-           if self.field.shape != other.field.shape:
-              print "!! ERROR !! The two objects you want to add do not have the same shape.",self.field.shape,other.field.shape
-              exit()
-           else:
-              self.field = self.field * other.field
-              if self.file != other.file: self.file = self.file + "_*_" + other.file
-              if self.var != other.var: self.var = self.var + "_*_" + other.var
-       else:
-           print "!! ERROR !! Operation is being made on objects of the wrong type." ; exit()
-
-    # redefine the / operation. works with objects or numbers.
-    # -------------------------------
-    def __div__(self,other):
-       if isinstance(other,int) or isinstance(other,float):
-           self.field = self.field / other
-       elif other.__class__.__name__ == "onerequest":
-           if self.field.shape != other.field.shape:
-              print "!! ERROR !! The two objects you want to add do not have the same shape.",self.field.shape,other.field.shape
-              exit()
-           else:
-              self.field = self.field / other.field
-              if self.file != other.file: self.file = self.file + "_/_" + other.file
-              if self.var != other.var: self.var = self.var + "_/_" + other.var
-       else:
-           print "!! ERROR !! Operation is being made on objects of the wrong type." ; exit()
-
-    # redefine the power operation.
-    # -------------------------------
-    def __pow__(self,num):
-       if isinstance(num,int) or isinstance(num,float):
-           self.field = self.field ** num
-           self.file = self.file + "_^_"+str(num)
-           self.var = self.var + "_^_"+str(num)
-       else:
-           print "!! ERROR !! To define a power, either an int or a float is needed." ; exit()
 
     # open a file. for now it is netcdf. TBD for other formats.
     # check that self.var is inside.
