@@ -23,8 +23,8 @@ parser.add_option('--verbose',action='store_true',dest='verbose',default=False,h
 # field --> lower case
 parser.add_option('-f','--file',action='append',dest='file',type="string",default=None,help='')
 parser.add_option('-v','--var',action='append',dest='var',type="string",default=None,help='')
-parser.add_option('-x','--lat',action='append',dest='x',type="string",default=None,help='')
-parser.add_option('-y','--lon',action='append',dest='y',type="string",default=None,help='')
+parser.add_option('-x','--lon',action='append',dest='x',type="string",default=None,help='')
+parser.add_option('-y','--lat',action='append',dest='y',type="string",default=None,help='')
 parser.add_option('-z','--vert',action='append',dest='z',type="string",default=None,help='')
 parser.add_option('-t','--time',action='append',dest='t',type="string",default=None,help='')
 parser.add_option('-c','--contour',action='store',dest='contour',type="string",default=None,help='')

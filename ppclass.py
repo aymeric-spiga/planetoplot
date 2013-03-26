@@ -1116,7 +1116,7 @@ class onerequest():
             else:               
                 self.method_x = "fixed"
                 if self.verbose: print "**** OK. no x dimension."
-        if self.method_y == "free" or test in ["compfree","compcomp"]:
+        if self.method_y == "free" or test in ["freecomp","compcomp"]:
             self.index_y = range(0,self.dim_y,stridey)
             if self.dim_y > 1:  
                 if self.method_y == "free": self.dimplot = self.dimplot + 1
