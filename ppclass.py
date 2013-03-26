@@ -222,10 +222,11 @@ class pp():
            for z in range(self.nplotz):
             for y in range(self.nploty):
              for x in range(self.nplotx):
-              obj = self.request[i][j][t][z][y][x]
-              for k, v in vars(obj).items():
+              obj_ref = self.request[i][j][t][z][y][x]
+              obj = the_clone.request[i][j][t][z][y][x]
+              for k, v in vars(obj_ref).items():
                if k != "field":
-                setattr(the_clone,k,v)
+                setattr(obj,k,v)
         the_clone.status = "retrieved"
         return the_clone
 
