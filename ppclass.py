@@ -724,6 +724,14 @@ class pp():
             self.fig = mpl.figure(figsize=(16,8))
             self.subv,self.subh = ppplot.definesubplot(self.howmanyplots,self.fig) 
             self.n = 0
+            ## adapted space for labels etc
+            ## ... except for ortho because there is no label anyway
+            customplot = self.p[0].field.ndim == 2 \
+                        and self.p[0].mapmode == True \
+                        and self.p[0].proj not in ["ortho"]
+            if customplot:
+                margin = 0.07
+                self.fig.subplots_adjust(left=margin,right=1-margin,bottom=margin,top=1-margin)
         else:
             # start from an existing figure.
             # extraplot must have been set in the call to the previous figure.
@@ -764,8 +772,10 @@ class pp():
             pl.make()
             self.n = self.n+1 
         # once completed show the plot (cannot show intermediate plotin)
+        # ... added a fix (customplot=True) for the label problem in basemap
         print "**** Done step: makeplot"
-        if (self.n == self.howmanyplots): ppplot.save(mode=self.out,filename=self.filename,folder=self.folder)
+        if (self.n == self.howmanyplots): 
+            ppplot.save(mode=self.out,filename=self.filename,folder=self.folder,custom=customplot)
         # SAVE A PICKLE FILE WITH THE self.p ARRAY OF OBJECTS
         if self.verbose: print "**** Saving session in "+self.filename + ".ppobj"
         savfile = self.folder + "/" + self.filename + ".ppobj"

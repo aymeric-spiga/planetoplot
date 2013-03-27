@@ -217,7 +217,7 @@ def bounds(what_I_plot,zevmin,zevmax,miss=9e+35):
 
 # a generic function to show (GUI) or save a plot (PNG,EPS,PDF,...)
 # -------------------------------
-def save(mode="gui",filename="plot",folder="./",includedate=True,res=150):
+def save(mode="gui",filename="plot",folder="./",includedate=True,res=150,custom=False):
     # a few settings
     possiblesave = ['eps','ps','svg','png','jpg','pdf'] 
     # now the main instructions
@@ -232,7 +232,12 @@ def save(mode="gui",filename="plot",folder="./",includedate=True,res=150):
         name = name +"."+mode
         ## save file
         print "**** Saving file in "+mode+" format... Please wait."
-        mpl.savefig(name,dpi=res,bbox_inches='tight',pad_inches=pad_inches_value)
+        if not custom:
+            # ... regular plots
+            mpl.savefig(name,dpi=res,pad_inches=pad_inches_value,bbox_inches='tight')
+        else:
+            # ... mapping mode, adapted space for labels etc...
+            mpl.savefig(name,dpi=res)
     else:
         print "!! ERROR !! File format not supported. Supported: ",possiblesave
 
@@ -537,7 +542,7 @@ class plot2d(plot):
             # some tests, bug fixes, and good-looking settings
             # ... cyl is good for global and regional
             if self.proj == "cyl":
-                pass
+                format = '%.0f'
             # ... global projections
             elif self.proj in ["ortho","moll","robin"]:
                 wlat[0] = None ; wlat[1] = None ; wlon[0] = None ; wlon[1] = None
@@ -602,12 +607,12 @@ class plot2d(plot):
         ############################################################################################
         if self.trans > 0.:
             ## draw colorbar. settings are different with projections. or if not mapmode.
-            if not self.mapmode: orientation=zeorientation ; frac = 0.075
-            elif self.proj in ['moll']: orientation="horizontal" ; frac = 0.075
-            elif self.proj in ['cyl']: orientation="vertical" ; frac = 0.023
-            else: orientation = zeorientation ; frac = zefrac
+            if not self.mapmode: orientation=zeorientation ; frac = 0.075 ; pad = 0.03
+            elif self.proj in ['moll']: orientation="horizontal" ; frac = 0.075 ; pad = 0.03
+            elif self.proj in ['cyl']: orientation="vertical" ; frac = 0.023 ; pad = 0.03
+            else: orientation = zeorientation ; frac = zefrac ; pad = 0.03
             zelevpal = np.linspace(zevmin,zevmax,num=min([ticks/2+1,21]))
-            zecb = mpl.colorbar(fraction=frac,pad=0.03,\
+            zecb = mpl.colorbar(fraction=frac,pad=pad,\
                                 format=self.fmt,orientation=orientation,\
                                 ticks=zelevpal,\
                                 extend='neither',spacing='proportional') 
@@ -628,6 +633,7 @@ class plot2d(plot):
                               angles='xy',color=self.colorvec,pivot='middle',\
                               scale=zescale*reducevec,width=widthvec )
                 # make vector key. default is on upper left corner.
-                p = mpl.quiverkey(q,-0.06,0.98,\
+                p = mpl.quiverkey(q,-0.03,1.08,\
                                   zescale,str(int(zescale)),\
                                   color='black',labelpos='S',labelsep = 0.07)
+        #### streamplot!!! avec basemap
