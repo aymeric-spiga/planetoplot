@@ -201,6 +201,14 @@ def calculate_bounds(field,vmin=None,vmax=None):
        if vmax is None: zevmax = damean + dev
        # special case: negative values with stddev while field is positive
        if zevmin < 0. and ppcompute.min(fieldcalc) > 0.: zevmin = 0.
+    # check that bounds are not too tight given the field
+    amin = ppcompute.min(field)
+    amax = ppcompute.max(field)
+    cmin = 100.*np.abs((amin - zevmin)/amin)
+    cmax = 100.*np.abs((amax - zevmax)/amax)
+    if cmin > 150. or cmax > 150.:
+        print "!! WARNING !! Bounds are a bit too tight. Might need to reconsider those."
+        print "!! WARNING !! --> actual",amin,amax,"adopted",zevmin,zevmax
     return zevmin, zevmax    
     #### treat vmin = vmax for continuity 
     #if vmin == vmax:  zevmin = damean - dev ; zevmax = damean + dev

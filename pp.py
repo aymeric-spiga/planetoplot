@@ -19,42 +19,45 @@ import sys
 # get arguments from the command line
 #####################################
 parser = OptionParser()
-parser.add_option('--verbose',action='store_true',dest='verbose',default=False,help='')
+parser.add_option('--verbose',action='store_true',dest='verbose',default=False,help='make the program verbose')
 # field --> lower case
-parser.add_option('-f','--file',action='append',dest='file',type="string",default=None,help='')
-parser.add_option('-v','--var',action='append',dest='var',type="string",default=None,help='')
-parser.add_option('-x','--lon',action='append',dest='x',type="string",default=None,help='')
-parser.add_option('-y','--lat',action='append',dest='y',type="string",default=None,help='')
-parser.add_option('-z','--vert',action='append',dest='z',type="string",default=None,help='')
-parser.add_option('-t','--time',action='append',dest='t',type="string",default=None,help='')
-parser.add_option('-c','--contour',action='store',dest='contour',type="string",default=None,help='')
-parser.add_option('-i','--vecx',action='store',dest='vecx',type="string",default=None,help='')
-parser.add_option('-j','--vecy',action='store',dest='vecy',type="string",default=None,help='')
-parser.add_option('-m','--mult',action='store',dest='mult',type="float",default=None,help='')
-parser.add_option('-a','--add',action='store',dest='add',type="float",default=None,help='')
-parser.add_option('-o','--output',action='store',dest='filename',type="string",default="myplot",help='')
-parser.add_option('-d','--directory',action='store',dest='folder',type="string",default="./",help='')
+parser.add_option('-f','--file',action='append',dest='file',type="string",default=None,help="[NEEDED] 'file' or ['file1','file2',etc]")
+parser.add_option('-v','--var',action='append',dest='var',type="string",default=None,help="'variable' or ['var1','var2',etc]")
+parser.add_option('-x','--lon',action='append',dest='x',type="string",default=None,help="x axis value. either one value; or val1,val2 (computations)")
+parser.add_option('-y','--lat',action='append',dest='y',type="string",default=None,help="y axis value. either one value; or val1,val2 (computations)")
+parser.add_option('-z','--vert',action='append',dest='z',type="string",default=None,help="z axis value. either one value; or val1,val2 (computations)")
+parser.add_option('-t','--time',action='append',dest='t',type="string",default=None,help="t axis value. either one value; or val1,val2 (computations)")
+parser.add_option('-u','--compute',action='store',dest='compute',type="string",default="mean",help="computation: mean, min, max")
+parser.add_option('-c','--contour',action='store',dest='contour',type="string",default=None,help="one 'variable' for contour")
+parser.add_option('-i','--vecx',action='store',dest='vecx',type="string",default=None,help="one 'variable' for wind vector x component")
+parser.add_option('-j','--vecy',action='store',dest='vecy',type="string",default=None,help="one 'variable' for wind vector x component")
+parser.add_option('-m','--mult',action='store',dest='mult',type="float",default=None,help="multiplicative factor on field")
+parser.add_option('-a','--add',action='store',dest='add',type="float",default=None,help="additive factor on field")
+parser.add_option('-o','--output',action='store',dest='filename',type="string",default="myplot",help="name of output files")
+parser.add_option('-d','--directory',action='store',dest='folder',type="string",default="./",help="directory of output files")
 # plot --> upper case
 # -- generic
-parser.add_option('-T','--title',action='append',dest='title',type="string",default=None,help='')
-parser.add_option('-X','--xlabel',action='append',dest='xlabel',type="string",default=None,help='')
-parser.add_option('-Y','--ylabel',action='append',dest='ylabel',type="string",default=None,help='')
-parser.add_option('-D','--div',action='store',dest='div',type="int",default=20,help='')
-parser.add_option('-H','--trans',action='store',dest='trans',type="float",default=1.0,help='')
-parser.add_option('-Z','--logy',action='store_true',dest='logy',default=False,help='')
-parser.add_option('-O','--save',action='store',dest='out',type="string",default="gui",help='')
+parser.add_option('-T','--title',action='append',dest='title',type="string",default=None,help="change 'title'")
+parser.add_option('-X','--xlabel',action='append',dest='xlabel',type="string",default=None,help="change 'xlabel'")
+parser.add_option('-Y','--ylabel',action='append',dest='ylabel',type="string",default=None,help="change 'ylabel'")
+parser.add_option('-D','--div',action='store',dest='div',type="int",default=20,help="integer for number of divisions")
+parser.add_option('-H','--trans',action='store',dest='trans',type="float",default=1.0,help="float for transparency (0=transp,1=opaque)")
+parser.add_option('-Z','--logy',action='store_true',dest='logy',default=False,help="set log for vertical axis")
+parser.add_option('-O','--save',action='store',dest='out',type="string",default="gui",help="save mode: 'gui' 'png' 'pdf' 'eps' 'svg' 'ps'")
 # -- 1D plot
-parser.add_option('-L','--lstyle',action='append',dest='lstyle',type="string",default=None,help='')
-parser.add_option('-S','--superpose',action='store_true',dest='superpose',default=False,help='')
+parser.add_option('-L','--lstyle',action='append',dest='lstyle',type="string",default=None,help="[1D] linestyle: '-' '--' '.' '..'")
+parser.add_option('-Q','--color',action='append',dest='color',type="string",default=None,help="[1D] color: 'b' 'g' 'r' etc")
+parser.add_option('-K','--marker',action='append',dest='marker',type="string",default=None,help="[1D] marker: '' 'x' 'o' etc")
+parser.add_option('-S','--superpose',action='store_true',dest='superpose',default=False,help="[1D] use same axis for all plots")
 # -- 2D plot
-parser.add_option('-C','--colorb',action='append',dest='colorb',type="string",default=None,help='')
-parser.add_option('-P','--proj',action='append',dest='proj',type="string",default=None,help='')
-parser.add_option('-B','--back',action='append',dest='back',type="string",default=None,help='')
-parser.add_option('-A','--area',action='append',dest='area',type="string",default=None,help='')
-parser.add_option('-I','--blon',action='append',dest='blon',type="float",default=None,help='')
-parser.add_option('-J','--blat',action='append',dest='blat',type="float",default=None,help='')
-parser.add_option('-N','--vmin',action='append',dest='vmin',type="float",default=None,help='')
-parser.add_option('-M','--vmax',action='append',dest='vmax',type="float",default=None,help='')
+parser.add_option('-C','--colorb',action='append',dest='colorb',type="string",default=None,help="[2D] colormap: http://micropore.files.wordpress.com/2010/06/colormaps.png")
+parser.add_option('-P','--proj',action='append',dest='proj',type="string",default=None,help="[2D] map projection: 'cyl' 'npstere' 'spstere' 'ortho' 'moll' 'robin' 'lcc' 'laea' 'merc'")
+parser.add_option('-B','--back',action='append',dest='back',type="string",default=None,help='[2D] predefined map background (cf. set_back.txt)')
+parser.add_option('-A','--area',action='append',dest='area',type="string",default=None,help='[2D] predefined region of mapping (cf. set_area.txt)')
+parser.add_option('-I','--blon',action='append',dest='blon',type="float",default=None,help='[2D] float: bounding longitude for stere (or center longitude for ortho)')
+parser.add_option('-J','--blat',action='append',dest='blat',type="float",default=None,help='[2D] float: bounding latitude for stere (or center latitude for ortho) ')
+parser.add_option('-N','--vmin',action='append',dest='vmin',type="float",default=None,help='[2D] float: minimum value for displayed field')
+parser.add_option('-M','--vmax',action='append',dest='vmax',type="float",default=None,help='[2D] float: maximum value for displayed field')
 (opt,args) = parser.parse_args()
 
 ##########################################
@@ -77,9 +80,16 @@ for element in opt.var:
     if opt.vecx is not None: var.append(opt.vecx) ; vargoal.append("vector")
     if opt.vecy is not None: var.append(opt.vecy) ; vargoal.append("vector")
 # set pp object
-user = pp(file=opt.file, var=var, vargoal=vargoal, \
-          x=opt.x, y=opt.y, z=opt.z, t=opt.t,\
-          verbose=opt.verbose)
+user = pp()
+user.file = opt.file
+user.var = var
+user.vargoal = vargoal
+user.x = opt.x
+user.y = opt.y
+user.z = opt.z
+user.t = opt.t
+user.verbose = opt.verbose
+user.compute = opt.compute
 # define field
 user.define()
 # retrieve field
@@ -104,5 +114,8 @@ user.makeplot()
 ####################################
 command = ""
 for arg in sys.argv: command = command + arg + ' '
-f = open(opt.filename+'.sh', 'w')
-f.write(command)
+try:
+    f = open(opt.folder+'/'+opt.filename+'.sh', 'w')
+    f.write(command)
+except IOError:
+    print "!! WARNING !! pp.py command not saved. Probably do not have permission to write here."

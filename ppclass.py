@@ -171,7 +171,10 @@ class pp():
 
     # print status
     def printstatus(self):
-        print "**** Done step: " + self.status
+        if self.filename == "THIS_IS_A_CLONE":
+            pass
+        else:
+            print "**** Done step: " + self.status
 
     #####################################################
     # EMULATE OPERATORS + - * / ** << FOR PP() OBJECTS  #
@@ -215,6 +218,7 @@ class pp():
            if k != "request":
                setattr(the_clone,k,v)
         the_clone.verbose = False
+        the_clone.filename = "THIS_IS_A_CLONE" # trick to avoid additional outputs
         the_clone.define()
         for i in range(self.nfin):
          for j in range(self.nvin):
@@ -510,7 +514,7 @@ class pp():
     def retrieve(self):
         self.printstatus()
         # check if things were done OK before
-        if self.status != "defined": print "!! ERROR !! Please use .define() to define your pp object."
+        if self.status != "defined": print "!! ERROR !! Please use .define() to define your pp object." ; exit()
         ## first get fields
         ## ... only what is needed is extracted from the files
         ## ... and averages are computed
@@ -776,11 +780,15 @@ class pp():
         print "**** Done step: makeplot"
         if (self.n == self.howmanyplots): 
             ppplot.save(mode=self.out,filename=self.filename,folder=self.folder,custom=customplot)
+            mpl.close()
         # SAVE A PICKLE FILE WITH THE self.p ARRAY OF OBJECTS
         if self.verbose: print "**** Saving session in "+self.filename + ".ppobj"
         savfile = self.folder + "/" + self.filename + ".ppobj"
-        filehandler = open(savfile, 'w')
-        pickle.dump(self.p, filehandler)
+        try: 
+            filehandler = open(savfile, 'w')
+            pickle.dump(self.p, filehandler)
+        except IOError: 
+            print "!! WARNING !! Saved object file not written. Probably do not have permission to write here."
 
     ###########################################################
     # plot: a shortcut method for the defineplot + plot chain #
@@ -883,6 +891,16 @@ class pp():
             try: self.p[iii].lstyle = opt.lstyle[iii]
             except: 
                 try: self.p[iii].lstyle = opt.lstyle[0]
+                except: pass
+            ###
+            try: self.p[iii].color = opt.color[iii]
+            except:  
+                try: self.p[iii].color = opt.color[0]
+                except: pass
+            ###
+            try: self.p[iii].marker = opt.marker[iii]
+            except:  
+                try: self.p[iii].marker = opt.marker[0]
                 except: pass
             ###
             try: self.p[iii].proj = opt.proj[iii]

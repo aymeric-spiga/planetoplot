@@ -6,6 +6,7 @@ A. Spiga LMD/UPMC 24/03/2013
 
 Contents
 --------
+--------
 core
 ----
 - ppclass.py --> main class with pp() objects (need ppplot and ppcompute)
@@ -13,7 +14,7 @@ core
 - ppcompute.py --> computation class (can be used independently)
 scripts
 -------
-- pp.py --> command line utility to use ppclass
+- pp.py --> command line utility to use ppclass [HELP with 'pp.py -h']
 - pp_reload.py --> command line utility to load saved plot objects *.ppobj
 - example/* --> example scripts using ppclass
 settings files
@@ -32,6 +33,7 @@ data
 
 Requirements
 ------------
+------------
 python + numpy + matplotlib + netCDF4
 - for mapping --> Basemap
 - for scientific computations --> scipy
@@ -39,14 +41,17 @@ python + numpy + matplotlib + netCDF4
 
 Installation
 ------------
+------------
 - install required softwares and librairies in requirements
 - add planetoplot_v2 in your PYTHONPATH environment variable (and in your PATH to use pp.py)
 
 Take a demo tour
 ----------------
+----------------
 pp_reload.py demo_data/*
 
 Improvements compared to v1
+---------------------------
 ---------------------------
 * code readability and structuration for future improvements
 * modularity (class formulation)
@@ -73,6 +78,7 @@ Improvements compared to v1
 * verbose / non verbose mode
 
 Acknowledgements
+----------------
 ----------------
 Thanks to A. Colaitis, T. Navarro, J. Leconte
 for feedbacks and contributions on version 1
