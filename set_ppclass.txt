@@ -13,3 +13,6 @@ altitude;Alt;vert;presnivs;bottom_top;altitude_abg
   # t-axis: possible names to search for. add in the line with a separating ;
   #
 Times;time;Time;time_counter
+  # area: possible names to search for. add in the line with a separating ;
+  #
+area;aire

@@ -32,12 +32,14 @@ whereset = ppcompute.findset(whereset)
 # ... we load user-defined automatic settings from set_ppclass.txt
 zefile = "set_ppclass.txt"
 glob_listx = [] ; glob_listy = [] ; glob_listz = [] ; glob_listt = []
+glob_listarea = []
 try: 
     f = open(whereset+zefile, 'r') ; lines = f.readlines()
     for stuff in lines[5].strip().split(';'): glob_listx.append(stuff)
     for stuff in lines[8].strip().split(';'): glob_listy.append(stuff)
     for stuff in lines[11].strip().split(';'): glob_listz.append(stuff)
     for stuff in lines[14].strip().split(';'): glob_listt.append(stuff)
+    for stuff in lines[17].strip().split(';'): glob_listarea.append(stuff)
 except IOError: 
     print "warning: "+zefile+" not in "+whereset+" ; no presets."
 
@@ -150,6 +152,7 @@ class pp():
         self.n = 0 ; self.howmanyplots = 0
         self.nplot = 0
         self.p = None
+        self.customplot = False
         ## what could be defined by the user
         self.file = file
         self.var = var
@@ -496,9 +499,9 @@ class pp():
               obj.method_x = mx ; obj.method_y = my
               obj.method_z = mz ; obj.method_t = mt           
               ### get index
-              obj.getindextime(st,t,self.stridet)
-              obj.getindexvert(sz,z,self.stridez)
-              obj.getindexhori(sx,sy,x,y,self.stridex,self.stridey)
+              obj.getindextime(dalist=st,ind=t,stride=self.stridet)
+              obj.getindexvert(dalist=sz,ind=z,stride=self.stridez)
+              obj.getindexhori(dalistx=sx,dalisty=sy,indx=x,indy=y,stridex=self.stridex,stridey=self.stridey)
         # change status
         self.status = "defined"
 
@@ -517,7 +520,7 @@ class pp():
         if self.status != "defined": print "!! ERROR !! Please use .define() to define your pp object." ; exit()
         ## first get fields
         ## ... only what is needed is extracted from the files
-        ## ... and averages are computed
+        ## ... and computations are performed
         for i in range(self.nfin):
          for j in range(self.nvin):
           for t in range(self.nplott):
@@ -526,6 +529,7 @@ class pp():
              for x in range(self.nplotx):
               obj = self.request[i][j][t][z][y][x]
               obj.getfield()
+              obj.computations()
         # change status
         self.status = "retrieved"
 
@@ -730,10 +734,10 @@ class pp():
             self.n = 0
             ## adapted space for labels etc
             ## ... except for ortho because there is no label anyway
-            customplot = self.p[0].field.ndim == 2 \
+            self.customplot = self.p[0].field.ndim == 2 \
                         and self.p[0].mapmode == True \
                         and self.p[0].proj not in ["ortho"]
-            if customplot:
+            if self.customplot:
                 margin = 0.07
                 self.fig.subplots_adjust(left=margin,right=1-margin,bottom=margin,top=1-margin)
         else:
@@ -743,6 +747,7 @@ class pp():
             self.subv,self.subh = self.plotin.subv,self.plotin.subh
             self.n = self.plotin.n
             self.howmanyplots = self.plotin.howmanyplots
+            self.customplot = self.plotin.customplot
         # LOOP on all subplots
         # NB: cannot use 'for pl in self.p' if self.plotin not None
         # --------------------
@@ -779,7 +784,7 @@ class pp():
         # ... added a fix (customplot=True) for the label problem in basemap
         print "**** Done step: makeplot"
         if (self.n == self.howmanyplots): 
-            ppplot.save(mode=self.out,filename=self.filename,folder=self.folder,custom=customplot)
+            ppplot.save(mode=self.out,filename=self.filename,folder=self.folder,custom=self.customplot)
             mpl.close()
         # SAVE A PICKLE FILE WITH THE self.p ARRAY OF OBJECTS
         if self.verbose: print "**** Saving session in "+self.filename + ".ppobj"
@@ -979,6 +984,12 @@ class onerequest():
             print '!! ERROR !! File '+self.file+' does not contain variable: '+self.var
             print '..... try instead with ',self.f.variables.keys() ; exit()
 
+    # copy attributes from another existing object
+    # --------------------------------------------
+    def copy(self,source):
+        for k, v in vars(source).items():
+            setattr(self,k,v)
+
     # get x,y,z,t dimensions from NETCDF file
     # TBD: user could request for a specific altitude dimension
     # TBD: staggered variables could request specific dimensions
@@ -1076,7 +1087,7 @@ class onerequest():
     # get list of index to be retrieved for time axis
     ### TBD: il faudrait ne prendre que les indices qui correspondent a l interieur d un plot (dans all)
     # -------------------------------
-    def getindextime(self,dalist,ind,stride):
+    def getindextime(self,dalist=None,ind=None,stride=1):
         if self.method_t == "free": 
             self.index_t = np.arange(0,self.dim_t,stride)
             if self.dim_t > 1:  
@@ -1100,7 +1111,7 @@ class onerequest():
     # get list of index to be retrieved for vertical axis
     ### TBD: il faudrait ne prendre que les indices qui correspondent a l interieur d un plot (dans all)
     # -------------------------------
-    def getindexvert(self,dalist,ind,stride):
+    def getindexvert(self,dalist=None,ind=None,stride=1):
         if self.method_z == "free": 
             self.index_z = np.arange(0,self.dim_z,stride)
             if self.dim_z > 1:  
@@ -1128,7 +1139,7 @@ class onerequest():
     # NB: to append index we use lists (the most convenient) then we convert into a numpy.array
     ### TBD: il faudrait ne prendre que les indices qui correspondent a l interieur d un plot (dans all)
     # -------------------------------
-    def getindexhori(self,dalistx,dalisty,indx,indy,stridex,stridey):
+    def getindexhori(self,dalistx=None,dalisty=None,indx=None,indy=None,stridex=1,stridey=1):
         ## get what is the method over x and y axis
         test = self.method_x+self.method_y
         ## CASE 0, EASY CASES: 
@@ -1308,25 +1319,39 @@ class onerequest():
              if self.verbose: print "!! WARNING !! Values over +-1e25 are considered missing values."
              self.field = masked
              self.field.set_fill_value([np.NaN])
-        # now ready to compute [TBD?? we would like to have e.g. mean over x,y and min over t]
+
+    # perform computations
+    # -------------------------------
+    # available: mean, max, min, meanarea
+    # TB: integrals? for derivatives, define a function self.dx()
+    def computations(self):  
+        nt,nz,ny,nx = self.field.shape
+        # treat the case of mean on fields normalized with grid mesh area
+        # ... this is done in the .area() method. 
+        # after that self.field contains field*area/totarea
+        if "area" in self.compute: self.area()
+        # now ready to compute [TBD: we would like to have e.g. mean over x,y and min over t ??]
         if self.method_t == "comp":
             if self.verbose: print "**** OK. Computing over t axis."
-            if self.compute == "mean": self.field = ppcompute.mean(self.field,axis=0)
+            if "mean" in self.compute: self.field = ppcompute.mean(self.field,axis=0)
             elif self.compute == "min": self.field = ppcompute.min(self.field,axis=0)
             elif self.compute == "max": self.field = ppcompute.max(self.field,axis=0)
             else: print "!! ERROR !! operation not supported." ; exit()
             nt = 1 ; self.field = np.reshape(self.field,(nt,nz,ny,nx))
         if self.method_z == "comp": 
             if self.verbose: print "**** OK. Computing over z axis."
-            if self.compute == "mean": self.field = ppcompute.mean(self.field,axis=1)
+            if "mean" in self.compute: self.field = ppcompute.mean(self.field,axis=1)
             elif self.compute == "min": self.field = ppcompute.min(self.field,axis=1)
             elif self.compute == "max": self.field = ppcompute.max(self.field,axis=1)
+            else: print "!! ERROR !! operation not supported." ; exit()
             nz = 1 ; self.field = np.reshape(self.field,(nt,nz,ny,nx))
         if self.method_y == "comp": 
             if self.verbose: print "**** OK. Computing over y axis."
             if self.compute == "mean": self.field = ppcompute.mean(self.field,axis=2)
             elif self.compute == "min": self.field = ppcompute.min(self.field,axis=2)
             elif self.compute == "max": self.field = ppcompute.max(self.field,axis=2)
+            elif self.compute == "meanarea": self.field = ppcompute.sum(self.field,axis=2)
+            else: print "!! ERROR !! operation not supported." ; exit()
             ny = 1 ; self.field = np.reshape(self.field,(nt,nz,ny,nx))
             if self.field_x.ndim == 2: self.field_x = self.field_x[0,:] # TBD: this is OK for regular grid but not for irregular
         if self.method_x == "comp":
@@ -1334,6 +1359,8 @@ class onerequest():
             if self.compute == "mean": self.field = ppcompute.mean(self.field,axis=3)
             elif self.compute == "min": self.field = ppcompute.min(self.field,axis=3)
             elif self.compute == "max": self.field = ppcompute.max(self.field,axis=3)
+            elif self.compute == "meanarea": self.field = ppcompute.sum(self.field,axis=3)
+            else: print "!! ERROR !! operation not supported." ; exit()
             nx = 1 ; self.field = np.reshape(self.field,(nt,nz,ny,nx))
             if self.field_y.ndim == 2: self.field_y = self.field_y[:,0] # TBD: this is OK for regular grid but not for irregular
         # remove all dimensions with size 1 to prepare plot (and check the resulting dimension with dimplot)
@@ -1342,6 +1369,48 @@ class onerequest():
             print "!! ERROR !! Problem: self.field is different than plot dimensions", self.field.ndim, self.dimplot ; exit()
         if self.verbose: 
             print "**** OK. Final shape for "+self.var+" after averaging and squeezing",self.field.shape
+    
+    # get areas for computations and ponderate field by those areas
+    # -------------------------------------------------------------
+    def area(self):
+        if self.verbose: print "**** OK. Get area array for computations."
+        # create a request object for area
+        # ... and copy known attributes from self
+        aire = onerequest()
+        aire.copy(self)
+        # get area field name
+        aire.var = "nothing"
+        for c in glob_listarea:
+         if c in aire.f.variables.keys():
+            aire.var = c
+        # do not try to calculate areas automatically 
+        if aire.var == "nothing":
+            print "!! ERROR !! area variable not found... needs to be added in set_ppclass.txt?"
+            exit()
+        # define area request dimensions
+        aire.getdim()
+        # ensure this is a 2D horizontal request and define indexes
+        #    ... areas are not supposed to vary with time and height
+        aire.method_x = "free" ; aire.method_y = "free"
+        aire.getindexhori() ; aire.dimplot = 2
+        aire.method_z = "fixed" ; aire.field_z = np.array([0]) ; aire.index_z = np.array([0])
+        aire.method_t = "fixed" ; aire.field_t = np.array([0]) ; aire.index_t = np.array([0])
+        # read the 2D area array in netCDF file
+        aire.getfield()
+        # normalize by total area
+        aire.field = np.squeeze(aire.field)
+        totarea = ppcompute.sum(ppcompute.sum(aire.field,axis=1),axis=0)
+        if self.verbose: print "**** OK. Total area is: ",totarea
+        aire.field = aire.field / totarea
+        # reduce with self horizontal indexes
+        if "fixed" in self.method_x+self.method_y:
+            aire.field = aire.field[self.index_y,self.index_x]
+        # tile area array over self t and z axis so that area field could be multiplied with self.field
+        aire.field = np.tile(aire.field,(self.index_t.size,self.index_z.size,1,1))
+        if self.field.shape != aire.field.shape:
+            print "!! ERROR !! Problem in area(). Check array shapes." ; exit()
+        else:
+            self.field = self.field*aire.field
 
     # define coordinates for plot
     # -------------------------------
