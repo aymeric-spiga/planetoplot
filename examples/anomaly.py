@@ -16,6 +16,7 @@ mean.get()
 
 ## COMPUTE AND PLOT RELATIVE ANOMALY in %
 anomaly = ((simple-mean)/mean)*100.
+anomaly.filename = "anomaly"
 anomaly.defineplot()
 anomaly.p[0].title = "surface temperature anomaly in %"
 anomaly.makeplot()

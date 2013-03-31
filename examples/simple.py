@@ -20,6 +20,7 @@ u.get()
 u.defineplot() 
 u.p[0].title = "This is what we name $u$ (m s$^{-1}$)"
 u.p[0].proj = "robin"
+u.filename = "simple"
 
 # we plot
 u.makeplot()
@@ -27,6 +28,7 @@ u.makeplot()
 # we simply change the colorbar
 # ... no need to reload data
 u.p[0].colorb = "RdBu"
+u.filename = "myplot"
 u.makeplot()
 
 # we remove map projection

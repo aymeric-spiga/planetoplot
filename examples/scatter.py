@@ -49,6 +49,7 @@ S3.p[0].lstyle=""
 S3.p[0].marker="o"
 S3.p[0].color="k"
 S3.p[0].ylabel="wind speed $\sqrt{u^{2}+v^{2}}$ (m s$^{-1}$)"
+S3.filename="scatter"
 S3.makeplot()
 
 ## multidim scatter also possible

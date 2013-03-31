@@ -29,7 +29,8 @@ documentation
 - README.TXT --> this README file
 data
 ----
-- demo_data/* --> plot objects for a demonstration tour and customizing tests
+plot objects for a demonstration tour and customizing tests
+https://dl.dropbox.com/u/11078310/demo_data.tar.gz
 
 Requirements
 ------------

@@ -15,19 +15,33 @@ import sys
 #     ... complex operations,
 #     ... see sample scripts
 
-#####################################
-# get arguments from the command line
-#####################################
+######################################
+# define parser with version and usage 
+######################################
 parser = OptionParser()
+parser.version = \
+'''************************************************************************
+PLANETOPLOT (for help: pp.py -h)
+--> command line tool to make nice & quick plots from netCDF files
+--> based on python + numpy + scipy + matplotlib + basemap + netCDF4
+--> Author: A. Spiga (LMD/UPMC) aymeric.spiga@upmc.fr
+************************************************************************'''
+parser.usage = \
+'''pp.py [options] netCDF file(s)
+(NB: no options --> simple inspection of variables and dimensions in netCDF files'''
+parser.print_version()
+
+########################################
+# set options for the pp.py command line
+########################################
 parser.add_option('--verbose',action='store_true',dest='verbose',default=False,help='make the program verbose')
 # field --> lower case
-parser.add_option('-f','--file',action='append',dest='file',type="string",default=None,help="[NEEDED] 'file' or ['file1','file2',etc]")
 parser.add_option('-v','--var',action='append',dest='var',type="string",default=None,help="'variable' or ['var1','var2',etc]")
-parser.add_option('-x','--lon',action='append',dest='x',type="string",default=None,help="x axis value. either one value; or val1,val2 (computations)")
-parser.add_option('-y','--lat',action='append',dest='y',type="string",default=None,help="y axis value. either one value; or val1,val2 (computations)")
-parser.add_option('-z','--vert',action='append',dest='z',type="string",default=None,help="z axis value. either one value; or val1,val2 (computations)")
-parser.add_option('-t','--time',action='append',dest='t',type="string",default=None,help="t axis value. either one value; or val1,val2 (computations)")
-parser.add_option('-u','--compute',action='store',dest='compute',type="string",default="mean",help="computation: mean, min, max")
+parser.add_option('-x','--lon',action='append',dest='x',type="string",default=None,help="x axis value. one value; or val1,val2 (computations)")
+parser.add_option('-y','--lat',action='append',dest='y',type="string",default=None,help="y axis value. one value; or val1,val2 (computations)")
+parser.add_option('-z','--vert',action='append',dest='z',type="string",default=None,help="z axis value. one value; or val1,val2 (computations)")
+parser.add_option('-t','--time',action='append',dest='t',type="string",default=None,help="t axis value. one value; or val1,val2 (computations)")
+parser.add_option('-u','--compute',action='store',dest='compute',type="string",default="mean",help="computation: mean, min, max, meanarea")
 parser.add_option('-c','--contour',action='store',dest='contour',type="string",default=None,help="one 'variable' for contour")
 parser.add_option('-i','--vecx',action='store',dest='vecx',type="string",default=None,help="one 'variable' for wind vector x component")
 parser.add_option('-j','--vecy',action='store',dest='vecy',type="string",default=None,help="one 'variable' for wind vector x component")
@@ -35,7 +49,6 @@ parser.add_option('-m','--mult',action='store',dest='mult',type="float",default=
 parser.add_option('-a','--add',action='store',dest='add',type="float",default=None,help="additive factor on field")
 parser.add_option('-o','--output',action='store',dest='filename',type="string",default="myplot",help="name of output files")
 parser.add_option('-d','--directory',action='store',dest='folder',type="string",default="./",help="directory of output files")
-parser.add_option('-u','--compute',action='store',dest='compute',type="string",default="mean",help='')
 # plot --> upper case
 # -- generic
 parser.add_option('-T','--title',action='append',dest='title',type="string",default=None,help="change 'title'")
@@ -50,6 +63,7 @@ parser.add_option('-L','--lstyle',action='append',dest='lstyle',type="string",de
 parser.add_option('-Q','--color',action='append',dest='color',type="string",default=None,help="[1D] color: 'b' 'g' 'r' etc")
 parser.add_option('-K','--marker',action='append',dest='marker',type="string",default=None,help="[1D] marker: '' 'x' 'o' etc")
 parser.add_option('-S','--superpose',action='store_true',dest='superpose',default=False,help="[1D] use same axis for all plots")
+parser.add_option('-E','--label',action='append',dest='label',type="string",default=None,help="[1D] label for line")
 # -- 2D plot
 parser.add_option('-C','--colorb',action='append',dest='colorb',type="string",default=None,help="[2D] colormap: http://micropore.files.wordpress.com/2010/06/colormaps.png")
 parser.add_option('-P','--proj',action='append',dest='proj',type="string",default=None,help="[2D] map projection: 'cyl' 'npstere' 'spstere' 'ortho' 'moll' 'robin' 'lcc' 'laea' 'merc'")
@@ -61,13 +75,19 @@ parser.add_option('-N','--vmin',action='append',dest='vmin',type="float",default
 parser.add_option('-M','--vmax',action='append',dest='vmax',type="float",default=None,help='[2D] float: maximum value for displayed field')
 (opt,args) = parser.parse_args()
 
-##########################################
-# a possibility to simply inspect the file
-##########################################
-if opt.file is None:
-    print "Stop here. I need at least a file: -f FILE" ; exit()
+######################################
+# get arguments (one or several files)
+######################################
+if args is None:
+    print "Stop here! I need file(s) as argument(s)!" ; exit()
+else:
+    files = args
+
+#############################################
+# a possibility to simply inspect the file(s)
+#############################################
 if opt.var is None:
-    for filename in opt.file: inspect(filename)
+    for filename in files: inspect(filename)
     exit()
 
 ######################################
@@ -82,13 +102,10 @@ for element in opt.var:
     if opt.vecy is not None: var.append(opt.vecy) ; vargoal.append("vector")
 # set pp object
 user = pp()
-user.file = opt.file
-user.var = var
-user.vargoal = vargoal
-user.x = opt.x
-user.y = opt.y
-user.z = opt.z
-user.t = opt.t
+user.file = files
+user.var = var ; user.vargoal = vargoal
+user.x = opt.x ; user.y = opt.y 
+user.z = opt.z ; user.t = opt.t
 user.verbose = opt.verbose
 user.compute = opt.compute
 # define field
@@ -117,6 +134,6 @@ command = ""
 for arg in sys.argv: command = command + arg + ' '
 try:
     f = open(opt.folder+'/'+opt.filename+'.sh', 'w')
-    f.write(command)
+    f.write(command)	
 except IOError:
     print "!! WARNING !! pp.py command not saved. Probably do not have permission to write here."

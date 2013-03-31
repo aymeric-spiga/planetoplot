@@ -20,6 +20,7 @@ u.var = "u"
 u.x = "-180,180"
 u.y = None
 u.t = "0.5"
+u.filename = "zonalmean"
 u.get()
 u.defineplot()
 u.p[0].div = 30.
@@ -29,6 +30,7 @@ u.makeplot()
 
 ## ZONAL MINIMUM
 u.compute = "min"
+u.filename = "zonalmin"
 u.get()
 u.defineplot()
 u.p[0].div = 30.
@@ -38,6 +40,7 @@ u.makeplot()
 
 ## ZONAL MAXIMUM
 u.compute = "max"
+u.filename = "myplot"
 u.get()
 u.defineplot()
 u.p[0].div = 30.

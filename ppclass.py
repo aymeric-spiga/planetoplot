@@ -23,9 +23,6 @@ import ppcompute
 #### HEADER                      ##
 #### ... executed when imported  ##
 ###################################
-print "************************************"
-print "**** WELCOME TO PLANETOPLOT 2.0 ****"
-print "************************************"
 # where settings files are located...
 whereset = None
 whereset = ppcompute.findset(whereset)
@@ -142,7 +139,18 @@ class pp():
                       forcedimplot=-1,\
                       out="gui",\
                       filename="myplot",\
-                      folder="./"):
+                      folder="./",\
+                      xlabel=None,ylabel=None,\
+                      xcoeff=None,ycoeff=None,\
+                      proj=None,\
+                      vmin=None,vmax=None,\
+                      div=None,\
+                      colorb=None,\
+                      lstyle=None,\
+                      marker=None,\
+                      color=None,\
+                      label=None,\
+                      title=None):
         self.request = None
         self.nfin = 0 ; self.nvin = 0
         self.nplotx = None ; self.nploty = None
@@ -171,17 +179,66 @@ class pp():
         self.out = out
         self.filename = filename
         self.folder = folder
+        ## here are user-defined plot settings 
+        ## -- if not None, valid on all plots in the pp() objects
+        self.xlabel = xlabel ; self.xcoeff = xcoeff
+        self.ylabel = ylabel ; self.ycoeff = ycoeff
+        self.proj = proj
+        self.vmin = vmin ; self.vmax = vmax
+        self.div = div
+        self.colorb = colorb
+        self.lstyle = lstyle
+        self.marker = marker
+        self.color = color
+        self.label = label
+        self.title = title
 
     # print status
     def printstatus(self):
         if self.filename == "THIS_IS_A_CLONE":
             pass
         else:
-            print "**** Done step: " + self.status
+            print "**** PPCLASS. Done step: " + self.status
 
     #####################################################
     # EMULATE OPERATORS + - * / ** << FOR PP() OBJECTS  #
     #####################################################
+
+    # define the operation <<
+    # ... e.g. obj2 << obj1
+    # ... means: get init for pp object obj2 from another pp object obj1
+    # ... (this should solve the affectation trap obj2 = obj1)
+    def __lshift__(self,other):
+        if other.__class__.__name__ == "pp":
+            self.file = other.file
+            self.var = other.var
+            self.filegoal = other.filegoal
+            self.vargoal = other.vargoal
+            self.x = other.x ; self.y = other.y   ## if None, free dimension
+            self.z = other.z ; self.t = other.t   ## if None, free dimension
+            self.stridex = other.stridex ; self.stridey = other.stridey
+            self.stridez = other.stridez ; self.stridet = other.stridet
+            self.verbose = other.verbose
+            self.noproj = other.noproj
+            self.plotin = other.plotin
+            self.superpose = other.superpose
+            self.forcedimplot = other.forcedimplot
+            self.out = other.out
+            self.filename = other.filename
+            self.folder = other.folder
+            self.xlabel = other.xlabel ; self.xcoeff = other.xcoeff
+            self.ylabel = other.ylabel ; self.ycoeff = other.ycoeff
+            self.proj = other.proj
+            self.vmin = other.vmin ; self.vmax = other.vmax
+            self.div = other.div
+            self.colorb = other.colorb
+            self.lstyle = other.lstyle
+            self.marker = other.marker
+            self.color = other.color
+            self.label = other.label
+            self.title = other.title
+        else:
+            print "!! ERROR !! argument must be a pp object." ; exit()
 
     # check the compatibility of two objects for operations
     # --> if other is a pp class, test sizes and return isnum = False
@@ -235,6 +292,7 @@ class pp():
                if k != "field":
                 setattr(obj,k,v)
         the_clone.status = "retrieved"
+        the_clone.filename = self.filename
         return the_clone
 
     # define the operation + on two objects. or with an int/float.
@@ -257,9 +315,10 @@ class pp():
                     exit()
               else:           
                   ope = other
-              if "vector" in self.vargoal[j] + self.filegoal[i]:
-                  print "!! ERROR !! we do not operate on vectors yet."
-                  exit()
+              goal = self.vargoal[j] + self.filegoal[i]
+              if ("vector" in goal) or ("contour" in goal):
+                  if self.verbose: print "!! WARNING !! No operation was made on contours and vectors. This can be debatted actually."
+                  obj.field = obj_ref.field
               else:
                   obj.field = obj_ref.field + ope
         return the_clone
@@ -284,9 +343,10 @@ class pp():
                     exit()
               else:
                   ope = other
-              if "vector" in self.vargoal[j] + self.filegoal[i]:
-                  print "!! ERROR !! we do not operate on vectors yet."
-                  exit()
+              goal = self.vargoal[j] + self.filegoal[i]
+              if ("vector" in goal) or ("contour" in goal):
+                  if self.verbose: print "!! WARNING !! No operation was made on contours and vectors. This can be debatted actually."
+                  obj.field = obj_ref.field
               else:
                   obj.field = obj_ref.field - ope
         return the_clone
@@ -311,9 +371,10 @@ class pp():
                     exit()
               else:
                   ope = other
-              if "vector" in self.vargoal[j] + self.filegoal[i]:
-                  print "!! ERROR !! we do not operate on vectors yet."
-                  exit()
+              goal = self.vargoal[j] + self.filegoal[i]
+              if ("vector" in goal) or ("contour" in goal):
+                  if self.verbose: print "!! WARNING !! No operation was made on contours and vectors. This can be debatted actually."
+                  obj.field = obj_ref.field
               else:
                   obj.field = obj_ref.field * ope
         return the_clone
@@ -338,9 +399,10 @@ class pp():
                     exit()
               else:
                   ope = other
-              if "vector" in self.vargoal[j] + self.filegoal[i]:
-                  print "!! ERROR !! we do not operate on vectors yet."
-                  exit()
+              goal = self.vargoal[j] + self.filegoal[i]
+              if ("vector" in goal) or ("contour" in goal):
+                  if self.verbose: print "!! WARNING !! No operation was made on contours and vectors. This can be debatted actually."
+                  obj.field = obj_ref.field
               else:
                   obj.field = obj_ref.field / ope
         return the_clone
@@ -382,39 +444,17 @@ class pp():
                  for x in range(self.nplotx):
                   obj  = the_clone.request[i][j][t][z][y][x]
                   obj_ref = self.request[i][j][t][z][y][x]
-                  if "vector" in self.vargoal[j] + self.filegoal[i]:
-                      print "!! ERROR !! we do not operate on vectors yet."
-                      exit()
+                  goal = self.vargoal[j] + self.filegoal[i]
+                  if ("vector" in goal) or ("contour" in goal):
+                      if self.verbose: print "!! WARNING !! No operation was made on contours and vectors. This can be debatted actually."
+                      obj.field = obj_ref.field
                   else:
                       obj.field = obj_ref.field ** num
         else:
             print "!! ERROR !! To define a power, either an int or a float is needed." ; exit()
         return the_clone
 
-    # define the operation <<
-    # ... e.g. obj2 << obj1
-    # ... means: get init for pp object obj2 from another pp object obj1
-    # ... (this should solve the affectation trap obj2 = obj1)
-    def __lshift__(self,other):
-        if other.__class__.__name__ == "pp":
-            self.file = other.file
-            self.var = other.var
-            self.filegoal = other.filegoal
-            self.vargoal = other.vargoal
-            self.x = other.x ; self.y = other.y   ## if None, free dimension
-            self.z = other.z ; self.t = other.t   ## if None, free dimension
-            self.stridex = other.stridex ; self.stridey = other.stridey
-            self.stridez = other.stridez ; self.stridet = other.stridet
-            self.verbose = other.verbose
-            self.noproj = other.noproj
-            self.plotin = other.plotin
-            self.superpose = other.superpose
-            self.forcedimplot = other.forcedimplot
-            self.out = other.out
-            self.filename = other.filename
-            self.folder = other.folder
-        else:
-            print "!! ERROR !! argument must be a pp object." ; exit()
+    ### TBD: reverse power? for exponentials?
 
     ##############################################################################################
     # define method
@@ -504,6 +544,7 @@ class pp():
               obj.getindexhori(dalistx=sx,dalisty=sy,indx=x,indy=y,stridex=self.stridex,stridey=self.stridey)
         # change status
         self.status = "defined"
+        return self
 
     ##############################################################################################
     # retrieve method
@@ -532,6 +573,7 @@ class pp():
               obj.computations()
         # change status
         self.status = "retrieved"
+        return self
 
     ##########################################################
     # get: a shortcut method for the define + retrieve chain #
@@ -539,6 +581,7 @@ class pp():
     def get(self):
         self.define()
         self.retrieve()
+        return self  
 
     ########################################
     # smooth: smooth the field in 1D or 2D #
@@ -642,15 +685,44 @@ class pp():
                     plobj.absc = obj.absc      # abscissa (or longitude)
                     plobj.ordi = obj.ordi      # ordinate (or latitude)
                                                # -- useless in 1D but not used anyway
-                    if dp == 2:
+                    # specific 1D plot stuff
+                    if dp == 1:
+                        # -- a default label
+                        plobj.label = ""
+                        if self.nfin > 1: plobj.label = plobj.label + " file #"+str(i+1)
+                        if self.nvin > 1: plobj.label = plobj.label + " var #"+str(j+1)
+                        if self.nplott > 1: plobj.label = plobj.label + " t #"+str(t+1)
+                        if self.nplotz > 1: plobj.label = plobj.label + " z #"+str(z+1)
+                        if self.nploty > 1: plobj.label = plobj.label + " y #"+str(y+1)
+                        if self.nplotx > 1: plobj.label = plobj.label + " x #"+str(x+1)
                     # specific 2d plot stuff
+                    if dp == 2:
                         # -- light grey background for missing values
                         if type(plobj.field).__name__ in 'MaskedArray': plobj.axisbg = '0.75'
                         # -- define if it is a map or a plot
                         plobj.mapmode = ( obj.method_x+obj.method_y == "freefree" \
                                        and "grid points" not in obj.name_x \
                                        and not self.noproj )
-                    # finally append
+                    # possible user-defined plot settings shared by all plots
+                    if self.div is not None: plobj.div = self.div
+                    if self.xlabel is not None: plobj.xlabel = self.xlabel
+                    if self.xcoeff is not None: plobj.xcoeff = self.xcoeff
+                    if self.ylabel is not None: plobj.ylabel = self.ylabel
+                    if self.ycoeff is not None: plobj.ycoeff = self.ycoeff
+                    if self.title is not None: plobj.title = self.title
+                    # -- 1D specific
+                    if dp == 1:
+                        if self.lstyle is not None: plobj.lstyle = self.lstyle
+                        if self.marker is not None: plobj.marker = self.marker
+                        if self.color is not None: plobj.color = self.color
+                        if self.label is not None: plobj.label = self.label
+                    # -- 2D specific
+                    elif dp == 2:
+                        if self.proj is not None and not self.noproj: plobj.proj = self.proj
+                        if self.vmin is not None: plobj.vmin = self.vmin
+                        if self.vmax is not None: plobj.vmax = self.vmax
+                        if self.colorb is not None: plobj.colorb = self.colorb
+                    # finally append plot object
                     self.p.append(plobj)
                     count = count + 1
         # self.nplot is number of plot to be defined in this call to defineplot()
@@ -710,6 +782,7 @@ class pp():
             exit() # because this means that we only had 0D values !
         # final status
         self.status = "definedplot"
+        return self
 
     ##############################################################################################
     # makeplot method
@@ -779,11 +852,13 @@ class pp():
             if self.verbose: print "**** Done subplot %i / %i " %( self.n+1,self.howmanyplots ) 
             # finally make the plot
             pl.make()
-            self.n = self.n+1 
+            # increment plot count (and propagate this in plotin)
+            self.n = self.n+1
+            if self.plotin is not None: self.plotin.n = self.n
         # once completed show the plot (cannot show intermediate plotin)
         # ... added a fix (customplot=True) for the label problem in basemap
-        print "**** Done step: makeplot"
-        if (self.n == self.howmanyplots): 
+        print "**** PPCLASS. Done step: makeplot"
+        if (self.n == self.howmanyplots):
             ppplot.save(mode=self.out,filename=self.filename,folder=self.folder,custom=self.customplot)
             mpl.close()
         # SAVE A PICKLE FILE WITH THE self.p ARRAY OF OBJECTS
@@ -794,6 +869,7 @@ class pp():
             pickle.dump(self.p, filehandler)
         except IOError: 
             print "!! WARNING !! Saved object file not written. Probably do not have permission to write here."
+        return self
 
     ###########################################################
     # plot: a shortcut method for the defineplot + plot chain #
@@ -801,6 +877,7 @@ class pp():
     def plot(self,extraplot=0):
         self.defineplot(extraplot=extraplot)
         self.makeplot()
+        return self
 
     #######################################################
     # getplot: a shortcut method for the get + plot chain #
@@ -808,6 +885,7 @@ class pp():
     def getplot(self,extraplot=0):
         self.get()
         self.plot(extraplot=extraplot)
+        return self
 
     ###################################################################
     # getdefineplot: a shortcut method for the get + defineplot chain #
@@ -815,6 +893,7 @@ class pp():
     def getdefineplot(self,extraplot=0):
         self.get()
         self.defineplot(extraplot=extraplot)
+        return self
 
     ##############################################################
     # f: operation on two pp objects being on status 'definedplot'
@@ -906,6 +985,11 @@ class pp():
             try: self.p[iii].marker = opt.marker[iii]
             except:  
                 try: self.p[iii].marker = opt.marker[0]
+                except: pass
+            ###
+            try: self.p[iii].label = opt.label[iii]
+            except:
+                try: self.p[iii].label = opt.label[0]
                 except: pass
             ###
             try: self.p[iii].proj = opt.proj[iii]
@@ -1044,7 +1128,7 @@ class onerequest():
           # if xy axis are apparently undefined, set 2D grid points axis.
           if "grid points" not in self.name_x:
             if self.field_x.all() == self.field_x[0,0]:
-               print "!! WARNING !! xy axis look undefined. creating a non-dummy ones."
+               print "!! WARNING !! xy axis look undefined. creating non-dummy ones."
                self.field_x = np.array(range(self.dim_x)) ; self.name_x = "x grid points"
                self.field_y = np.array(range(self.dim_y)) ; self.name_y = "y grid points"
                [self.field_x,self.field_y] = np.meshgrid(self.field_x,self.field_y)
@@ -1329,7 +1413,11 @@ class onerequest():
         # treat the case of mean on fields normalized with grid mesh area
         # ... this is done in the .area() method. 
         # after that self.field contains field*area/totarea
-        if "area" in self.compute: self.area()
+        if "area" in self.compute: 
+            if "comp" in self.method_x+self.method_y: 
+                self.area()
+            else:
+                if self.verbose: print "!! WARNING !! No area accounted for (computing on t and/or z axis)."
         # now ready to compute [TBD: we would like to have e.g. mean over x,y and min over t ??]
         if self.method_t == "comp":
             if self.verbose: print "**** OK. Computing over t axis."
@@ -1370,8 +1458,8 @@ class onerequest():
         if self.verbose: 
             print "**** OK. Final shape for "+self.var+" after averaging and squeezing",self.field.shape
     
-    # get areas for computations and ponderate field by those areas
-    # -------------------------------------------------------------
+    # get areas for computations and ponderate self.field by area/totarea
+    # -------------------------------------------------------------------
     def area(self):
         if self.verbose: print "**** OK. Get area array for computations."
         # create a request object for area
@@ -1397,14 +1485,28 @@ class onerequest():
         aire.method_t = "fixed" ; aire.field_t = np.array([0]) ; aire.index_t = np.array([0])
         # read the 2D area array in netCDF file
         aire.getfield()
-        # normalize by total area
         aire.field = np.squeeze(aire.field)
-        totarea = ppcompute.sum(ppcompute.sum(aire.field,axis=1),axis=0)
-        if self.verbose: print "**** OK. Total area is: ",totarea
-        aire.field = aire.field / totarea
         # reduce with self horizontal indexes
         if "fixed" in self.method_x+self.method_y:
             aire.field = aire.field[self.index_y,self.index_x]
+        # calculate total area
+        # ... 2D comp is easy. 1D comp is a bit less easy but simple array manipulation.
+        if "free" in self.method_x+self.method_y:
+            if self.method_x == "free":
+                totarea = ppcompute.sum(aire.field,axis=0)
+                totarea = np.reshape(totarea,(1,totarea.size))
+                totarea = np.tile(totarea,(1,self.index_x))
+            elif self.method_y == "free":
+                totarea = ppcompute.sum(aire.field,axis=1)
+                totarea = np.reshape(totarea,(totarea.size,1))
+                totarea = np.tile(totarea,(1,self.index_x.size))
+        elif self.method_x == "comp" and self.method_y == "comp":
+            totarea = ppcompute.sum(ppcompute.sum(aire.field,axis=1),axis=0)
+        else:
+            if self.verbose: print "!! WARNING !! Not account for areas. Only averaging over z and/or t axis."
+        # normalize by total area
+        print "**** OK. I can now normalize field by areas."
+        aire.field = aire.field / totarea
         # tile area array over self t and z axis so that area field could be multiplied with self.field
         aire.field = np.tile(aire.field,(self.index_t.size,self.index_z.size,1,1))
         if self.field.shape != aire.field.shape:

@@ -46,6 +46,7 @@ for curve in S.p:
 S.p[0].swaplab = False
 S.p[0].ylabel="Geopotential height (km)"
 S.p[0].xlabel="Potential temperature (K)"
+S.filename = "meso_profile"
 
 # make the plot
 S.makeplot()

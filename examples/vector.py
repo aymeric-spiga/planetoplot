@@ -7,6 +7,7 @@ u.var = ["temp","phisinit","u","v"]
 u.vargoal = ["main","contour","vector","vector"]
 u.t = "0.5,0.8"
 u.z = "50000"
+u.filename = "vector"
 u.get()
 u.defineplot()
 #u.p[0].proj = "ortho"
@@ -15,6 +16,7 @@ u.makeplot()
 
 
 u.z = "50"
+u.filename = "myplot"
 u.getplot()
 
 

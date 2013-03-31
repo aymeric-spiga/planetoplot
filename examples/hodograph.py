@@ -16,6 +16,7 @@ v.get()
 
 # u as a function of v
 hodo = u.f(v)
+hodo.filename = "hodograph"
 hodo.makeplot()
 
 # v as a function of u

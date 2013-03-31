@@ -13,6 +13,7 @@ les.getplot()
 les.x = None
 les.y = None
 les.t = ["10"]
-#les.stridex = 3
-#les.stridey = 3
+les.stridex = 3
+les.stridey = 3
+les.filename = "les_psfc"
 les.getplot()

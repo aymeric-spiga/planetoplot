@@ -24,6 +24,7 @@ v.makeplot() # plot within the previous one (do not show)
 wind = u**2 + v**2
 wind = wind**0.5
 wind.plotin = v
+wind.filename = "windspeed"
 wind.defineplot()
 wind.p[2].title = "$\sqrt{u^2+v^2}$ (m s$^{-1}$)"
 wind.p[2].proj = "ortho"

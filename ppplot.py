@@ -348,13 +348,15 @@ class plot1d(plot):
     def __init__(self,\
                  lstyle='-',\
                  color='b',\
-                 marker='x'):
+                 marker='x',\
+                 label=None):
         ## get initialization from parent class
         plot.__init__(self)
         ## what could be defined by the user
         self.lstyle = lstyle
         self.color = color
         self.marker = marker
+        self.label = label
 
     # define_from_var
     # ... this uses settings in set_var.txt
@@ -388,15 +390,19 @@ class plot1d(plot):
         # make the 1D plot
         # either request linestyle or let matplotlib decide
         if self.lstyle is not None and self.color is not None:
-            mpl.plot(x,y,self.color+self.lstyle,marker=self.marker)
+            mpl.plot(x,y,self.color+self.lstyle,marker=self.marker,label=self.label)
         else:
-            mpl.plot(x,y,marker=self.marker)
+            mpl.plot(x,y,marker=self.marker,label=self.label)
         # make log axes and/or invert ordinate
         # ... this must be after plot so that axis bounds are well-defined
         # ... also inverting must be after making the thing logarithmic
         if self.logx: mpl.semilogx()
         if self.logy: mpl.semilogy()
         if self.invert: ax = mpl.gca() ; ax.set_ylim(ax.get_ylim()[::-1])
+        # add a label for line(s)
+        if self.label is not None:
+            if self.label != "":
+                mpl.legend(loc="best",fancybox=True)
         ## TBD: set with .div the number of ticks
         ## TBD: be able to control plot limits
         #ticks = self.div + 1
@@ -555,7 +561,7 @@ class plot2d(plot):
             elif self.proj in ["ortho","moll","robin"]:
                 wlat[0] = None ; wlat[1] = None ; wlon[0] = None ; wlon[1] = None
                 steplon = 30. ; steplat = 30.
-                if self.proj == "robin": steplon = 60.
+                if self.proj in ["robin","moll"]: steplon = 60.
                 mertab = np.r_[-360.:360.:steplon]
                 partab = np.r_[-90.:90.:steplat]
                 if self.proj == "ortho": 
@@ -641,7 +647,8 @@ class plot2d(plot):
                               angles='xy',color=self.colorvec,pivot='middle',\
                               scale=zescale*reducevec,width=widthvec )
                 # make vector key. default is on upper left corner.
-                p = mpl.quiverkey(q,-0.03,1.08,\
+                keyh = 1.025 ; keyv = 1.05
+                #keyh = -0.03 ; keyv = 1.08
+                p = mpl.quiverkey(q,keyh,keyv,\
                                   zescale,str(int(zescale)),\
                                   color='black',labelpos='S',labelsep = 0.07)
-        #### streamplot!!! avec basemap

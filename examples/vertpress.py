@@ -8,6 +8,7 @@ prof.var = "tk"
 prof.t = [10.,20.]
 prof.x = 30
 prof.y = 30
+prof.filename = "vertpress"
 
 prof.get()
 prof.superpose = True

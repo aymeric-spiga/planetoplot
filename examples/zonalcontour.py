@@ -7,6 +7,7 @@ u.var = ["temp","u"]
 u.vargoal = ["main","contour"]
 u.x = "0"
 u.t = "0.5"
+u.filename = "zonalcontour"
 u.get()
 u.defineplot()
 u.p[0].div = 30.
