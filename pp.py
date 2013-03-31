@@ -20,15 +20,18 @@ import sys
 ######################################
 parser = OptionParser()
 parser.version = \
-'''************************************************************************
-PLANETOPLOT (for help: pp.py -h)
+'''**************************************************
+******** PLANETOPLOT (for help: pp.py -h) ********
+**************************************************'''
+parser.usage = \
+'''pp.py [options] netCDF file(s)
+(NB: no options --> simple inspection of variables and dimensions in netCDF files)
+-------------------
+PLANETOPLOT
 --> command line tool to make nice & quick plots from netCDF files
 --> based on python + numpy + scipy + matplotlib + basemap + netCDF4
 --> Author: A. Spiga (LMD/UPMC) aymeric.spiga@upmc.fr
-************************************************************************'''
-parser.usage = \
-'''pp.py [options] netCDF file(s)
-(NB: no options --> simple inspection of variables and dimensions in netCDF files'''
+-------------------'''
 parser.print_version()
 
 ########################################
