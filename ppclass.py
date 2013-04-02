@@ -1355,21 +1355,6 @@ class onerequest():
           self.field_y = self.field_y[self.index_y2d, self.index_x2d]
         self.field_z = self.field_z[self.index_z]
         self.field_t = self.field_t[self.index_t]
-        # now have to obtain the new indexes which correspond to the extracted self.field
-        # for it to work with unique index, ensure that any index_* is a numpy array
-        if not isinstance(self.index_x, np.ndarray): self.index_x = np.array([self.index_x])
-        if not isinstance(self.index_y, np.ndarray): self.index_y = np.array([self.index_y])
-        if not isinstance(self.index_z, np.ndarray): self.index_z = np.array([self.index_z])
-        if not isinstance(self.index_t, np.ndarray): self.index_t = np.array([self.index_t])
-        for val in self.index_x: self.index_x2d[np.where(self.index_x2d == val)] = np.where(self.index_x == val)[0]
-        for val in self.index_y: self.index_y2d[np.where(self.index_y2d == val)] = np.where(self.index_y == val)[0]
-        for val in self.index_z: self.index_z  [np.where(self.index_z   == val)] = np.where(self.index_z == val)[0]
-        for val in self.index_t: self.index_t  [np.where(self.index_t   == val)] = np.where(self.index_t == val)[0]
-               ##### VERY EXPENSIVE
-               ## recast self.field with 2D horizontal arrays because we might have extracted
-               ## more than what is to be actually plot or computed, in particular for comps on 2D lat,lon coordinates
-               #self.field = self.field[np.ix_(self.index_t,self.index_z,self.index_y2d,self.index_x2d)]
-               #(nt,nz,ny,nx) = self.field.shape        
         # extract relevant horizontal points
         # TBD: is compfree OK with computing on irregular grid?
         test = self.method_x + self.method_y
@@ -1377,6 +1362,19 @@ class onerequest():
           pass
         elif test in ["fixedfree","fixedcomp"] or test in ["freefixed","compfixed"]: 
           time0 = timelib.time()  
+          # now have to obtain the new indexes which correspond to the extracted self.field
+          # for it to work with unique index, ensure that any index_* is a numpy array
+          if not isinstance(self.index_x, np.ndarray): self.index_x = np.array([self.index_x])
+          if not isinstance(self.index_y, np.ndarray): self.index_y = np.array([self.index_y])
+          if not isinstance(self.index_z, np.ndarray): self.index_z = np.array([self.index_z])
+          if not isinstance(self.index_t, np.ndarray): self.index_t = np.array([self.index_t])
+          for val in self.index_x: self.index_x2d[np.where(self.index_x2d == val)] = np.where(self.index_x == val)[0]
+          for val in self.index_y: self.index_y2d[np.where(self.index_y2d == val)] = np.where(self.index_y == val)[0]
+               ##### VERY EXPENSIVE
+               ## recast self.field with 2D horizontal arrays because we might have extracted
+               ## more than what is to be actually plot or computed, in particular for comps on 2D lat,lon coordinates
+               #self.field = self.field[np.ix_(self.index_t,self.index_z,self.index_y2d,self.index_x2d)]
+               #(nt,nz,ny,nx) = self.field.shape        
           # prepare the loop on all relevant horizontal points
           if self.method_x in ["comp","free"]:    
               nnn = self.index_x2d.shape[0] ; what_I_am_supposed_to_do = "keepx"
@@ -1388,8 +1386,8 @@ class onerequest():
           # ... (for sure the method with np.diag is much slower)
           for iii in range(nnn):
            ix = self.index_x2d[iii] ; iy = self.index_y2d[iii]
-           for iz in self.index_z:
-            for it in self.index_t:
+           for iz in range(self.index_z.size):
+            for it in range(self.index_t.size):
               if what_I_am_supposed_to_do == "keepx":    self.field[it,iz,0,ix] = self.field[it,iz,iy,ix]
               elif what_I_am_supposed_to_do == "keepy":  self.field[it,iz,iy,0] = self.field[it,iz,iy,ix]
           if self.verbose: print "**** OK. I got to pick the right values for your request. This took me %6.4f seconds" % (timelib.time() - time0)

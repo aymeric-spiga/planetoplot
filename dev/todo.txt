@@ -1,6 +1,4 @@
 
-- persistent plot settings in ppclass (valid for all plots)
-
 - a plot3d() class for 3D plots /planeto/tnalmd/runs/newref/isoline.py
 
 - movies
