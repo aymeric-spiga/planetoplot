@@ -24,7 +24,7 @@ import ppcompute
 # -------------------------------
 mpl.rcParams['font.family'] = "serif"
 mpl.rcParams['axes.color_cycle'] = "r,g,b,k"
-mpl.rcParams['contour.negative_linestyle'] = "dashed"
+mpl.rcParams['contour.negative_linestyle'] = "dashed" # ou "solid"
 mpl.rcParams['verbose.level'] = "silent"
 mpl.rcParams['lines.linewidth'] = 1.5
 mpl.rcParams['lines.markersize'] = 10
@@ -50,7 +50,20 @@ zeorientation="vertical"
 zefrac = 0.05
 # (save figures)
 pad_inches_value=0.25
+# (negative mode)
+def_negative = False
+def_negative = True
 ###############################################
+
+### settings for 'negative-like' mode
+if def_negative:
+    mpl.rc('figure', facecolor='k', edgecolor='k')
+    mpl.rcParams['text.color'] = 'w'
+    mpl.rc('axes',labelcolor='w',facecolor='k',edgecolor='w')
+    mpl.rcParams['xtick.color'] = 'w'
+    mpl.rcParams['ytick.color'] = 'w'
+    mpl.rcParams['grid.color'] = 'w'
+    mpl.rc('savefig',facecolor='k',edgecolor='k')
 
 ##########################
 # executed when imported #
@@ -318,6 +331,7 @@ class plot():
     # -------------------------------
     def make(self):
         self.check()
+        # labels, title, etc...
         mpl.xlabel(self.xlabel)
         mpl.ylabel(self.ylabel)
         if self.swap:
