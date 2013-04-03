@@ -52,7 +52,6 @@ zefrac = 0.05
 pad_inches_value=0.25
 # (negative mode)
 def_negative = False
-def_negative = True
 ###############################################
 
 ### settings for 'negative-like' mode
