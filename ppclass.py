@@ -1247,8 +1247,18 @@ class onerequest():
             else:               
                 self.method_y = "fixed"
                 if self.verbose: print "**** OK. no y dimension."
-        ## CASE 0 above, this is just for continuity.
+        ## CASE 0 above, this is just for continuity for free.
+        ## ... for comp we have to select bounds.
+        ## ... TBD: take the bool array strategy for what follows!
         if self.method_x in ["free","comp"] and self.method_y in ["free","comp"]:
+            ### ref1_dirty_hack
+            ### ... for the moment this is a hack. but actually this is more powerful.
+            if self.method_x == "comp":
+                yeah = (self.field_x >= dalistx[indx][0])*(self.field_x <= dalistx[indx][1])
+                self.index_x = yeah[0,:]
+            if self.method_y == "comp":
+                yeah = (self.field_y >= dalisty[indy][0]) * (self.field_y <= dalisty[indy][1])
+                self.index_y = yeah[:,0]
             self.index_x2d = self.index_x
             self.index_y2d = self.index_y
         ## AND NOW THE LITTLE BIT MORE COMPLICATED CASES
@@ -1340,7 +1350,15 @@ class onerequest():
             print "!! ERROR !! field would have more than four dimensions ?" ; exit()
         # NB: ... always 4D array but possibly with "size 1" dimensions 
         #     ... if one dimension is missing because 1D 2D or 3D requests, make it appear again
-        self.field = np.reshape(self.field,(nt,nz,ny,nx))
+        try: 
+            self.field = np.reshape(self.field,(nt,nz,ny,nx))
+        except:
+            # dirty hack (AS) ref1_dirty_hack
+            # waiting for more fundamental modifications. case when self.index_y is a bool array.
+            # ... be careful if no point...
+            nx = np.sum(self.index_x) ## gives the size of the True part!
+            ny = np.sum(self.index_y)
+            self.field = np.reshape(self.field,(nt,nz,ny,nx))
         if self.verbose: print "**** OK. I got %7.1e values. This took me %6.4f seconds" % (nx*ny*nz*nt,timelib.time() - time0)
         if self.verbose: print "**** OK. I got var "+self.var+" with shape",self.field.shape
         # reduce coordinates to useful points
