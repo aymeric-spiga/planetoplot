@@ -99,8 +99,9 @@ def readslices(saxis):
                 zesaxis[i,0] = float(a[0])
                 zesaxis[i,1] = float(a[1])          
     return zesaxis
-# (needed by readslices)
+
 # look for comas in the input name to separate different names (files, variables,etc ..)
+# (needed by readslices)
 def separatenames (name):
     if name is None: names = None
     else:
@@ -140,6 +141,7 @@ class pp():
                       out="gui",\
                       filename="myplot",\
                       folder="./",\
+                      includedate=True,\
                       xlabel=None,ylabel=None,\
                       xcoeff=None,ycoeff=None,\
                       proj=None,\
@@ -161,6 +163,7 @@ class pp():
         self.nplot = 0
         self.p = None
         self.customplot = False
+        self.allfield = None
         ## what could be defined by the user
         self.file = file
         self.var = var
@@ -179,6 +182,7 @@ class pp():
         self.out = out
         self.filename = filename
         self.folder = folder
+        self.includedate = includedate
         ## here are user-defined plot settings 
         ## -- if not None, valid on all plots in the pp() objects
         self.xlabel = xlabel ; self.xcoeff = xcoeff
@@ -237,6 +241,7 @@ class pp():
             self.color = other.color
             self.label = other.label
             self.title = other.title
+            self.includedate = other.includedate
         else:
             print "!! ERROR !! argument must be a pp object." ; exit()
 
@@ -559,6 +564,13 @@ class pp():
         self.printstatus()
         # check if things were done OK before
         if self.status != "defined": print "!! ERROR !! Please use .define() to define your pp object." ; exit()
+        # create the list of allfield() objects
+        # --> so that the user can easily access values
+        self.allfield = [[[[[[ \
+                        [] \
+                        for x in range(self.nplotx)] for y in range(self.nploty)] \
+                        for z in range(self.nplotz)] for t in range(self.nplott)] \
+                        for j in range(self.nvin)]   for i in range(self.nfin)]
         ## first get fields
         ## ... only what is needed is extracted from the files
         ## ... and computations are performed
@@ -571,6 +583,9 @@ class pp():
               obj = self.request[i][j][t][z][y][x]
               obj.getfield()
               obj.computations()
+              self.allfield[i][j][t][z][y][x] = obj.field
+        # get rid of useless dimensions in allfield
+        self.allfield = np.squeeze(self.allfield)
         # change status
         self.status = "retrieved"
         return self
@@ -859,7 +874,7 @@ class pp():
         # ... added a fix (customplot=True) for the label problem in basemap
         print "**** PPCLASS. Done step: makeplot"
         if (self.n == self.howmanyplots):
-            ppplot.save(mode=self.out,filename=self.filename,folder=self.folder,custom=self.customplot)
+            ppplot.save(mode=self.out,filename=self.filename,folder=self.folder,custom=self.customplot,includedate=self.includedate)
             mpl.close()
         # SAVE A PICKLE FILE WITH THE self.p ARRAY OF OBJECTS
         if self.verbose: print "**** Saving session in "+self.filename + ".ppobj"
@@ -1379,7 +1394,7 @@ class onerequest():
         if test in ["fixedfixed","freefree"]:
           pass
         elif test in ["fixedfree","fixedcomp"] or test in ["freefixed","compfixed"]: 
-          time0 = timelib.time()  
+          time0 = timelib.time()
           # now have to obtain the new indexes which correspond to the extracted self.field
           # for it to work with unique index, ensure that any index_* is a numpy array
           if not isinstance(self.index_x, np.ndarray): self.index_x = np.array([self.index_x])
@@ -1517,6 +1532,7 @@ class onerequest():
                 totarea = np.reshape(totarea,(totarea.size,1))
                 totarea = np.tile(totarea,(1,self.index_x.size))
         elif self.method_x == "comp" and self.method_y == "comp":
+            aire.field = aire.field[np.ix_(self.index_y, self.index_x)] # reduce to requested indexes only
             totarea = ppcompute.sum(ppcompute.sum(aire.field,axis=1),axis=0)
         else:
             if self.verbose: print "!! WARNING !! Not account for areas. Only averaging over z and/or t axis."
@@ -1526,7 +1542,8 @@ class onerequest():
         # tile area array over self t and z axis so that area field could be multiplied with self.field
         aire.field = np.tile(aire.field,(self.index_t.size,self.index_z.size,1,1))
         if self.field.shape != aire.field.shape:
-            print "!! ERROR !! Problem in area(). Check array shapes." ; exit()
+            print "!! ERROR !! Problem in area(). Check array shapes."
+            print "Field vs. aire:",self.field.shape,aire.field.shape ; exit()
         else:
             self.field = self.field*aire.field
 

@@ -417,10 +417,12 @@ class plot1d(plot):
             if self.label != "":
                 mpl.legend(loc="best",fancybox=True)
         ## TBD: set with .div the number of ticks
-        ## TBD: be able to control plot limits
         #ticks = self.div + 1
         #ax = mpl.gca()
         #ax.get_xaxis().set_ticks(np.linspace(ppcompute.min(x),ppcompute.max(x),ticks/2+1))
+        # control plot limits (TBD: be able to control those)
+        ax = mpl.gca() ; ax.set_xbound(lower=ppcompute.min(x), upper=ppcompute.max(x))
+
 
 ################################
 # a subclass to make a 2D plot #
@@ -659,9 +661,9 @@ class plot2d(plot):
                               vecx[::stride,::stride],vecy[::stride,::stride],\
                               angles='xy',color=self.colorvec,pivot='middle',\
                               scale=zescale*reducevec,width=widthvec )
-                # make vector key. default is on upper left corner.
-                keyh = 1.025 ; keyv = 1.05
-                #keyh = -0.03 ; keyv = 1.08
+                # make vector key.
+                keyh = 1.025 ; keyv = 1.05 # upper right corner over colorbar
+                #keyh = -0.03 ; keyv = 1.08 # upper left corner
                 p = mpl.quiverkey(q,keyh,keyv,\
                                   zescale,str(int(zescale)),\
                                   color='black',labelpos='S',labelsep = 0.07)
