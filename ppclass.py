@@ -584,8 +584,6 @@ class pp():
               obj.getfield()
               obj.computations()
               self.allfield[i][j][t][z][y][x] = obj.field
-        # get rid of useless dimensions in allfield
-        self.allfield = np.squeeze(self.allfield)
         # change status
         self.status = "retrieved"
         return self

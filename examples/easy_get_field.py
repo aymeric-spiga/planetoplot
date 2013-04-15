@@ -28,14 +28,11 @@ test.get()
 # - request x
 # - field dimensions
 # -----------------------------
-# ALL DIM == 1 HAVE BEEN SQUEEZED
-# -----------------------------
 
-# for instance here, shape of allfield is (3,2)
-# because the user requested 3 files, 2 vars, 0D values
 
-tsurf = test.allfield[:,0]
-asr = test.allfield[:,1]
+for ii in range(test.nfin):
+    print "tsurf",test.allfield[ii][0][0][0][0][0]
+    print "asr",test.allfield[ii][1][0][0][0][0]
 
-mpl.plot(tsurf,asr)
-mpl.show()
+#mpl.plot(tsurf,asr)
+#mpl.show()
