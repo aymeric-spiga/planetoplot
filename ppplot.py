@@ -601,6 +601,9 @@ class plot2d(plot):
                 # help the user who forgets self.blat would better be negative in spstere
                 # (this actually serves for the default setting just above)
                 if self.proj == "spstere" and self.blat > 0: self.blat = -self.blat
+                # labels
+                mertab = np.r_[-360.:360.:15.]
+                partab = np.r_[-90.:90.:5.]
             # ... unsupported projections
             else:
                 print "!! ERROR !! unsupported projection. supported: "+\
@@ -613,8 +616,9 @@ class plot2d(plot):
                         llcrnrlon=wlon[0],urcrnrlon=wlon[1])
             # draw meridians and parallels
             ft = int(mpl.rcParams['font.size']*3./4.)
-            m.drawmeridians(mertab,labels=merlab,color='grey',linewidth=0.75,fontsize=ft,fmt=format)
-            m.drawparallels(partab,labels=parlab,color='grey',linewidth=0.75,fontsize=ft,fmt=format)
+            zelatmax = 85.
+            m.drawmeridians(mertab,labels=merlab,color='grey',linewidth=0.75,fontsize=ft,fmt=format,latmax=zelatmax)
+            m.drawparallels(partab,labels=parlab,color='grey',linewidth=0.75,fontsize=ft,fmt=format,latmax=zelatmax)
             # define background (see set_back.txt)
             if self.back is not None:
               if self.back in back.keys():
@@ -652,8 +656,9 @@ class plot2d(plot):
         ### not expecting NaN in self.addvecx and self.addvecy. masked arrays is just enough.
         stride = 3
         if self.addvecx is not None and self.addvecy is not None and self.mapmode:
-                ## for metwinds only ???
+                ### for metwinds only ???
                 [vecx,vecy] = m.rotate_vector(self.addvecx,self.addvecy,self.absc,self.ordi) 
+                #vecx,vecy = self.addvecx,self.addvecy
                 # reference vector is scaled
                 zescale = ppcompute.mean(np.sqrt(self.addvecx*self.addvecx+self.addvecy*self.addvecy))
                 # make vector field

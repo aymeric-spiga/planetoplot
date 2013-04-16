@@ -507,14 +507,14 @@ class pp():
         mx = findmethod(sx) ; my = findmethod(sy)
         mz = findmethod(sz) ; mt = findmethod(st)
         # get number of plots to be done
-        if mx == "fixed": self.nplotx = sx.size/2
-        else:             self.nplotx = 1
-        if my == "fixed": self.nploty = sy.size/2
-        else:             self.nploty = 1
-        if mz == "fixed": self.nplotz = sz.size/2
-        else:             self.nplotz = 1
-        if mt == "fixed": self.nplott = st.size/2
-        else:             self.nplott = 1
+        if mx in ["fixed","comp"]: self.nplotx = sx.size/2
+        else:                      self.nplotx = 1
+        if my in ["fixed","comp"]: self.nploty = sy.size/2
+        else:                      self.nploty = 1
+        if mz in ["fixed","comp"]: self.nplotz = sz.size/2
+        else:                      self.nplotz = 1
+        if mt in ["fixed","comp"]: self.nplott = st.size/2
+        else:                      self.nplott = 1
         if self.verbose:  print "**** OK. Plots over x,y,z,t -->",self.nplotx,self.nploty,self.nplotz,self.nplott
         # create the list of onerequest() objects
         self.request = [[[[[[ \
@@ -1361,17 +1361,14 @@ class onerequest():
             self.field = self.f.variables[self.var][self.index_t,self.index_z,self.index_y,self.index_x]
         else:
             print "!! ERROR !! field would have more than four dimensions ?" ; exit()
+        # dirty hack (AS) ref1_dirty_hack
+        # waiting for more fundamental modifications. case when self.index_y is a bool array.
+        # ... be careful if no point...
+        if type(self.index_x[0]) == np.bool_: nx = np.sum(self.index_x) ## gives the size of the True part!
+        if type(self.index_y[0]) == np.bool_: ny = np.sum(self.index_y) ## gives the size of the True part!
         # NB: ... always 4D array but possibly with "size 1" dimensions 
         #     ... if one dimension is missing because 1D 2D or 3D requests, make it appear again
-        try: 
-            self.field = np.reshape(self.field,(nt,nz,ny,nx))
-        except:
-            # dirty hack (AS) ref1_dirty_hack
-            # waiting for more fundamental modifications. case when self.index_y is a bool array.
-            # ... be careful if no point...
-            nx = np.sum(self.index_x) ## gives the size of the True part!
-            ny = np.sum(self.index_y)
-            self.field = np.reshape(self.field,(nt,nz,ny,nx))
+        self.field = np.reshape(self.field,(nt,nz,ny,nx))
         if self.verbose: print "**** OK. I got %7.1e values. This took me %6.4f seconds" % (nx*ny*nz*nt,timelib.time() - time0)
         if self.verbose: print "**** OK. I got var "+self.var+" with shape",self.field.shape
         # reduce coordinates to useful points
