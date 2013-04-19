@@ -18,7 +18,7 @@ u.get()
 
 # we define the plot, then set a few personal stuff
 u.defineplot() 
-u.p[0].title = "This is what we name $u$ (m s$^{-1}$)"
+u.p[0].title = "This is what we name $u$"
 u.p[0].proj = "robin"
 u.filename = "simple"
 

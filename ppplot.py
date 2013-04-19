@@ -11,6 +11,7 @@ import numpy as np
 import matplotlib.pyplot as mpl
 from matplotlib.cm import get_cmap
 from mpl_toolkits.basemap import Basemap
+from matplotlib.ticker import FormatStrFormatter
 # personal librairies
 import ppcompute
 ###############################################
@@ -78,17 +79,18 @@ whereset = ppcompute.findset(whereset)
 # - variable settings
 # -------------------------------
 zefile = "set_var.txt"
-vf = {} ; vc = {} ; vl = {}
+vf = {} ; vc = {} ; vl = {} ; vu = {}
 try: 
     f = open(whereset+zefile, 'r')
     for line in f:
         if "#" in line: pass
         else:
-            var, format, colorb, label = line.strip().split(';')
+            var, format, colorb, label, units = line.strip().split(';')
             ind = var.strip() 
             vf[ind] = format.strip()
             vc[ind] = colorb.strip()
             vl[ind] = label.strip()
+            vu[ind] = units.strip()
     f.close()
 except IOError: 
     files_not_present = files_not_present + zefile + " "
@@ -212,7 +214,7 @@ def calculate_bounds(field,vmin=None,vmax=None):
        if vmin is None: zevmin = damean - dev
        if vmax is None: zevmax = damean + dev
        # special case: negative values with stddev while field is positive
-       if zevmin < 0. and ppcompute.min(fieldcalc) > 0.: zevmin = 0.
+       if zevmin < 0. and ppcompute.min(fieldcalc) >= 0.: zevmin = 0.
     # check that bounds are not too tight given the field
     amin = ppcompute.min(field)
     amax = ppcompute.max(field)
@@ -238,28 +240,29 @@ def bounds(what_I_plot,zevmin,zevmax,miss=9e+35):
 # a generic function to show (GUI) or save a plot (PNG,EPS,PDF,...)
 # -------------------------------
 def save(mode="gui",filename="plot",folder="./",includedate=True,res=150,custom=False):
-    # a few settings
-    possiblesave = ['eps','ps','svg','png','jpg','pdf'] 
-    # now the main instructions
-    if mode == "gui": 
-        mpl.show()
-    elif mode in possiblesave:
-        ## name of plot
-        name = folder+'/'+filename
-        if includedate:
-            for ttt in timelib.gmtime():
-                name = name + "_" + str(ttt)
-        name = name +"."+mode
-        ## save file
-        print "**** Saving file in "+mode+" format... Please wait."
-        if not custom:
-            # ... regular plots
-            mpl.savefig(name,dpi=res,pad_inches=pad_inches_value,bbox_inches='tight')
-        else:
-            # ... mapping mode, adapted space for labels etc...
-            mpl.savefig(name,dpi=res)
-    else:
-        print "!! ERROR !! File format not supported. Supported: ",possiblesave
+    if mode != "nothing":
+      # a few settings
+      possiblesave = ['eps','ps','svg','png','jpg','pdf'] 
+      # now the main instructions
+      if mode == "gui": 
+          mpl.show()
+      elif mode in possiblesave:
+          ## name of plot
+          name = folder+'/'+filename
+          if includedate:
+              for ttt in timelib.gmtime():
+                  name = name + "_" + str(ttt)
+          name = name +"."+mode
+          ## save file
+          print "**** Saving file in "+mode+" format... Please wait."
+          if not custom:
+              # ... regular plots
+              mpl.savefig(name,dpi=res,pad_inches=pad_inches_value,bbox_inches='tight')
+          else:
+              # ... mapping mode, adapted space for labels etc...
+              mpl.savefig(name,dpi=res)
+      else:
+          print "!! ERROR !! File format not supported. Supported: ",possiblesave
 
 ##################################
 # a generic class to make a plot #
@@ -291,6 +294,8 @@ class plot():
                  invert=False,\
                  xcoeff=1.,\
                  ycoeff=1.,\
+                 fmt=None,\
+                 units="",\
                  title=""):
         ## what could be defined by the user
         self.var = var
@@ -307,6 +312,8 @@ class plot():
         self.invert = invert
         self.xcoeff = xcoeff
         self.ycoeff = ycoeff
+        self.fmt = fmt
+        self.units = units
         ## other useful arguments
         ## ... not used here in ppplot but need to be attached to plot object
         self.axisbg = "white"
@@ -324,6 +331,7 @@ class plot():
         if self.var is not None:
          if self.var.upper() in vl.keys():
           self.title = vl[self.var.upper()]
+          self.units = vu[self.var.upper()]
 
     # make
     # this is generic to all plots
@@ -382,12 +390,14 @@ class plot1d(plot):
          if self.var.upper() in vl.keys():
           self.ylabel = vl[self.var.upper()]
           self.title = ""
+          self.fmt = vf[self.var.upper()]
 
     # make
     # -------------------------------
     def make(self):
         # get what is done in the parent class
         plot.make(self)
+        if self.fmt is None: self.fmt = '%.0f'
         # add specific stuff
         mpl.grid(color='grey')
         if self.lstyle == "": self.lstyle = " " # to allow for no line at all with ""
@@ -416,13 +426,29 @@ class plot1d(plot):
         if self.label is not None:
             if self.label != "":
                 mpl.legend(loc="best",fancybox=True)
-        ## TBD: set with .div the number of ticks
+        # AXES
+        ax = mpl.gca()
+        # format labels
+        if self.swap: ax.get_xaxis().set_major_formatter(FormatStrFormatter(self.fmt))
+        else: ax.get_yaxis().set_major_formatter(FormatStrFormatter(self.fmt))
+        # plot limits: ensure that no curve would be outside the window
+        # x-axis
+        x1, x2 = ax.get_xbound()
+        xmin = ppcompute.min(x)
+        xmax = ppcompute.max(x)
+        if xmin < x1: x1 = xmin
+        if xmax > x2: x2 = xmax
+        ax.set_xbound(lower=x1,upper=x2)
+        # y-axis
+        y1, y2 = ax.get_ybound()
+        ymin = ppcompute.min(y)
+        ymax = ppcompute.max(y)
+        if ymin < y1: y1 = ymin
+        if ymax > y2: y2 = ymax
+        ax.set_ybound(lower=y1,upper=y2)
+        ## set with .div the number of ticks. less good than automatic.
         #ticks = self.div + 1
-        #ax = mpl.gca()
-        #ax.get_xaxis().set_ticks(np.linspace(ppcompute.min(x),ppcompute.max(x),ticks/2+1))
-        # control plot limits (TBD: be able to control those)
-        ax = mpl.gca() ; ax.set_xbound(lower=ppcompute.min(x), upper=ppcompute.max(x))
-
+        #ax.get_xaxis().set_ticks(np.linspace(x1,x2,ticks/2+1))
 
 ################################
 # a subclass to make a 2D plot #
@@ -450,7 +476,6 @@ class plot2d(plot):
                  addvecx=None,\
                  addvecy=None,\
                  addcontour=None,\
-                 fmt="%.2e",\
                  blon=None,\
                  blat=None,\
                  area=None,\
@@ -470,7 +495,6 @@ class plot2d(plot):
         self.addvecy = addvecy
         self.colorvec = colorvec
         self.addcontour = addcontour
-        self.fmt = fmt
         self.blon = blon ; self.blat = blat
         self.area = area
         self.vmin = vmin ; self.vmax = vmax
@@ -492,6 +516,7 @@ class plot2d(plot):
     def make(self):
         # get what is done in the parent class...
         plot.make(self)
+        if self.fmt is None: self.fmt = "%.2e"
         # ... then add specific stuff
         ############################################################################################
         ### PRE-SETTINGS
@@ -623,9 +648,9 @@ class plot2d(plot):
             if self.back is not None:
               if self.back in back.keys():
                  print "**** info: loading a background, please wait.",self.back
-                 if back not in ["coast","sea"]:   m.warpimage(back[self.back],scale=0.75)
-                 elif back == "coast":             m.drawcoastlines()
-                 elif back == "sea":               m.drawlsmask(land_color='white',ocean_color='aqua')
+                 if self.back not in ["coast","sea"]:   m.warpimage(back[self.back],scale=0.75)
+                 elif self.back == "coast":             m.drawcoastlines()
+                 elif self.back == "sea":               m.drawlsmask(land_color='white',ocean_color='aqua')
               else:
                  print "!! ERROR !! requested background not defined. change name or fill in set_back.txt" ; exit()
             # define x and y given the projection
@@ -640,16 +665,20 @@ class plot2d(plot):
         ############################################################################################
         if self.trans > 0.:
             ## draw colorbar. settings are different with projections. or if not mapmode.
-            if not self.mapmode: orientation=zeorientation ; frac = 0.075 ; pad = 0.03
-            elif self.proj in ['moll']: orientation="horizontal" ; frac = 0.075 ; pad = 0.03
-            elif self.proj in ['cyl']: orientation="vertical" ; frac = 0.023 ; pad = 0.03
-            else: orientation = zeorientation ; frac = zefrac ; pad = 0.03
+            if not self.mapmode: orientation=zeorientation ; frac = 0.075 ; pad = 0.03 ; lu = 0.5
+            elif self.proj in ['moll']: orientation="horizontal" ; frac = 0.075 ; pad = 0.03 ; lu = 1.0
+            elif self.proj in ['cyl']: orientation="vertical" ; frac = 0.023 ; pad = 0.03 ; lu = 0.5
+            else: orientation = zeorientation ; frac = zefrac ; pad = 0.03 ; lu = 0.5
             zelevpal = np.linspace(zevmin,zevmax,num=min([ticks/2+1,21]))
             zecb = mpl.colorbar(fraction=frac,pad=pad,\
                                 format=self.fmt,orientation=orientation,\
                                 ticks=zelevpal,\
-                                extend='neither',spacing='proportional') 
+                                extend='neither',spacing='proportional')
             if zeorientation == "horizontal": zecb.ax.set_xlabel(self.title) ; self.title = ""
+            # colorbar title --> units
+            if self.units not in ["dimless",""]:
+                zecb.ax.set_title("["+self.units+"]",fontsize=3.*mpl.rcParams['font.size']/4.,x=lu,y=1.025)
+
         ############################################################################################
         ### VECTORS. must be after the colorbar. we could also leave possibility for streamlines.
         ############################################################################################
@@ -667,7 +696,8 @@ class plot2d(plot):
                               angles='xy',color=self.colorvec,pivot='middle',\
                               scale=zescale*reducevec,width=widthvec )
                 # make vector key.
-                keyh = 1.025 ; keyv = 1.05 # upper right corner over colorbar
+                #keyh = 1.025 ; keyv = 1.05 # upper right corner over colorbar
+                keyh = 0.98 ; keyv = 1.06
                 #keyh = -0.03 ; keyv = 1.08 # upper left corner
                 p = mpl.quiverkey(q,keyh,keyv,\
                                   zescale,str(int(zescale)),\

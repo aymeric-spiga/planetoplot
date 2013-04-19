@@ -1364,8 +1364,11 @@ class onerequest():
         # dirty hack (AS) ref1_dirty_hack
         # waiting for more fundamental modifications. case when self.index_y is a bool array.
         # ... be careful if no point...
-        if type(self.index_x[0]) == np.bool_: nx = np.sum(self.index_x) ## gives the size of the True part!
-        if type(self.index_y[0]) == np.bool_: ny = np.sum(self.index_y) ## gives the size of the True part!
+        try:
+            if type(self.index_x[0]) == np.bool_: nx = np.sum(self.index_x) ## gives the size of the True part!
+            if type(self.index_y[0]) == np.bool_: ny = np.sum(self.index_y) ## gives the size of the True part!
+        except:
+            pass
         # NB: ... always 4D array but possibly with "size 1" dimensions 
         #     ... if one dimension is missing because 1D 2D or 3D requests, make it appear again
         self.field = np.reshape(self.field,(nt,nz,ny,nx))

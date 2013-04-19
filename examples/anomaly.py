@@ -18,5 +18,6 @@ mean.get()
 anomaly = ((simple-mean)/mean)*100.
 anomaly.filename = "anomaly"
 anomaly.defineplot()
-anomaly.p[0].title = "surface temperature anomaly in %"
+anomaly.p[0].title = "surface temperature anomaly"
+anomaly.p[0].units = '%'
 anomaly.makeplot()

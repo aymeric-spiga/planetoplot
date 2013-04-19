@@ -2,58 +2,58 @@
 ## set_var.txt
 ## var ; format ; colormap ; label
 ##################################
-T ; %.0f ; gist_heat ; Temperature (K)
-TEMP ; %0.f ; gist_heat ; Temperature (K) 
-TPOT ; %.0f ; Paired ; Potential temperature (K) 
-TSURF ; %.0f ; RdBu_r ; Surface temperature (K)
-TK ; %.0f ; gist_heat ; Temperature (K)
-U ; %.1f ; jet ; Zonal wind (m s$^{-1}$)
-UM ; %.1f ; jet ; Zonal wind (m s$^{-1}$)
-V ; %.1f ; jet ; Meridional wind (m s$^{-1}$)
-VM ; %.1f ; jet ; Meridional wind (m s$^{-1}$)
-W ; %.2f ; jet ; Vertical wind (m s$^{-1}$)
-WIND ; %.0f ; YlOrRd ; Wind speed (m s$^{-1}$)
-UV ; %.0f ; YlOrRd ; Wind speed (m s$^{-1}$)
-UVMET ; %.0f ; YlOrRd ; Wind speed (m s$^{-1}$)
-PTOT ; %.0f ; jet ; Pressure (Pa)
-PSFC ; %.1f ; RdYlBu_r ; Surface pressure (Pa)
-PS ; %.1f ; RdYlBu_r ; Surface pressure (Pa)
-ANOMALY ; %.1f ; gist_ncar ; Anomaly (%)
-HGT ; %.1e ; spectral ; Topography (m)
-HGT_M ; %.1e ; spectral ; Topography (m)
-MARS_TI ; %.0f ; jet ; Thermal inertia (tiu)
-THERMAL_INERTIA ; %.0f ; jet ; Thermal inertia (tiu)
-TAU ; %.1f ; YlOrBr_r ; Opacity
-TAU_DUST ; %.1f ; Oranges_r ; Dust opacity
-QDUST ; %.6f ; Oranges_r ; Dust mass mixing ratio (kg/kg)
-CCNQ ; %.2e ; YlOrBr ; Cloud condensation nuclei (kg/kg)
-CCNN ; %.2e ; YlOrBr ; Cloud condensation nuclei density
-QH2O ; %.2e ; PuBu ; Water vapor mixing ratio (kg/kg)
-MTOT ; %.1e ; spectral ; Column vapor (pr. $\mu$m)
-ICETOT ; %.1e ; YlGnBu_r ; Column ice (pr. $\mu$m)
-TAU_ICE ; %.2f ; Blues ; Ice cloud opacity
-TAUICE ; %.2f ; Blues ; Ice cloud opacity
-VMR_ICE ; %.1e ; Blues ; Ice volume mix. rat.
-VMR_H2OICE ; %.0f ; PuBu ; Ice volume mix. rat.
-VMR_H2OVAP ; %.0f ; PuBu ; Vapor volume mix. rat.
-QSURFICE ; %.0f ; hot_r ; Surface ice
-WATERCAPTAG ; %.0f ; Blues ; Cap grid point
-TAUTES ; %.2f ; jet ; Opacity
-TAUTESAP ; %.2f ; jet ; Opacity
-USTM ; %.2f ; jet ; Friction velocity (m s$^{-1}$)
-HFX ; %.0f ; RdYlBu ; Sensible heat flux (W m$^{-2}$)
-WSTAR ; %.1f ; YlOrRd ; Turbulent convective velocity scale (m s$^{-1}$)
-CO2 ; %.2f ; YlOrBr_r ; CO$_2$ mixing ratio
-ENFACT ; %.1.f ; jet ; Enrichment factor
-T_NADIR_DAY ; %.0f ; RdBu_r ; Temperature (K)
-T_NADIR_NIT ; %.0f ; RdBu_r ; Temperature (K)
-TEMP_DAY ; %.0f ; gist_heat ; Temperature (K)
-TEMP_NIGHT ; %.0f ; gist_heat ; Temperature (K)
-DTEMP ; %.0f ; gist_heat ; Temperature (K)
-NTEMP ; %.0f ; gist_heat ; Temperature (K)
-DNUMBINTEMP ; %.0f ; gist_heat ; Temperature (K)
-NNUMBINTEMP ; %.0f ; gist_heat ; Temperature (K)
-OLR ; %.0f ; gist_heat ; Outgoing Longwave Radiation (W m$^{-2}$)
-ASR ; %.0f ; gist_heat ; Absorbed Solar Radiation (W m$^{-2}$)
-ISR ; %.0f ; gist_heat ; Incoming Solar Radiation (W m$^{-2}$)
-SWDOWNZ ; %.0f ; gist_heat ; $\Phi^{SW}\downarrow$ (W m$^{-2}$)
+T ; %.0f ; gist_heat ; Temperature ; K
+TEMP ; %0.f ; gist_heat ; Temperature ; K 
+TPOT ; %.0f ; Paired ; Potential temperature ; K  
+TSURF ; %.0f ; RdBu_r ; Surface temperature ; K
+TK ; %.0f ; gist_heat ; Temperature ; K
+U ; %.1f ; jet ; Zonal wind ; m s$^{-1}$
+UM ; %.1f ; jet ; Zonal wind ; m s$^{-1}$
+V ; %.1f ; jet ; Meridional wind ; m s$^{-1}$
+VM ; %.1f ; jet ; Meridional wind ; m s$^{-1}$
+W ; %.2f ; jet ; Vertical wind ; m s$^{-1}$
+WIND ; %.0f ; YlOrRd ; Wind speed ; m s$^{-1}$
+UV ; %.0f ; YlOrRd ; Wind speed ; m s$^{-1}$
+UVMET ; %.0f ; YlOrRd ; Wind speed ; m s$^{-1}$
+PTOT ; %.0f ; jet ; Pressure ; Pa
+PSFC ; %.1f ; RdYlBu_r ; Surface pressure ; Pa
+PS ; %.1f ; RdYlBu_r ; Surface pressure ; Pa
+ANOMALY ; %.1f ; gist_ncar ; Anomaly ; %
+HGT ; %.1e ; spectral ; Topography ; m
+HGT_M ; %.1e ; spectral ; Topography ; m
+MARS_TI ; %.0f ; jet ; Thermal inertia ; tiu
+THERMAL_INERTIA ; %.0f ; jet ; Thermal inertia ; tiu
+TAU ; %.1f ; YlOrBr_r ; Opacity ; dimless
+TAU_DUST ; %.1f ; Oranges_r ; Dust opacity ; dimless
+QDUST ; %.6f ; Oranges_r ; Dust mass mixing ratio ; kg/kg
+CCNQ ; %.2e ; YlOrBr ; Cloud condensation nuclei ; kg/kg
+CCNN ; %.2e ; YlOrBr ; Cloud condensation nuclei density ; dimless
+QH2O ; %.2e ; PuBu ; Water vapor mixing ratio ; kg/kg
+MTOT ; %.1e ; spectral ; Column vapor ; pr. $\mu$m
+ICETOT ; %.1e ; YlGnBu_r ; Column ice ; pr. $\mu$m
+TAU_ICE ; %.2f ; Blues ; Ice cloud opacity ; dimless
+TAUICE ; %.2f ; Blues ; Ice cloud opacity ; dimless
+VMR_ICE ; %.1e ; Blues ; Ice volume mix. rat. ; dimless
+VMR_H2OICE ; %.0f ; PuBu ; Ice volume mix. rat. ; dimless
+VMR_H2OVAP ; %.0f ; PuBu ; Vapor volume mix. rat. ; dimless
+QSURFICE ; %.0f ; hot_r ; Surface ice ; dimless
+WATERCAPTAG ; %.0f ; Blues ; Cap grid point ; dimless
+TAUTES ; %.2f ; jet ; Opacity ; dimless
+TAUTESAP ; %.2f ; jet ; Opacity ; dimless
+USTM ; %.2f ; jet ; Friction velocity ; m s$^{-1}$
+HFX ; %.0f ; RdYlBu ; Sensible heat flux ; W m$^{-2}$
+WSTAR ; %.1f ; YlOrRd ; Turbulent convective velocity scale ; m s$^{-1}$
+CO2 ; %.2f ; YlOrBr_r ; CO$_2$ mixing ratio ; dimless
+ENFACT ; %.1.f ; jet ; Enrichment factor ; dimless
+T_NADIR_DAY ; %.0f ; RdBu_r ; Temperature ; K
+T_NADIR_NIT ; %.0f ; RdBu_r ; Temperature ; K
+TEMP_DAY ; %.0f ; gist_heat ; Temperature ; K
+TEMP_NIGHT ; %.0f ; gist_heat ; Temperature ; K
+DTEMP ; %.0f ; gist_heat ; Temperature ; K
+NTEMP ; %.0f ; gist_heat ; Temperature ; K
+DNUMBINTEMP ; %.0f ; gist_heat ; Temperature ; K
+NNUMBINTEMP ; %.0f ; gist_heat ; Temperature ; K
+OLR ; %.0f ; gist_heat ; Outgoing Longwave Radiation ; W m$^{-2}$
+ASR ; %.0f ; gist_heat ; Absorbed Solar Radiation ; W m$^{-2}$
+ISR ; %.0f ; gist_heat ; Incoming Solar Radiation ; W m$^{-2}$
+SWDOWNZ ; %.0f ; gist_heat ; $\Phi^{SW}\downarrow$ ; W m$^{-2}$

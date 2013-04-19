@@ -24,6 +24,7 @@ S.p[0].marker = 'o'
 S.p[0].lstyle = ''
 S.p[0].ylabel = "Surface geopotential height (km)"
 S.p[0].ycoeff = 1./1000.
+S.p[0].fmt = '%.0f'
 S.filename = "function"
 S.makeplot()
 
