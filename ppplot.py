@@ -11,7 +11,7 @@ import numpy as np
 import matplotlib.pyplot as mpl
 from matplotlib.cm import get_cmap
 from mpl_toolkits.basemap import Basemap
-from matplotlib.ticker import FormatStrFormatter
+from matplotlib.ticker import FormatStrFormatter,MaxNLocator
 # personal librairies
 import ppcompute
 ###############################################
@@ -218,7 +218,11 @@ def calculate_bounds(field,vmin=None,vmax=None):
     # check that bounds are not too tight given the field
     amin = ppcompute.min(field)
     amax = ppcompute.max(field)
-    cmin = 100.*np.abs((amin - zevmin)/amin)
+    if np.abs(amin) < 1.e-15: 
+        zevmin = 0.
+        cmin = 0.
+    else:
+        cmin = 100.*np.abs((amin - zevmin)/amin)
     cmax = 100.*np.abs((amax - zevmax)/amax)
     if cmin > 150. or cmax > 150.:
         print "!! WARNING !! Bounds are a bit too tight. Might need to reconsider those."
@@ -429,8 +433,8 @@ class plot1d(plot):
         # AXES
         ax = mpl.gca()
         # format labels
-        if self.swap: ax.get_xaxis().set_major_formatter(FormatStrFormatter(self.fmt))
-        else: ax.get_yaxis().set_major_formatter(FormatStrFormatter(self.fmt))
+        if self.swap: ax.xaxis.set_major_formatter(FormatStrFormatter(self.fmt))
+        else: ax.yaxis.set_major_formatter(FormatStrFormatter(self.fmt))
         # plot limits: ensure that no curve would be outside the window
         # x-axis
         x1, x2 = ax.get_xbound()
@@ -446,9 +450,8 @@ class plot1d(plot):
         if ymin < y1: y1 = ymin
         if ymax > y2: y2 = ymax
         ax.set_ybound(lower=y1,upper=y2)
-        ## set with .div the number of ticks. less good than automatic.
-        #ticks = self.div + 1
-        #ax.get_xaxis().set_ticks(np.linspace(x1,x2,ticks/2+1))
+        ## set with .div the number of ticks. (is it better than automatic?)
+        ax.xaxis.set_major_locator(MaxNLocator(self.div/2))
 
 ################################
 # a subclass to make a 2D plot #
@@ -585,10 +588,12 @@ class plot2d(plot):
              if self.area in area.keys():
                 wlon, wlat = area[self.area]
             # -- settings for meridians and parallels
-            steplon = abs(wlon[1]-wlon[0])/6.
-            steplat = abs(wlat[1]-wlat[0])/3.
-            mertab = np.r_[wlon[0]:wlon[1]:steplon] ; merlab = [0,0,0,1]
-            partab = np.r_[wlat[0]:wlat[1]:steplat] ; parlab = [1,0,0,0]
+            steplon = int(abs(wlon[1]-wlon[0])/6.)
+            steplat = int(abs(wlat[1]-wlat[0])/3.)
+            #mertab = np.r_[wlon[0]:wlon[1]:steplon] ; merlab = [0,0,0,1]
+            #partab = np.r_[wlat[0]:wlat[1]:steplat] ; parlab = [1,0,0,0]
+            mertab = np.r_[-360.:360.:steplon] ; merlab = [0,0,0,1]
+            partab = np.r_[-90.:90.:steplat] ; parlab = [1,0,0,0]
             format = '%.1f'
             # -- center of domain and bounding lats
             lon_0 = 0.5*(wlon[0]+wlon[1])

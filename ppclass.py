@@ -709,11 +709,11 @@ class pp():
                         # -- a default label
                         plobj.label = ""
                         if self.nfin > 1: plobj.label = plobj.label + " file #"+str(i+1)
-                        if self.nvin > 1: plobj.label = plobj.label + " var #"+str(j+1)
-                        if self.nplott > 1: plobj.label = plobj.label + " t #"+str(t+1)
-                        if self.nplotz > 1: plobj.label = plobj.label + " z #"+str(z+1)
-                        if self.nploty > 1: plobj.label = plobj.label + " y #"+str(y+1)
-                        if self.nplotx > 1: plobj.label = plobj.label + " x #"+str(x+1)
+                        if self.nvin > 1: plobj.label = plobj.label + " var "+plobj.var
+                        if self.nplott > 1: plobj.label = plobj.label + " t="+str(self.t[t])
+                        if self.nplotz > 1: plobj.label = plobj.label + " z="+str(self.z[z])
+                        if self.nploty > 1: plobj.label = plobj.label + " y="+str(self.y[y])
+                        if self.nplotx > 1: plobj.label = plobj.label + " x="+str(self.x[x])
                     # specific 2d plot stuff
                     if dp == 2:
                         # -- light grey background for missing values
@@ -1173,14 +1173,27 @@ class onerequest():
           # TIME. Try preset fields.
           self.name_t = "nothing"
           for c in glob_listt:
-            if c in self.f.dimensions.keys():
+            if c in self.f.variables.keys():
              self.name_t = c
+             if self.verbose: print "**** OK. Found time variable: ",c
           try:
             # speed up: only get first value, last one.
-            dafirst = self.f.variables[self.name_t][0]
-            dalast = self.f.variables[self.name_t][self.dim_t-1]
-            self.field_t = np.linspace(dafirst,dalast,num=self.dim_t)
-            if dafirst == dalast: self.field_t = np.array([dafirst])
+            tabtime = self.f.variables[self.name_t]
+            # (consider the case where tabtime is not dim 1)
+            # (time is most often the first dimension)
+            if tabtime.ndim == 2: tabtime = tabtime[:,0]
+            elif tabtime.ndim == 3: tabtime = tabtime[:,0,0]
+            elif tabtime.ndim == 4: tabtime = tabtime[:,0,0,0]
+            # (now proceed)
+            dafirst = tabtime[0]
+            if self.dim_t == 1:
+                self.field_t = np.array([dafirst])
+            else:
+                daint = tabtime[1] - dafirst
+                dalast = dafirst + (self.dim_t-1)*daint 
+                if dalast != tabtime[self.dim_t-1] and self.verbose:
+                    print "!! WARNING !! Time axis has been recast to be monotonic",dalast,tabtime[self.dim_t-1]
+                self.field_t = np.linspace(dafirst,dalast,num=self.dim_t)
           except:
             # ... or if a problem encountered, define a simple time axis
             self.field_t = np.array(range(self.dim_t))
