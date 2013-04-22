@@ -152,6 +152,7 @@ class pp():
                       marker=None,\
                       color=None,\
                       label=None,\
+                      changetime=None,\
                       title=None):
         self.request = None
         self.nfin = 0 ; self.nvin = 0
@@ -183,6 +184,7 @@ class pp():
         self.filename = filename
         self.folder = folder
         self.includedate = includedate
+        self.changetime = changetime
         ## here are user-defined plot settings 
         ## -- if not None, valid on all plots in the pp() objects
         self.xlabel = xlabel ; self.xcoeff = xcoeff
@@ -242,6 +244,7 @@ class pp():
             self.label = other.label
             self.title = other.title
             self.includedate = other.includedate
+            self.changetime = other.changetime
         else:
             print "!! ERROR !! argument must be a pp object." ; exit()
 
@@ -540,6 +543,9 @@ class pp():
               obj.openfile()
               ### get x,y,z,t dimensions from file
               obj.getdim()
+              ### possible time axis change
+              obj.changetime = self.changetime
+              obj.performtimechange()
               ### get methods 
               obj.method_x = mx ; obj.method_y = my
               obj.method_z = mz ; obj.method_t = mt           
@@ -1068,6 +1074,7 @@ class onerequest():
         self.verbose = True
         self.swap_axes = False ; self.invert_axes = False
         self.compute = None
+        self.changetime = None
 
     # open a file. for now it is netcdf. TBD for other formats.
     # check that self.var is inside.
@@ -1180,6 +1187,18 @@ class onerequest():
             self.name_t = "t grid points"
           if self.dim_t > 1: 
                if self.verbose: print "**** OK. t axis %4.0f values [%5.1f,%5.1f]" % (self.dim_t,self.field_t.min(),self.field_t.max())     
+
+    # change time axis
+    # ... add your options here!
+    # --------------------------
+    def performtimechange(self):
+        if self.changetime is not None \
+          and self.name_t != "t grid points":
+            if self.verbose: print "**** OK. Converting time axis:",self.changetime
+            if self.changetime == "mars_sol2ls": 
+                self.field_t = ppcompute.mars_sol2ls(self.field_t)
+            else:
+                print "!! WARNING !! This time change is not implemented. Nothing is done."
 
     # get list of index to be retrieved for time axis
     ### TBD: il faudrait ne prendre que les indices qui correspondent a l interieur d un plot (dans all)

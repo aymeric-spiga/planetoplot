@@ -6,6 +6,7 @@
 import os
 # added librairies
 import numpy as np
+import math  as m
 import scipy.signal as sp_signal
 ###############################################
 
@@ -172,3 +173,56 @@ def smooth1d(x,window=11,window_type='hanning'):
         w=eval('np.'+window_type+'(window)')
     y=np.convolve(w/w.sum(),s,mode='valid')
     return y
+
+########################
+#### TIME CONVERTER ####
+########################
+
+#  mars_sol2ls
+#  author T. Navarro
+#  -----------------
+#  convert a given martian day number (sol)
+#  into corresponding solar longitude, Ls (in degr.),
+#  where sol=0=Ls=0 is the
+#  northern hemisphere spring equinox.
+#  -----------------
+def mars_sol2ls(soltabin):
+      year_day  = 668.6
+      peri_day  = 485.35
+      e_elips   = 0.09340
+      radtodeg  = 57.2957795130823
+      timeperi  = 1.90258341759902
+      if type(soltabin).__name__ in ['int','float','float32','float64']:
+        soltab=[soltabin]
+        solout=np.zeros([1])
+      else:
+        soltab=soltabin
+        solout=np.zeros([len(soltab)])
+      i=0
+      for sol in soltab:
+         zz=(sol-peri_day)/year_day
+         zanom=2.*np.pi*(zz-np.floor(zz))
+         xref=np.abs(zanom)
+#  The equation zx0 - e * sin (zx0) = xref, solved by Newton
+         zx0=xref+e_elips*m.sin(xref)
+         iter=0
+         while iter <= 10:
+            iter=iter+1
+            zdx=-(zx0-e_elips*m.sin(zx0)-xref)/(1.-e_elips*m.cos(zx0))
+            if(np.abs(zdx) <= (1.e-7)):
+              continue
+            zx0=zx0+zdx
+         zx0=zx0+zdx
+         if(zanom < 0.): zx0=-zx0
+# compute true anomaly zteta, now that eccentric anomaly zx0 is known
+         zteta=2.*m.atan(m.sqrt((1.+e_elips)/(1.-e_elips))*m.tan(zx0/2.))
+# compute Ls
+         ls=zteta-timeperi
+         if(ls < 0.): ls=ls+2.*np.pi
+         if(ls > 2.*np.pi): ls=ls-2.*np.pi
+# convert Ls in deg.
+         ls=radtodeg*ls
+         solout[i]=ls
+         i=i+1
+      return solout
+
