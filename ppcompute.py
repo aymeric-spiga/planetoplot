@@ -186,7 +186,7 @@ def smooth1d(x,window=11,window_type='hanning'):
 #  where sol=0=Ls=0 is the
 #  northern hemisphere spring equinox.
 #  -----------------
-def mars_sol2ls(soltabin):
+def mars_sol2ls(soltabin,forcecontinuity=True):
       year_day  = 668.6
       peri_day  = 485.35
       e_elips   = 0.09340
@@ -224,5 +224,9 @@ def mars_sol2ls(soltabin):
          ls=radtodeg*ls
          solout[i]=ls
          i=i+1
+      if forcecontinuity:
+         for iii in range(len(soltab)-1):
+           while solout[iii+1] - solout[iii] > 180. :  solout[iii+1] = solout[iii+1] - 360.
+           while solout[iii] - solout[iii+1] > 180. :  solout[iii+1] = solout[iii+1] + 360.
       return solout
 
