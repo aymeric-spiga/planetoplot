@@ -219,7 +219,6 @@ def calculate_bounds(field,vmin=None,vmax=None):
     amin = ppcompute.min(field)
     amax = ppcompute.max(field)
     if np.abs(amin) < 1.e-15: 
-        zevmin = 0.
         cmin = 0.
     else:
         cmin = 100.*np.abs((amin - zevmin)/amin)
@@ -418,6 +417,10 @@ class plot1d(plot):
         # either request linestyle or let matplotlib decide
         if self.lstyle is not None and self.color is not None:
             mpl.plot(x,y,self.color+self.lstyle,marker=self.marker,label=self.label)
+        elif self.color is not None:
+            mpl.plot(x,y,color=self.color,marker=self.marker,label=self.label)
+        elif self.lstyle is not None:
+            mpl.plot(x,y,self.lstyle,marker=self.marker,label=self.label)
         else:
             mpl.plot(x,y,marker=self.marker,label=self.label)
         # make log axes and/or invert ordinate
@@ -671,7 +674,7 @@ class plot2d(plot):
         if self.trans > 0.:
             ## draw colorbar. settings are different with projections. or if not mapmode.
             if not self.mapmode: orientation=zeorientation ; frac = 0.075 ; pad = 0.03 ; lu = 0.5
-            elif self.proj in ['moll']: orientation="horizontal" ; frac = 0.075 ; pad = 0.03 ; lu = 1.0
+            elif self.proj in ['moll']: orientation="horizontal" ; frac = 0.08 ; pad = 0.03 ; lu = 1.0
             elif self.proj in ['cyl']: orientation="vertical" ; frac = 0.023 ; pad = 0.03 ; lu = 0.5
             else: orientation = zeorientation ; frac = zefrac ; pad = 0.03 ; lu = 0.5
             zelevpal = np.linspace(zevmin,zevmax,num=min([ticks/2+1,21]))
@@ -689,12 +692,14 @@ class plot2d(plot):
         ############################################################################################
         ### not expecting NaN in self.addvecx and self.addvecy. masked arrays is just enough.
         stride = 3
+        #stride = 1
         if self.addvecx is not None and self.addvecy is not None and self.mapmode:
                 ### for metwinds only ???
                 [vecx,vecy] = m.rotate_vector(self.addvecx,self.addvecy,self.absc,self.ordi) 
                 #vecx,vecy = self.addvecx,self.addvecy
                 # reference vector is scaled
                 zescale = ppcompute.mean(np.sqrt(self.addvecx*self.addvecx+self.addvecy*self.addvecy))
+                #zescale = 25.
                 # make vector field
                 q = m.quiver( x[::stride,::stride],y[::stride,::stride],\
                               vecx[::stride,::stride],vecy[::stride,::stride],\
@@ -703,7 +708,29 @@ class plot2d(plot):
                 # make vector key.
                 #keyh = 1.025 ; keyv = 1.05 # upper right corner over colorbar
                 keyh = 0.98 ; keyv = 1.06
+                keyh = 0.98 ; keyv = 1.07
                 #keyh = -0.03 ; keyv = 1.08 # upper left corner
                 p = mpl.quiverkey(q,keyh,keyv,\
                                   zescale,str(int(zescale)),\
                                   color='black',labelpos='S',labelsep = 0.07)
+        ############################################################################################
+        ### TEXT. ANYWHERE. add_text.txt should be present with lines x ; y ; text ; color
+        ############################################################################################
+        try:
+            f = open("add_text.txt", 'r')
+            for line in f:
+              if "#" in line: pass
+              else:
+                  userx, usery, usert, userc = line.strip().split(';')
+                  userc = userc.strip()
+                  usert = usert.strip()
+                  userx = float(userx.strip())
+                  usery = float(usery.strip())
+                  if self.mapmode: userx,usery = m(userx,usery)
+                  mpl.text(userx,usery,usert,\
+                           color = userc,\
+                           horizontalalignment='center',\
+                           verticalalignment='center')
+            f.close()
+        except IOError:
+            pass

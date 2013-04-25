@@ -13,12 +13,21 @@ parser.add_option('-T','--title',action='store',dest='title',type="string",defau
 parser.add_option('-K','--marker',action='store',dest='marker',type="string",default=None,help="[1D] Define a new marker")
 parser.add_option('-P','--proj',action='store',dest='proj',type="string",default=None,help='[2D] Define a new map projection')
 parser.add_option('-C','--colorb',action='store',dest='colorb',type="string",default=None,help="[2D] Define a new colormap")
+parser.add_option('-E','--explore',action='store_true',dest='explore',default=False,help="[2D] Try many colormaps")
 (opt,args) = parser.parse_args()
 # -----------------------------------------------------------------------
+clb = ["Greys","Blues","YlOrRd",\
+       "jet","spectral","hot",\
+       "RdBu","RdYlBu","Paired",\
+       "gist_ncar","gist_rainbow","gist_stern"]
+# -----------------------------------------------------------------------
+
 for files in args:
+
     yeah = pp()
     yeah.defineplot(loadfile=files)
     yeah.out = opt.out
+
     if opt.proj is not None:
       for plot in yeah.p:
         plot.proj = opt.proj
@@ -31,5 +40,13 @@ for files in args:
     if opt.title is not None:
       for plot in yeah.p:
         plot.title = opt.title
-    yeah.makeplot()
+
+    if opt.explore:
+      for cm in clb:
+       for plot in yeah.p:
+         plot.colorb = cm
+         plot.title = cm
+       yeah.makeplot()
+    else:         
+      yeah.makeplot()
 

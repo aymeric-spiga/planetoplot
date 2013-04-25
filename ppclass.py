@@ -537,6 +537,9 @@ class pp():
               obj.verbose = self.verbose
               obj.file = self.file[i]
               obj.var = self.var[j]
+              # get methods
+              obj.method_x = mx ; obj.method_y = my
+              obj.method_z = mz ; obj.method_t = mt
               # indicate the computation method
               obj.compute = self.compute
               # open the files (the same file might be opened several times but this is cheap)
@@ -546,9 +549,6 @@ class pp():
               ### possible time axis change
               obj.changetime = self.changetime
               obj.performtimechange()
-              ### get methods 
-              obj.method_x = mx ; obj.method_y = my
-              obj.method_z = mz ; obj.method_t = mt           
               ### get index
               obj.getindextime(dalist=st,ind=t,stride=self.stridet)
               obj.getindexvert(dalist=sz,ind=z,stride=self.stridez)
@@ -1205,13 +1205,44 @@ class onerequest():
     # ... add your options here!
     # --------------------------
     def performtimechange(self):
-        if self.changetime is not None \
-          and self.name_t != "t grid points":
+        if self.changetime is not None:
             if self.verbose: print "**** OK. Converting time axis:",self.changetime
+            ### option added by T. Navarro 
             if self.changetime == "mars_sol2ls": 
                 self.field_t = ppcompute.mars_sol2ls(self.field_t)
+            ### options added by A. Spiga
+            elif "mars_meso" in self.changetime:
+                if 'Times' not in self.f.variables.keys():
+                    if self.verbose: print "!! WARNING !! Variable Times not in file. Cannot proceed to change of time axis."
+                else:
+                    # get the array of strings describing dates
+                    dates = self.f.variables['Times']
+                    dates.set_auto_maskandscale(False) # necessary to solve the api Times bug!
+                    # get ls sol utc from those strings
+                    ls, sol, utc = ppcompute.mars_date(dates[:])
+                    # populate self.field_t with the right output from mars_date
+                    if self.changetime == "mars_meso_ls": 
+                        self.field_t = ls 
+                        self.name_t = "Ls"
+                    elif self.changetime == "mars_meso_sol": 
+                        self.field_t = sol 
+                        self.name_t = "sol"
+                    elif self.changetime == "mars_meso_utc" \
+                        and ( self.changetime == "mars_meso_lt" \
+                              and not hasattr(self.f,'CEN_LON') ): 
+                        self.field_t = ppcompute.timecorrect(utc)
+                        self.name_t = "utc"
+                        if self.method_t == "fixed": 
+                            self.field_t = self.field_t % 24 # so that the user is not mistaken!
+                    elif self.changetime == "mars_meso_lt":
+                        self.field_t = ppcompute.timecorrect(utc) + getattr(self.f,'CEN_LON') / 15.
+                        self.field_t = ppcompute.timecorrect(self.field_t)
+                        self.name_t = "local time (center of domain)"
+                        if self.method_t == "fixed": 
+                            self.field_t = self.field_t % 24 # so that the user is not mistaken!
             else:
                 print "!! WARNING !! This time change is not implemented. Nothing is done."
+            if self.verbose: print "**** OK. new t axis values [%5.1f,%5.1f]" % (self.field_t.min(),self.field_t.max())
 
     # get list of index to be retrieved for time axis
     ### TBD: il faudrait ne prendre que les indices qui correspondent a l interieur d un plot (dans all)

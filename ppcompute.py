@@ -230,3 +230,42 @@ def mars_sol2ls(soltabin,forcecontinuity=True):
            while solout[iii] - solout[iii+1] > 180. :  solout[iii+1] = solout[iii+1] + 360.
       return solout
 
+# mars_date
+# author A. Spiga
+# ------------------------------
+# get Ls, sol, utc from a string with format yyyy-mm-dd_hh:00:00
+# -- argument timechar is a vector of such strings indicating dates
+# -- example: timechar = nc.variables['Times'][:] in mesoscale files
+# NB: uses mars_sol2ls function above
+# ------------------------------
+def mars_date(timechar):
+    # some preliminary information
+    days_in_month = [61, 66, 66, 65, 60, 54, 50, 46, 47, 47, 51, 56]
+    plus_in_month = [ 0, 61,127,193,258,318,372,422,468,515,562,613]
+    # get utc and sol from strings
+    utc = [] ; sol = []
+    for zetime in timechar:
+        dautc = float(zetime[11]+zetime[12]) + float(zetime[14]+zetime[15])/37.
+        dasol = dautc / 24.
+        dasol = dasol + plus_in_month[ int(zetime[5]+zetime[6])-1 ] + int(zetime[8]+zetime[9])
+        dasol = dasol - 1 ##les sols GCM commencent a 0
+        utc.append(dautc)
+        sol.append(dasol)
+    sol = np.array(sol)
+    utc = np.array(utc)
+    # get ls from sol
+    ls = mars_sol2ls(sol)
+    return ls, sol, utc
+
+# timecorrect
+# author A. Spiga
+# -----------------------------
+# ensure time axis is monotonic
+# correct negative values
+# -----------------------------
+def timecorrect(time):
+    for ind in range(len(time)-1):
+        if time[ind] < 0.: time[ind] = time[ind] + 24.
+        if time[ind+1] < time[ind]: time[ind+1] = time[ind+1] + 24.
+    return time
+
