@@ -391,7 +391,7 @@ class plot1d(plot):
         # add specific stuff
         if self.var is not None:
          if self.var.upper() in vl.keys():
-          self.ylabel = vl[self.var.upper()]
+          self.ylabel = vl[self.var.upper()] + " (" + vu[self.var.upper()] + ")"
           self.title = ""
           self.fmt = vf[self.var.upper()]
 
@@ -563,8 +563,9 @@ class plot2d(plot):
             x=x*self.xcoeff ; y=y*self.ycoeff
             # make shaded and line contours
             if self.addcontour is not None: 
-                mpl.contour(x, y, what_I_contour, \
+                objC = mpl.contour(x, y, what_I_contour, \
                             zelevelsc, colors = ccol, linewidths = cline)
+                #mpl.clabel(objC, inline=1, fontsize=10)
             mpl.contourf(x, y, \
                          self.field, \
                          zelevels, cmap=palette)
@@ -665,8 +666,9 @@ class plot2d(plot):
             x, y = m(self.absc, self.ordi)
             # contour field. first line contour then shaded contour.
             if self.addcontour is not None: 
-                m.contour(x, y, what_I_contour, \
+                objC2 = m.contour(x, y, what_I_contour, \
                             zelevelsc, colors = ccol, linewidths = cline)
+                #mpl.clabel(objC2, inline=1, fontsize=10)
             m.contourf(x, y, what_I_plot, zelevels, cmap = palette, alpha = self.trans)
         ############################################################################################
         ### COLORBAR

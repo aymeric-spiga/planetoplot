@@ -21,8 +21,10 @@ PS ; %.1f ; RdYlBu_r ; Surface pressure ; Pa
 ANOMALY ; %.1f ; gist_ncar ; Anomaly ; %
 HGT ; %.1e ; spectral ; Topography ; m
 HGT_M ; %.1e ; spectral ; Topography ; m
+ZMOL ; %.0f ; spectral ; Topography ; km
 MARS_TI ; %.0f ; jet ; Thermal inertia ; tiu
 THERMAL_INERTIA ; %.0f ; jet ; Thermal inertia ; tiu
+ALBEDO ; %.2f ; Greys_r ; Albedo ; dimless
 TAU ; %.1f ; YlOrBr_r ; Opacity ; dimless
 TAU_DUST ; %.1f ; Oranges_r ; Dust opacity ; dimless
 QDUST ; %.6f ; Oranges_r ; Dust mass mixing ratio ; kg/kg
