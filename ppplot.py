@@ -24,7 +24,7 @@ import ppcompute
 # http://matplotlib.org/users/customizing.html
 # -------------------------------
 mpl.rcParams['font.family'] = "serif"
-mpl.rcParams['axes.color_cycle'] = "r,g,b,k"
+mpl.rcParams['axes.color_cycle'] = "b,r,g,k"
 mpl.rcParams['contour.negative_linestyle'] = "dashed" # ou "solid"
 mpl.rcParams['verbose.level'] = "silent"
 mpl.rcParams['lines.linewidth'] = 1.5
@@ -370,8 +370,8 @@ class plot1d(plot):
     # -- 2. yeah = pp() ; yeah.title = "foo"
     # -------------------------------
     def __init__(self,\
-                 lstyle='-',\
-                 color='b',\
+                 lstyle=None,\
+                 color=None,\
                  marker='x',\
                  label=None):
         ## get initialization from parent class
@@ -420,7 +420,7 @@ class plot1d(plot):
         elif self.color is not None:
             mpl.plot(x,y,color=self.color,marker=self.marker,label=self.label)
         elif self.lstyle is not None:
-            mpl.plot(x,y,self.lstyle,marker=self.marker,label=self.label)
+            mpl.plot(x,y,linestyle=self.lstyle,marker=self.marker,label=self.label)
         else:
             mpl.plot(x,y,marker=self.marker,label=self.label)
         # make log axes and/or invert ordinate
