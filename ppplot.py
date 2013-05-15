@@ -533,6 +533,15 @@ class plot2d(plot):
          if len(self.absc) == shape[0] and len(self.ordi) == shape[1]:
             print "!! WARNING !! Transposing axes"
             self.field = np.transpose(self.field)
+        # set dummy xy axis if not defined
+        if self.absc is None: 
+            self.absc = np.array(range(self.field.shape[0]))
+            self.mapmode = False
+            print "!! WARNING !! dummy coordinates on x axis"
+        if self.ordi is None: 
+            self.ordi = np.array(range(self.field.shape[1]))
+            self.mapmode = False
+            print "!! WARNING !! dummy coordinates on y axis"
         # bound field
         zevmin, zevmax = calculate_bounds(self.field,vmin=self.vmin,vmax=self.vmax)
         what_I_plot = bounds(self.field,zevmin,zevmax)

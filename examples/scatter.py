@@ -14,7 +14,7 @@ ps << tsurf
 ps.var = "ps"
 ps.getdefineplot()
 
-S = ps.f(tsurf)
+S = ps.func(tsurf)
 S.p[0].lstyle=""
 S.p[0].marker="h"
 S.p[0].color="g"
@@ -25,7 +25,7 @@ icetot << tsurf
 icetot.var = "icetot"
 icetot.getdefineplot()
 
-S2 = icetot.f(tsurf)
+S2 = icetot.func(tsurf)
 S2.p[0].lstyle=""
 S2.p[0].marker="D"
 S2.p[0].color="r"
@@ -44,7 +44,7 @@ v.get()
 
 wind = u**2 + v**2
 wind = wind**0.5
-S3 = wind.f(ps)
+S3 = wind.func(ps)
 S3.p[0].lstyle=""
 S3.p[0].marker="o"
 S3.p[0].color="k"
@@ -69,7 +69,7 @@ ps << tsurf
 ps.var = "ps"
 ps.getdefineplot()
 
-S = ps.f(tsurf)
+S = ps.func(tsurf)
 S.p[0].lstyle=""
 S.p[0].marker="h"
 S.p[0].color="g"

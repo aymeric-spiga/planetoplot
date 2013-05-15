@@ -18,7 +18,7 @@ t=2.)
 var2.get()
 var2 = var2 / 3.72
 
-S = var2.f(var1)
+S = var2.func(var1)
 
 S.p[0].marker = 'o'
 S.p[0].lstyle = ''

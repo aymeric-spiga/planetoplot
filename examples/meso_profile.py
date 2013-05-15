@@ -37,7 +37,7 @@ geop.get()
 z = geop/3.72/1000.
 
 # define potential temperature as a function of height
-S = tpot.f(z)
+S = tpot.func(z)
 
 # change a few plot settings
 for curve in S.p: 

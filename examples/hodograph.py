@@ -15,10 +15,10 @@ v.var = "v"
 v.get()
 
 # u as a function of v
-hodo = u.f(v)
+hodo = u.func(v)
 hodo.filename = "hodograph"
 hodo.makeplot()
 
 # v as a function of u
-hodo2 = v.f(u)
+hodo2 = v.func(u)
 hodo2.makeplot()

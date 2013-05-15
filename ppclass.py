@@ -24,6 +24,7 @@ import ppcompute
 #### ... executed when imported  ##
 ###################################
 # where settings files are located...
+# ... this can be hardcoded here
 whereset = None
 whereset = ppcompute.findset(whereset)
 # ... we load user-defined automatic settings from set_ppclass.txt
@@ -38,7 +39,7 @@ try:
     for stuff in lines[14].strip().split(';'): glob_listt.append(stuff)
     for stuff in lines[17].strip().split(';'): glob_listarea.append(stuff)
 except IOError: 
-    print "warning: "+zefile+" not in "+whereset+" ; no presets."
+    print "PPCLASS warning: "+zefile+" not in "+whereset+" ; no presets."
 
 ##################################
 #### USEFUL GENERIC FUNCTIONS ####
@@ -134,7 +135,9 @@ class pp():
                       stridex=1,stridey=1,\
                       stridez=1,stridet=1,\
                       compute="mean",\
-                      verbose=False,noproj=False,\
+                      verbose=False,\
+                      quiet=False,\
+                      noproj=False,\
                       superpose=False,\
                       plotin=None,\
                       forcedimplot=-1,\
@@ -153,8 +156,10 @@ class pp():
                       color=None,\
                       label=None,\
                       changetime=None,\
+                      units=None,\
                       title=None):
         self.request = None
+        self.nrequest = 0
         self.nfin = 0 ; self.nvin = 0
         self.nplotx = None ; self.nploty = None
         self.nplotz = None ; self.nplott = None
@@ -164,7 +169,8 @@ class pp():
         self.nplot = 0
         self.p = None
         self.customplot = False
-        self.allfield = None
+        self.f = None
+        self.l = None
         ## what could be defined by the user
         self.file = file
         self.var = var
@@ -176,6 +182,7 @@ class pp():
         self.stridez = stridez ; self.stridet = stridet
         self.compute = compute
         self.verbose = verbose
+        self.quiet = quiet
         self.noproj = noproj
         self.plotin = plotin
         self.superpose = superpose
@@ -197,10 +204,12 @@ class pp():
         self.marker = marker
         self.color = color
         self.label = label
+        self.units = units
         self.title = title
 
     # print status
     def printstatus(self):
+      if not self.quiet:
         if self.filename == "THIS_IS_A_CLONE":
             pass
         else:
@@ -242,6 +251,7 @@ class pp():
             self.marker = other.marker
             self.color = other.color
             self.label = other.label
+            self.units = other.units
             self.title = other.title
             self.includedate = other.includedate
             self.changetime = other.changetime
@@ -318,8 +328,10 @@ class pp():
               obj_ref = self.request[i][j][t][z][y][x]
               if not isnum:   
                   ope = other.request[i][j][t][z][y][x].field
-                  if obj_ref.field.shape != ope.shape:
-                    print "!! ERROR !! The two fields for operation do not have the same shape.",self.field.shape,other.field.shape
+                  if ope.ndim == 0: 
+                    ope = float(ope) # if no dimension then this means that ope is a single value (not to be kept as an array)
+                  elif obj_ref.field.shape != ope.shape:
+                    print "!! ERROR !! The two fields for operation do not have the same shape.",obj_ref.field.shape,ope.shape
                     exit()
               else:           
                   ope = other
@@ -346,8 +358,10 @@ class pp():
               obj_ref = self.request[i][j][t][z][y][x]
               if not isnum:
                   ope = other.request[i][j][t][z][y][x].field
-                  if obj_ref.field.shape != ope.shape:
-                    print "!! ERROR !! The two fields for operation do not have the same shape.",self.field.shape,other.field.shape
+                  if ope.ndim == 0: 
+                    ope = float(ope) # if no dimension then this means that ope is a single value (not to be kept as an array)
+                  elif obj_ref.field.shape != ope.shape:
+                    print "!! ERROR !! The two fields for operation do not have the same shape.",obj_ref.field.shape,ope.shape
                     exit()
               else:
                   ope = other
@@ -374,8 +388,10 @@ class pp():
               obj_ref = self.request[i][j][t][z][y][x]
               if not isnum:
                   ope = other.request[i][j][t][z][y][x].field
-                  if obj_ref.field.shape != ope.shape:
-                    print "!! ERROR !! The two fields for operation do not have the same shape.",self.field.shape,other.field.shape
+                  if ope.ndim == 0: 
+                    ope = float(ope) # if no dimension then this means that ope is a single value (not to be kept as an array)
+                  elif obj_ref.field.shape != ope.shape:
+                    print "!! ERROR !! The two fields for operation do not have the same shape.",obj_ref.field.shape,ope.shape
                     exit()
               else:
                   ope = other
@@ -402,8 +418,10 @@ class pp():
               obj_ref = self.request[i][j][t][z][y][x]
               if not isnum:
                   ope = other.request[i][j][t][z][y][x].field
-                  if obj_ref.field.shape != ope.shape:
-                    print "!! ERROR !! The two fields for operation do not have the same shape.",self.field.shape,other.field.shape
+                  if ope.ndim == 0: 
+                    ope = float(ope) # if no dimension then this means that ope is a single value (not to be kept as an array)
+                  elif obj_ref.field.shape != ope.shape:
+                    print "!! ERROR !! The two fields for operation do not have the same shape.",obj_ref.field.shape,ope.shape
                     exit()
               else:
                   ope = other
@@ -525,6 +543,8 @@ class pp():
                        for x in range(self.nplotx)] for y in range(self.nploty)] \
                        for z in range(self.nplotz)] for t in range(self.nplott)] \
                        for j in range(self.nvin)]   for i in range(self.nfin)] 
+        # store how many onerequest() objects are in self.request
+        self.nrequest = self.nfin*self.nvin*self.nplotx*self.nploty*self.nplotz*self.nplott
         # loop on onerequest() objects
         for i in range(self.nfin):
          for j in range(self.nvin):
@@ -570,13 +590,12 @@ class pp():
         self.printstatus()
         # check if things were done OK before
         if self.status != "defined": print "!! ERROR !! Please use .define() to define your pp object." ; exit()
-        # create the list of allfield() objects
-        # --> so that the user can easily access values
-        self.allfield = [[[[[[ \
-                        [] \
-                        for x in range(self.nplotx)] for y in range(self.nploty)] \
-                        for z in range(self.nplotz)] for t in range(self.nplott)] \
-                        for j in range(self.nvin)]   for i in range(self.nfin)]
+        ## create the list of f() and l() objects
+        ## --> so that the user can easily access values (and labels for easy exploration)
+        ## --> see example easy_get_field
+        self.f = [ [] for iii in range(self.nrequest) ]
+        self.l = [ [] for iii in range(self.nrequest) ]
+        count = 0
         ## first get fields
         ## ... only what is needed is extracted from the files
         ## ... and computations are performed
@@ -589,7 +608,19 @@ class pp():
               obj = self.request[i][j][t][z][y][x]
               obj.getfield()
               obj.computations()
-              self.allfield[i][j][t][z][y][x] = obj.field
+              # save fields in self.f for the user
+              self.f[count] = obj.field
+              # save a label in self.l for the user
+              self.l[count] = "_"
+              if self.nfin > 1:   self.l[count] = self.l[count] + "f=#"+str(int(i+1))+'_'
+              if self.nvin > 1:   self.l[count] = self.l[count] + "v="+obj.var+'_'
+              if self.nplotx > 1: self.l[count] = self.l[count] + "x="+str(self.x[x])+'_'
+              if self.nploty > 1: self.l[count] = self.l[count] + "y="+str(self.y[y])+'_'
+              if self.nplotz > 1: self.l[count] = self.l[count] + "z="+str(self.z[z])+'_'
+              if self.nplott > 1: self.l[count] = self.l[count] + "t="+str(self.t[t])+'_'
+              count = count + 1
+        ## make it simple: self.f is simply the data array if self.nrequest=1
+        if self.nrequest == 1: self.f = self.f[0]
         # change status
         self.status = "retrieved"
         return self
@@ -601,6 +632,26 @@ class pp():
         self.define()
         self.retrieve()
         return self  
+
+    ###########################################################
+    # getf: a shortcut method for the define + retrieve chain #
+    #       ... in which the output is self.f                 #
+    #       ... and the ppclass is kept quiet                 #
+    ###########################################################
+    def getf(self):
+        self.quiet = True
+        self.get()
+        return self.f
+
+    ############################################################
+    # getfl: a shortcut method for the define + retrieve chain #
+    #       ... in which the output is self.f, self.l          #
+    #       ... and the ppclass is kept quiet                 #
+    ############################################################
+    def getfl(self):
+        self.quiet = True
+        self.get()
+        return self.f,self.l
 
     ########################################
     # smooth: smooth the field in 1D or 2D #
@@ -729,6 +780,7 @@ class pp():
                     if self.ylabel is not None: plobj.ylabel = self.ylabel
                     if self.ycoeff is not None: plobj.ycoeff = self.ycoeff
                     if self.title is not None: plobj.title = self.title
+                    if self.units is not None: plobj.units = self.units
                     # -- 1D specific
                     if dp == 1:
                         if self.lstyle is not None: plobj.lstyle = self.lstyle
@@ -798,7 +850,7 @@ class pp():
         if self.howmanyplots > 0:
             if self.verbose: print "**** OK. expect %i plots" % (self.howmanyplots)
         else:
-            exit() # because this means that we only had 0D values !
+            pass # because this means that we only had 0D values !
         # final status
         self.status = "definedplot"
         return self
@@ -812,6 +864,7 @@ class pp():
     # --> see practical examples in the folder 'examples'
     ##############################################################################################
     def makeplot(self):
+      if self.howmanyplots > 0:
         self.printstatus()
         # a few initial operations
         # ------------------------
@@ -887,7 +940,7 @@ class pp():
             filehandler = open(savfile, 'w')
             pickle.dump(self.p, filehandler)
         except IOError: 
-            print "!! WARNING !! Saved object file not written. Probably do not have permission to write here."
+            if self.verbose: print "!! WARNING !! Saved object file not written. Probably do not have permission to write here."
         return self
 
     ###########################################################
@@ -914,13 +967,13 @@ class pp():
         self.defineplot(extraplot=extraplot)
         return self
 
-    ##############################################################
-    # f: operation on two pp objects being on status 'definedplot'
+    #################################################################
+    # func: operation on two pp objects being on status 'definedplot'
     # this allows for one field being function of another one
-    # e.g. u.f(v) means u will be displayed as a function of v
-    # ... no need to do defineplot after u.f(v), makeplot directly
-    ##############################################################
-    def f(self,other):
+    # e.g. u.func(v) means u will be displayed as a function of v
+    # ... no need to do defineplot after u.func(v), makeplot directly
+    #################################################################
+    def func(self,other):
         # preamble: for this operation to work, defineplot() must have been done
         if self.status != "definedplot":
             if self.verbose: print "!! WARNING !! performing defineplot on operand"
@@ -1148,7 +1201,7 @@ class onerequest():
           # if xy axis are apparently undefined, set 2D grid points axis.
           if "grid points" not in self.name_x:
             if self.field_x.all() == self.field_x[0,0]:
-               print "!! WARNING !! xy axis look undefined. creating non-dummy ones."
+               if self.verbose: print "!! WARNING !! xy axis look undefined. creating non-dummy ones."
                self.field_x = np.array(range(self.dim_x)) ; self.name_x = "x grid points"
                self.field_y = np.array(range(self.dim_y)) ; self.name_y = "y grid points"
                [self.field_x,self.field_y] = np.meshgrid(self.field_x,self.field_y)
@@ -1241,7 +1294,7 @@ class onerequest():
                         if self.method_t == "fixed": 
                             self.field_t = self.field_t % 24 # so that the user is not mistaken!
             else:
-                print "!! WARNING !! This time change is not implemented. Nothing is done."
+                if self.verbose: print "!! WARNING !! This time change is not implemented. Nothing is done."
             if self.verbose: print "**** OK. new t axis values [%5.1f,%5.1f]" % (self.field_t.min(),self.field_t.max())
 
     # get list of index to be retrieved for time axis
@@ -1395,10 +1448,11 @@ class onerequest():
     # -------------------------------
     def getfield(self):
         ## first tell what is to be done
-        if self.dimplot > 2:                       print "**** !! ERROR !! "+str(self.dimplot)+"D plots not supported!" ; exit()
-        elif self.dimplot == 0 and self.verbose:   print "**** OK. 0D value requested."
-        elif self.dimplot == 1 and self.verbose:   print "**** OK. 1D plot requested."
-        elif self.verbose:                         print "**** OK. 2D section requested."
+        if self.verbose:
+          if self.dimplot > 2:                       print "**** !! WARNING !! "+str(self.dimplot)+"D plots will not be supported!"
+          elif self.dimplot == 0 and self.verbose:   print "**** OK. 0D value requested."
+          elif self.dimplot == 1 and self.verbose:   print "**** OK. 1D plot requested."
+          elif self.verbose:                         print "**** OK. 2D section requested."
         # well, now get field from netcdf file
         # part below is necessary otherwise there is an index error below
         if self.index_x.size == 1: self.index_x = self.index_x[0]

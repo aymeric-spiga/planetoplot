@@ -25,6 +25,7 @@ clb = ["Greys","Blues","YlOrRd",\
 for files in args:
 
     yeah = pp()
+    yeah.quiet = True
     yeah.defineplot(loadfile=files)
     yeah.out = opt.out
 
