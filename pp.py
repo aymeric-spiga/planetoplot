@@ -69,6 +69,8 @@ parser.add_option('-Q','--color',action='append',dest='color',type="string",defa
 parser.add_option('-K','--marker',action='append',dest='marker',type="string",default=None,help="[1D] marker: '' 'x' 'o' etc")
 parser.add_option('-S','--superpose',action='store_true',dest='superpose',default=False,help="[1D] use same axis for all plots")
 parser.add_option('-E','--label',action='append',dest='label',type="string",default=None,help="[1D] label for line")
+parser.add_option('--xcoeff',action='append',dest='xcoeff',type="float",default=None,help="[1D] multiply x axis")
+parser.add_option('--ycoeff',action='append',dest='ycoeff',type="float",default=None,help="[1D] multiply y axis")
 # -- 2D plot
 parser.add_option('-C','--colorb',action='append',dest='colorb',type="string",default=None,help="[2D] colormap: http://micropore.files.wordpress.com/2010/06/colormaps.png")
 parser.add_option('-P','--proj',action='append',dest='proj',type="string",default=None,help="[2D] map projection: 'cyl' 'npstere' 'spstere' 'ortho' 'moll' 'robin' 'lcc' 'laea' 'merc'")
@@ -126,6 +128,9 @@ user.superpose = opt.superpose
 user.filename = opt.filename
 user.folder = opt.folder
 user.out = opt.out
+# if user wants to give a name, we drop the indication of date
+if opt.filename != "myplot":
+    user.includedate = False
 # define plot
 user.defineplot()
 # user-defined plot settings

@@ -1098,6 +1098,17 @@ class pp():
             except: 
                 try: self.p[iii].vmax = opt.vmax[0]
                 except: pass
+            ###
+            try: self.p[iii].xcoeff = opt.xcoeff[iii]
+            except:
+                try: self.p[iii].xcoeff = opt.xcoeff[0]
+                except: pass
+            ###
+            try: self.p[iii].ycoeff = opt.ycoeff[iii]
+            except:
+                try: self.p[iii].ycoeff = opt.ycoeff[0]
+                except: pass
+
 
 ##########################################################
 ### THE ONEREQUEST SUBOBJECT TO PP (ON WHICH IT LOOPS) ###
