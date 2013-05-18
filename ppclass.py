@@ -145,6 +145,7 @@ class pp():
                       filename="myplot",\
                       folder="./",\
                       includedate=True,\
+                      res=150.,\
                       xlabel=None,ylabel=None,\
                       xcoeff=None,ycoeff=None,\
                       proj=None,\
@@ -189,6 +190,7 @@ class pp():
         self.forcedimplot = forcedimplot
         self.out = out
         self.filename = filename
+        self.res = res
         self.folder = folder
         self.includedate = includedate
         self.changetime = changetime
@@ -931,7 +933,7 @@ class pp():
         # ... added a fix (customplot=True) for the label problem in basemap
         print "**** PPCLASS. Done step: makeplot"
         if (self.n == self.howmanyplots):
-            ppplot.save(mode=self.out,filename=self.filename,folder=self.folder,custom=self.customplot,includedate=self.includedate)
+            ppplot.save(mode=self.out,filename=self.filename,folder=self.folder,custom=self.customplot,includedate=self.includedate,res=self.res)
             mpl.close()
         # SAVE A PICKLE FILE WITH THE self.p ARRAY OF OBJECTS
         if self.verbose: print "**** Saving session in "+self.filename + ".ppobj"

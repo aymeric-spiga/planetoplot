@@ -487,6 +487,7 @@ class plot2d(plot):
                  area=None,\
                  vmin=None,\
                  vmax=None,\
+                 showcb=True,\
                  colorvec="black"):
         ## get initialization from parent class
         plot.__init__(self)
@@ -504,6 +505,7 @@ class plot2d(plot):
         self.blon = blon ; self.blat = blat
         self.area = area
         self.vmin = vmin ; self.vmax = vmax
+        self.showcb = showcb
 
     # define_from_var
     # ... this uses settings in set_var.txt
@@ -682,7 +684,7 @@ class plot2d(plot):
         ############################################################################################
         ### COLORBAR
         ############################################################################################
-        if self.trans > 0.:
+        if self.trans > 0. and self.showcb:
             ## draw colorbar. settings are different with projections. or if not mapmode.
             if not self.mapmode: orientation=zeorientation ; frac = 0.075 ; pad = 0.03 ; lu = 0.5
             elif self.proj in ['moll']: orientation="horizontal" ; frac = 0.08 ; pad = 0.03 ; lu = 1.0
