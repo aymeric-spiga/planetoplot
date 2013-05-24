@@ -63,6 +63,8 @@ parser.add_option('-D','--div',action='store',dest='div',type="int",default=20,h
 parser.add_option('-H','--trans',action='store',dest='trans',type="float",default=1.0,help="float for transparency (0=transp,1=opaque)")
 parser.add_option('-Z','--logy',action='store_true',dest='logy',default=False,help="set log for vertical axis")
 parser.add_option('-O','--save',action='store',dest='out',type="string",default="gui",help="save mode: 'gui' 'png' 'pdf' 'eps' 'svg' 'ps'")
+parser.add_option('-V','--void',action='store_true',dest='void',default=False,help="no colorbar, no title, no labels")
+parser.add_option('-U','--units',action='append',dest='units',type="string",default=None,help="units for the field")
 # -- 1D plot
 parser.add_option('-L','--lstyle',action='append',dest='lstyle',type="string",default=None,help="[1D] linestyle: '-' '--' '.' '..'")
 parser.add_option('-Q','--color',action='append',dest='color',type="string",default=None,help="[1D] color: 'b' 'g' 'r' etc")
@@ -73,14 +75,16 @@ parser.add_option('--xcoeff',action='append',dest='xcoeff',type="float",default=
 parser.add_option('--ycoeff',action='append',dest='ycoeff',type="float",default=None,help="[1D] multiply y axis")
 # -- 2D plot
 parser.add_option('-C','--colorb',action='append',dest='colorb',type="string",default=None,help="[2D] colormap: http://micropore.files.wordpress.com/2010/06/colormaps.png")
-parser.add_option('-P','--proj',action='append',dest='proj',type="string",default=None,help="[2D] map projection: 'cyl' 'npstere' 'spstere' 'ortho' 'moll' 'robin' 'lcc' 'laea' 'merc'")
+parser.add_option('-P','--proj',action='append',dest='proj',type="string",default=None,help="[2D] map projection: 'cyl' 'npstere' 'spstere' 'ortho' 'moll' 'robin' 'lcc' 'laea' 'merc' 'noproj'")
 parser.add_option('-B','--back',action='append',dest='back',type="string",default=None,help='[2D] predefined map background (cf. set_back.txt)')
 parser.add_option('-A','--area',action='append',dest='area',type="string",default=None,help='[2D] predefined region of mapping (cf. set_area.txt)')
 parser.add_option('-I','--blon',action='append',dest='blon',type="float",default=None,help='[2D] float: bounding longitude for stere (or center longitude for ortho)')
 parser.add_option('-J','--blat',action='append',dest='blat',type="float",default=None,help='[2D] float: bounding latitude for stere (or center latitude for ortho) ')
 parser.add_option('-N','--vmin',action='append',dest='vmin',type="float",default=None,help='[2D] float: minimum value for displayed field')
 parser.add_option('-M','--vmax',action='append',dest='vmax',type="float",default=None,help='[2D] float: maximum value for displayed field')
+parser.add_option('-W','--wscale',action='append',dest='wscale',type="float",default=None,help='[2D] float: set size of reference wind vector')
 (opt,args) = parser.parse_args()
+# remains F G R  
 
 ######################################
 # get arguments (one or several files)
@@ -128,12 +132,17 @@ user.superpose = opt.superpose
 user.filename = opt.filename
 user.folder = opt.folder
 user.out = opt.out
+# if noproj is given for proj, no map mode
+if opt.proj is not None:
+    if 'noproj' in opt.proj: 
+        user.noproj = True
 # if user wants to give a name, we drop the indication of date
 if opt.filename != "myplot":
     user.includedate = False
 # define plot
 user.defineplot()
 # user-defined plot settings
+# ... shouldn't this be before defineplot?
 user.getopt(opt)
 # make plot
 user.makeplot()

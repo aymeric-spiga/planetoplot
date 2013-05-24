@@ -1016,6 +1016,10 @@ class pp():
         # -- if as many as number of plots --> OK, each plot has its own setting
         # (except a few cases such as trans)
         for iii in range(self.howmanyplots):
+            if opt.void:
+                self.p[iii].showcb = False
+            else:
+                self.p[iii].showcb = True
             ###
             try: self.p[iii].trans = opt.trans
             except: pass
@@ -1031,18 +1035,27 @@ class pp():
                 try: self.p[iii].colorb = opt.colorb[0]
                 except: pass
             ###
-            try: self.p[iii].title = opt.title[iii]
-            except: 
+            if opt.void:
+                self.p[iii].title = ""
+            else:
+              try: self.p[iii].title = opt.title[iii]
+              except: 
                 try: self.p[iii].title = opt.title[0]
                 except: pass
             ###
-            try: self.p[iii].xlabel = opt.xlabel[iii]
-            except: 
+            if opt.void:
+                self.p[iii].xlabel = ""
+            else:
+              try: self.p[iii].xlabel = opt.xlabel[iii]
+              except: 
                 try: self.p[iii].xlabel = opt.xlabel[0]
                 except: pass
             ###
-            try: self.p[iii].ylabel = opt.ylabel[iii]
-            except: 
+            if opt.void:
+                self.p[iii].ylabel = ""
+            else:
+              try: self.p[iii].ylabel = opt.ylabel[iii]
+              except: 
                 try: self.p[iii].ylabel = opt.ylabel[0]
                 except: pass
             ###
@@ -1110,6 +1123,17 @@ class pp():
             except:
                 try: self.p[iii].ycoeff = opt.ycoeff[0]
                 except: pass
+            ###
+            try: self.p[iii].units = opt.units[iii]
+            except:
+                try: self.p[iii].units = opt.units[0]
+                except: pass
+            ###
+            try: self.p[iii].wscale = opt.wscale[iii]
+            except:
+                try: self.p[iii].wscale = opt.wscale[0]
+                except: pass
+
 
 
 ##########################################################
@@ -1250,8 +1274,8 @@ class onerequest():
             if tabtime.ndim == 2: tabtime = tabtime[:,0]
             elif tabtime.ndim == 3: tabtime = tabtime[:,0,0]
             elif tabtime.ndim == 4: tabtime = tabtime[:,0,0,0]
-            # (now proceed)
-            dafirst = tabtime[0]
+            # (now proceed) (the +0. just ensures this is a number)
+            dafirst = tabtime[0] + 0.
             if self.dim_t == 1:
                 self.field_t = np.array([dafirst])
             else:
@@ -1262,6 +1286,7 @@ class onerequest():
                 self.field_t = np.linspace(dafirst,dalast,num=self.dim_t)
           except:
             # ... or if a problem encountered, define a simple time axis
+            if self.verbose: print "**** OK. There is something weird. Let us go for a simple time axis."
             self.field_t = np.array(range(self.dim_t))
             self.name_t = "t grid points"
           if self.dim_t > 1: 

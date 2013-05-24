@@ -488,6 +488,7 @@ class plot2d(plot):
                  vmin=None,\
                  vmax=None,\
                  showcb=True,\
+                 wscale=None,\
                  colorvec="black"):
         ## get initialization from parent class
         plot.__init__(self)
@@ -506,6 +507,7 @@ class plot2d(plot):
         self.area = area
         self.vmin = vmin ; self.vmax = vmax
         self.showcb = showcb
+        self.wscale = wscale
 
     # define_from_var
     # ... this uses settings in set_var.txt
@@ -607,7 +609,7 @@ class plot2d(plot):
             steplat = int(abs(wlat[1]-wlat[0])/3.)
             #mertab = np.r_[wlon[0]:wlon[1]:steplon] ; merlab = [0,0,0,1]
             #partab = np.r_[wlat[0]:wlat[1]:steplat] ; parlab = [1,0,0,0]
-            mertab = np.r_[-360.:360.:steplon] ; merlab = [0,0,0,1]
+            mertab = np.r_[-180.:180.:steplon] ; merlab = [0,0,0,1] #-360:360.
             partab = np.r_[-90.:90.:steplat] ; parlab = [1,0,0,0]
             format = '%.1f'
             # -- center of domain and bounding lats
@@ -711,20 +713,19 @@ class plot2d(plot):
                 [vecx,vecy] = m.rotate_vector(self.addvecx,self.addvecy,self.absc,self.ordi) 
                 #vecx,vecy = self.addvecx,self.addvecy
                 # reference vector is scaled
-                zescale = ppcompute.mean(np.sqrt(self.addvecx*self.addvecx+self.addvecy*self.addvecy))
-                #zescale = 25.
+                if self.wscale is None: self.wscale = ppcompute.mean(np.sqrt(self.addvecx*self.addvecx+self.addvecy*self.addvecy))
                 # make vector field
                 q = m.quiver( x[::stride,::stride],y[::stride,::stride],\
                               vecx[::stride,::stride],vecy[::stride,::stride],\
                               angles='xy',color=self.colorvec,pivot='middle',\
-                              scale=zescale*reducevec,width=widthvec )
+                              scale=self.wscale*reducevec,width=widthvec )
                 # make vector key.
                 #keyh = 1.025 ; keyv = 1.05 # upper right corner over colorbar
-                keyh = 0.98 ; keyv = 1.06
-                keyh = 0.98 ; keyv = 1.07
+                keyh = 0.97 ; keyv = 1.05
                 #keyh = -0.03 ; keyv = 1.08 # upper left corner
                 p = mpl.quiverkey(q,keyh,keyv,\
-                                  zescale,str(int(zescale)),\
+                                  self.wscale,str(int(self.wscale)),\
+                                  fontproperties={'size': 'small'},\
                                   color='black',labelpos='S',labelsep = 0.07)
         ############################################################################################
         ### TEXT. ANYWHERE. add_text.txt should be present with lines x ; y ; text ; color
