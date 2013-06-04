@@ -180,6 +180,13 @@ if files_not_present != "":
 # useful functions #
 ####################
 
+# a function to change color lines according to a color map (idea by A. Pottier)
+# ... two optional arguments: color maps + a number telling how much intervals are needed
+def rainbow(cb="jet",num=8):
+    ax = mpl.gca()
+    pal = mpl.cm.get_cmap(name=cb)
+    ax._get_lines.set_color_cycle([pal(i) for i in np.linspace(0,0.9,num)])
+
 # a function to define subplot
 # ... user can change settings in set_multiplot.txt read above
 # -------------------------------
@@ -298,6 +305,7 @@ class plot():
                  xcoeff=1.,\
                  ycoeff=1.,\
                  fmt=None,\
+                 colorb="jet",\
                  units="",\
                  title=""):
         ## what could be defined by the user
@@ -317,6 +325,7 @@ class plot():
         self.ycoeff = ycoeff
         self.fmt = fmt
         self.units = units
+        self.colorb = colorb
         ## other useful arguments
         ## ... not used here in ppplot but need to be attached to plot object
         self.axisbg = "white"
@@ -381,6 +390,10 @@ class plot1d(plot):
         self.color = color
         self.marker = marker
         self.label = label
+        self.xmin = None
+        self.ymin = None
+        self.xmax = None
+        self.ymax = None
 
     # define_from_var
     # ... this uses settings in set_var.txt
@@ -404,6 +417,10 @@ class plot1d(plot):
         # add specific stuff
         mpl.grid(color='grey')
         if self.lstyle == "": self.lstyle = " " # to allow for no line at all with ""
+        # set dummy x axis if not defined
+        if self.absc is None: 
+            self.absc = np.array(range(self.field.shape[0]))
+            print "!! WARNING !! dummy coordinates on x axis"
         # swapping if requested
         if self.swap:  x = self.field ; y = self.absc
         else:          x = self.absc ; y = self.field
@@ -426,8 +443,8 @@ class plot1d(plot):
         # make log axes and/or invert ordinate
         # ... this must be after plot so that axis bounds are well-defined
         # ... also inverting must be after making the thing logarithmic
-        if self.logx: mpl.semilogx()
-        if self.logy: mpl.semilogy()
+        if self.logx: mpl.xscale("log") # not mpl.semilogx() because excludes log on y
+        if self.logy: mpl.yscale("log") # not mpl.semilogy() because excludes log on x
         if self.invert: ax = mpl.gca() ; ax.set_ylim(ax.get_ylim()[::-1])
         # add a label for line(s)
         if self.label is not None:
@@ -445,6 +462,8 @@ class plot1d(plot):
         xmax = ppcompute.max(x)
         if xmin < x1: x1 = xmin
         if xmax > x2: x2 = xmax
+        if self.xmin is not None: x1 = self.xmin
+        if self.xmax is not None: x2 = self.xmax
         ax.set_xbound(lower=x1,upper=x2)
         # y-axis
         y1, y2 = ax.get_ybound()
@@ -452,6 +471,8 @@ class plot1d(plot):
         ymax = ppcompute.max(y)
         if ymin < y1: y1 = ymin
         if ymax > y2: y2 = ymax
+        if self.ymin is not None: y1 = self.ymin
+        if self.ymax is not None: y2 = self.ymax
         ax.set_ybound(lower=y1,upper=y2)
         ## set with .div the number of ticks. (is it better than automatic?)
         ax.xaxis.set_major_locator(MaxNLocator(self.div/2))
@@ -477,7 +498,6 @@ class plot2d(plot):
                  mapmode=False,\
                  proj="cyl",\
                  back=None,\
-                 colorb="jet",\
                  trans=1.0,\
                  addvecx=None,\
                  addvecy=None,\
@@ -497,7 +517,6 @@ class plot2d(plot):
         self.mapmode = mapmode
         self.proj = proj
         self.back = back
-        self.colorb = colorb
         self.trans = trans
         self.addvecx = addvecx
         self.addvecy = addvecy
@@ -526,17 +545,11 @@ class plot2d(plot):
     def make(self):
         # get what is done in the parent class...
         plot.make(self)
-        if self.fmt is None: self.fmt = "%.2e"
+        if self.fmt is None: self.fmt = "%.1e"
         # ... then add specific stuff
         ############################################################################################
         ### PRE-SETTINGS
         ############################################################################################
-        # transposing if necessary
-        shape = self.field.shape
-        if shape[0] != shape[1]:
-         if len(self.absc) == shape[0] and len(self.ordi) == shape[1]:
-            print "!! WARNING !! Transposing axes"
-            self.field = np.transpose(self.field)
         # set dummy xy axis if not defined
         if self.absc is None: 
             self.absc = np.array(range(self.field.shape[0]))
@@ -546,6 +559,12 @@ class plot2d(plot):
             self.ordi = np.array(range(self.field.shape[1]))
             self.mapmode = False
             print "!! WARNING !! dummy coordinates on y axis"
+        # transposing if necessary
+        shape = self.field.shape
+        if shape[0] != shape[1]:
+         if len(self.absc) == shape[0] and len(self.ordi) == shape[1]:
+            print "!! WARNING !! Transposing axes"
+            self.field = np.transpose(self.field)
         # bound field
         zevmin, zevmax = calculate_bounds(self.field,vmin=self.vmin,vmax=self.vmax)
         what_I_plot = bounds(self.field,zevmin,zevmax)

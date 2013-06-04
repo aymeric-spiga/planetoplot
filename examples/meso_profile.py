@@ -10,12 +10,13 @@ m.var = "W"
 m.x = "136.,139." # computing over x interval
 m.y = -5. # setting a fixed y value
 m.z = None # leaving z as a free dimension
-m.t = [6.,12.,18.,24.] # setting 4 fixed t values
+m.t = [6.,9.,12.,15.,18.,21.,24.] # setting 4 fixed t values
 
 # define settings
 m.superpose = True # superpose 1D plots
 #m.verbose = True # making the programe verbose
 #m.out = "pdf" # output format
+m.colorb = "spectral" # color cycle according to a color map
 
 # get data and make plot with default settings
 m.getplot()
@@ -47,6 +48,7 @@ S.p[0].swaplab = False
 S.p[0].ylabel="Geopotential height (km)"
 S.p[0].xlabel="Potential temperature (K)"
 S.filename = "meso_profile"
+S.colorb = None # come back to default color cycle
 
 # make the plot
 S.makeplot()

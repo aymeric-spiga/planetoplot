@@ -6,6 +6,7 @@
 # -----------------------------------------------------------------------
 from optparse import OptionParser ### TBR by argparse
 from ppclass import pp
+from ppplot import rainbow
 # -----------------------------------------------------------------------
 parser = OptionParser()
 parser.add_option('-O','--out',action='store',dest='out',type="string",default="gui",help='Specify a new output format')
@@ -33,6 +34,7 @@ for files in args:
       for plot in yeah.p:
         plot.proj = opt.proj
     if opt.colorb is not None:
+      yeah.colorb = opt.colorb
       for plot in yeah.p:
         plot.colorb = opt.colorb
     if opt.marker is not None:

@@ -73,6 +73,10 @@ parser.add_option('-S','--superpose',action='store_true',dest='superpose',defaul
 parser.add_option('-E','--label',action='append',dest='label',type="string",default=None,help="[1D] label for line")
 parser.add_option('--xcoeff',action='append',dest='xcoeff',type="float",default=None,help="[1D] multiply x axis")
 parser.add_option('--ycoeff',action='append',dest='ycoeff',type="float",default=None,help="[1D] multiply y axis")
+parser.add_option('--xmin',action='append',dest='xmin',type="float",default=None,help="[1D] min bound x axis")
+parser.add_option('--ymin',action='append',dest='ymin',type="float",default=None,help="[1D] min bound y axis")
+parser.add_option('--xmax',action='append',dest='xmax',type="float",default=None,help="[1D] max bound x axis")
+parser.add_option('--ymax',action='append',dest='ymax',type="float",default=None,help="[1D] max bound y axis")
 # -- 2D plot
 parser.add_option('-C','--colorb',action='append',dest='colorb',type="string",default=None,help="[2D] colormap: http://micropore.files.wordpress.com/2010/06/colormaps.png")
 parser.add_option('-P','--proj',action='append',dest='proj',type="string",default=None,help="[2D] map projection: 'cyl' 'npstere' 'spstere' 'ortho' 'moll' 'robin' 'lcc' 'laea' 'merc' 'noproj'")

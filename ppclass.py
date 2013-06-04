@@ -783,6 +783,7 @@ class pp():
                     if self.ycoeff is not None: plobj.ycoeff = self.ycoeff
                     if self.title is not None: plobj.title = self.title
                     if self.units is not None: plobj.units = self.units
+                    if self.colorb is not None: plobj.colorb = self.colorb
                     # -- 1D specific
                     if dp == 1:
                         if self.lstyle is not None: plobj.lstyle = self.lstyle
@@ -794,7 +795,6 @@ class pp():
                         if self.proj is not None and not self.noproj: plobj.proj = self.proj
                         if self.vmin is not None: plobj.vmin = self.vmin
                         if self.vmax is not None: plobj.vmax = self.vmax
-                        if self.colorb is not None: plobj.colorb = self.colorb
                     # finally append plot object
                     self.p.append(plobj)
                     count = count + 1
@@ -908,6 +908,11 @@ class pp():
                 if self.n == 0: 
                     self.fig.add_subplot(1,1,1,axisbg=pl.axisbg) # define one subplot (still needed for user-defined font sizes)
                     sav = pl.xlabel,pl.ylabel,pl.xcoeff,pl.ycoeff,pl.title,pl.swaplab # save titles and labels
+                    # possibility to color lines according to a color map
+                    # ... made so that all plots span the whole color map automatically.
+                    if self.colorb is not None: 
+                        if self.verbose: print "**** OK. We make a rainbow spaghetti plot with color map ",self.colorb
+                        ppplot.rainbow(cb=self.colorb,num=self.howmanyplots)
                 else: 
                     pl.invert = False ; pl.lstyle = None # don't invert again axis
                     # set saved titles and labels
@@ -931,7 +936,7 @@ class pp():
             if self.plotin is not None: self.plotin.n = self.n
         # once completed show the plot (cannot show intermediate plotin)
         # ... added a fix (customplot=True) for the label problem in basemap
-        print "**** PPCLASS. Done step: makeplot"
+        if not self.quiet: print "**** PPCLASS. Done step: makeplot"
         if (self.n == self.howmanyplots):
             ppplot.save(mode=self.out,filename=self.filename,folder=self.folder,custom=self.customplot,includedate=self.includedate,res=self.res)
             mpl.close()
@@ -1132,6 +1137,26 @@ class pp():
             try: self.p[iii].wscale = opt.wscale[iii]
             except:
                 try: self.p[iii].wscale = opt.wscale[0]
+                except: pass
+            ###
+            try: self.p[iii].xmin = opt.xmin[iii]
+            except:
+                try: self.p[iii].xmin = opt.xmin[0]
+                except: pass
+            ###
+            try: self.p[iii].ymin = opt.ymin[iii]
+            except:
+                try: self.p[iii].ymin = opt.ymin[0]
+                except: pass
+            ###
+            try: self.p[iii].xmax = opt.xmax[iii]
+            except:
+                try: self.p[iii].xmax = opt.xmax[0]
+                except: pass
+            ###
+            try: self.p[iii].ymax = opt.ymax[iii]
+            except:
+                try: self.p[iii].ymax = opt.ymax[0]
                 except: pass
 
 
