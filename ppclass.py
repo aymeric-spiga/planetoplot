@@ -1037,7 +1037,7 @@ class pp():
             ###
             try: self.p[iii].colorb = opt.colorb[iii]
             except: 
-                try: self.p[iii].colorb = opt.colorb[0]
+                try: self.p[iii].colorb = opt.colorb[0] ; self.colorb = opt.colorb[0]
                 except: pass
             ###
             if opt.void:
