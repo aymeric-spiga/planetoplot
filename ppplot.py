@@ -512,6 +512,8 @@ class plot2d(plot):
                  vmax=None,\
                  showcb=True,\
                  wscale=None,\
+                 stridevecx=1,\
+                 stridevecy=1,\
                  colorvec="black"):
         ## get initialization from parent class
         plot.__init__(self)
@@ -530,6 +532,8 @@ class plot2d(plot):
         self.vmin = vmin ; self.vmax = vmax
         self.showcb = showcb
         self.wscale = wscale
+        self.stridevecx = stridevecx
+        self.stridevecy = stridevecy
 
     # define_from_var
     # ... this uses settings in set_var.txt
@@ -728,22 +732,21 @@ class plot2d(plot):
         ### VECTORS. must be after the colorbar. we could also leave possibility for streamlines.
         ############################################################################################
         ### not expecting NaN in self.addvecx and self.addvecy. masked arrays is just enough.
-        stride = 3
-        stride = 1 ## no need to stride. done with data. except if you want to stride wind and not field TBD.
         if self.addvecx is not None and self.addvecy is not None: 
+                # vectors on map projection or simple 2D mapping
                 if self.mapmode: [vecx,vecy] = m.rotate_vector(self.addvecx,self.addvecy,self.absc,self.ordi) # for metwinds only ?
                 else: vecx,vecy = self.addvecx,self.addvecy ; x,y = np.meshgrid(x,y)
                 # reference vector is scaled
                 if self.wscale is None: self.wscale = ppcompute.mean(np.sqrt(self.addvecx*self.addvecx+self.addvecy*self.addvecy))
                 # make vector field
                 if self.mapmode: 
-                    q = m.quiver( x[::stride,::stride],y[::stride,::stride],\
-                                  vecx[::stride,::stride],vecy[::stride,::stride],\
+                    q = m.quiver( x[::self.stridevecy,::self.stridevecx],y[::self.stridevecy,::self.stridevecx],\
+                                  vecx[::self.stridevecy,::self.stridevecx],vecy[::self.stridevecy,::self.stridevecx],\
                                   angles='xy',color=self.colorvec,pivot='tail',\
                                   scale=self.wscale*reducevec,width=widthvec )
                 else:
-                    q = mpl.quiver( x[::stride,::stride],y[::stride,::stride],\
-                                    vecx[::stride,::stride],vecy[::stride,::stride],\
+                    q = mpl.quiver( x[::self.stridevecy,::self.stridevecx],y[::self.stridevecy,::self.stridevecx],\
+                                    vecx[::self.stridevecy,::self.stridevecx],vecy[::self.stridevecy,::self.stridevecx],\
                                     angles='xy',color=self.colorvec,pivot='tail',\
                                     scale=self.wscale*reducevec,width=widthvec )
                 # make vector key.

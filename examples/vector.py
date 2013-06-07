@@ -8,11 +8,21 @@ u.vargoal = ["main","contour","vector","vector"]
 u.t = "0.5,0.8"
 u.z = "50000"
 u.filename = "vector"
-u.get()
-u.defineplot()
-#u.p[0].proj = "ortho"
-#u.p[0].blat = -45.
-u.makeplot()
+
+# stride both x and y
+# this impacts field + vector
+u.stridex = 3
+u.stridey = 3
+u.getplot()
+u.stridex = 1 # (reinitialise)
+u.stridey = 1 # (reinitialise)
+
+# stride vectors only
+# not field (here topography)
+u.stridevecx = 3
+u.stridevecy = 3
+u.getplot()
+
 
 
 u.z = "50"

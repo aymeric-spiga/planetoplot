@@ -134,6 +134,8 @@ class pp():
                       x=None,y=None,z=None,t=None,\
                       stridex=1,stridey=1,\
                       stridez=1,stridet=1,\
+                      stridevecx=1,\
+                      stridevecy=1,\
                       compute="mean",\
                       verbose=False,\
                       quiet=False,\
@@ -181,6 +183,8 @@ class pp():
         self.z = z ; self.t = t   ## if None, free dimension
         self.stridex = stridex ; self.stridey = stridey
         self.stridez = stridez ; self.stridet = stridet
+        self.stridevecx = stridevecx
+        self.stridevecy = stridevecy
         self.compute = compute
         self.verbose = verbose
         self.quiet = quiet
@@ -798,6 +802,8 @@ class pp():
                         if self.proj is not None and not self.noproj: plobj.proj = self.proj
                         if self.vmin is not None: plobj.vmin = self.vmin
                         if self.vmax is not None: plobj.vmax = self.vmax
+                        plobj.stridevecx = self.stridevecx
+                        plobj.stridevecy = self.stridevecy
                     # finally append plot object
                     self.p.append(plobj)
                     count = count + 1

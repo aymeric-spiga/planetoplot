@@ -91,6 +91,9 @@ parser.add_option('-J','--blat',action='append',dest='blat',type="float",default
 parser.add_option('-N','--vmin',action='append',dest='vmin',type="float",default=None,help='[2D] float: minimum value for displayed field')
 parser.add_option('-M','--vmax',action='append',dest='vmax',type="float",default=None,help='[2D] float: maximum value for displayed field')
 parser.add_option('-W','--wscale',action='append',dest='wscale',type="float",default=None,help='[2D] float: set size of reference wind vector')
+parser.add_option('--stridevecx',action='store',dest='stridevecx',type="int",default=1,help="Define an abscissa stride on vectors only -- not on field")
+parser.add_option('--stridevecy',action='store',dest='stridevecy',type="int",default=1,help="Define an ordinate stride on vectors only -- not on field")
+###########################
 (opt,args) = parser.parse_args()
 # remains F G R  
 
@@ -132,6 +135,8 @@ user.stridex = opt.stridex
 user.stridey = opt.stridey
 user.stridez = opt.stridez
 user.stridet = opt.stridet
+user.stridevecx = opt.stridevecx
+user.stridevecy = opt.stridevecy
 # define field
 user.define()
 # retrieve field
