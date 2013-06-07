@@ -47,13 +47,17 @@ parser.add_option('-t','--time',action='append',dest='t',type="string",default=N
 parser.add_option('-u','--compute',action='store',dest='compute',type="string",default="mean",help="computation: mean, min, max, meanarea")
 parser.add_option('-c','--contour',action='store',dest='contour',type="string",default=None,help="one 'variable' for contour")
 parser.add_option('-i','--vecx',action='store',dest='vecx',type="string",default=None,help="one 'variable' for wind vector x component")
-parser.add_option('-j','--vecy',action='store',dest='vecy',type="string",default=None,help="one 'variable' for wind vector x component")
+parser.add_option('-j','--vecy',action='store',dest='vecy',type="string",default=None,help="one 'variable' for wind vector y component")
 parser.add_option('-m','--mult',action='store',dest='mult',type="float",default=None,help="multiplicative factor on field")
 parser.add_option('-a','--add',action='store',dest='add',type="float",default=None,help="additive factor on field")
 parser.add_option('-o','--output',action='store',dest='filename',type="string",default="myplot",help="name of output files")
 parser.add_option('-d','--directory',action='store',dest='folder',type="string",default="./",help="directory of output files")
 parser.add_option('-s','--changetime',action='store',dest='changetime',type="string",default=None,\
                   help="transformation on time axis : [None] | mars_sol2ls | mars_meso_ls | mars_meso_sol | mars_meso_utc | mars_meso_lt ")
+parser.add_option('--stridex',action='store',dest='stridex',type="int",default=1,help="Load data every stridex grid points over x dimension")
+parser.add_option('--stridey',action='store',dest='stridey',type="int",default=1,help="Load data every stridex grid points over y dimension")
+parser.add_option('--stridez',action='store',dest='stridez',type="int",default=1,help="Load data every stridex grid points over z dimension")
+parser.add_option('--stridet',action='store',dest='stridet',type="int",default=1,help="Load data every stridex grid points over t dimension")
 # plot --> upper case
 # -- generic
 parser.add_option('-T','--title',action='append',dest='title',type="string",default=None,help="change 'title'")
@@ -124,6 +128,10 @@ user.z = opt.z ; user.t = opt.t
 user.verbose = opt.verbose
 user.compute = opt.compute
 user.changetime = opt.changetime
+user.stridex = opt.stridex
+user.stridey = opt.stridey
+user.stridez = opt.stridez
+user.stridet = opt.stridet
 # define field
 user.define()
 # retrieve field

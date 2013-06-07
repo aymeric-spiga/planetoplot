@@ -571,10 +571,13 @@ class pp():
               ### possible time axis change
               obj.changetime = self.changetime
               obj.performtimechange()
+              # get strides
+              obj.stridex = self.stridex ; obj.stridey = self.stridey
+              obj.stridez = self.stridez ; obj.stridet = self.stridet
               ### get index
-              obj.getindextime(dalist=st,ind=t,stride=self.stridet)
-              obj.getindexvert(dalist=sz,ind=z,stride=self.stridez)
-              obj.getindexhori(dalistx=sx,dalisty=sy,indx=x,indy=y,stridex=self.stridex,stridey=self.stridey)
+              obj.getindextime(dalist=st,ind=t)
+              obj.getindexvert(dalist=sz,ind=z)
+              obj.getindexhori(dalistx=sx,dalisty=sy,indx=x,indy=y)
         # change status
         self.status = "defined"
         return self
@@ -1190,6 +1193,7 @@ class onerequest():
         self.swap_axes = False ; self.invert_axes = False
         self.compute = None
         self.changetime = None
+        self.stridex = 1 ; self.stridey = 1 ; self.stridez = 1 ; self.stridet = 1
 
     # open a file. for now it is netcdf. TBD for other formats.
     # check that self.var is inside.
@@ -1363,9 +1367,9 @@ class onerequest():
     # get list of index to be retrieved for time axis
     ### TBD: il faudrait ne prendre que les indices qui correspondent a l interieur d un plot (dans all)
     # -------------------------------
-    def getindextime(self,dalist=None,ind=None,stride=1):
+    def getindextime(self,dalist=None,ind=None):
         if self.method_t == "free": 
-            self.index_t = np.arange(0,self.dim_t,stride)
+            self.index_t = np.arange(0,self.dim_t,self.stridet)
             if self.dim_t > 1:  
                 self.dimplot = self.dimplot + 1 
                 if self.verbose: print "**** OK. t values. all."
@@ -1375,7 +1379,7 @@ class onerequest():
         elif self.method_t == "comp":
             start = np.argmin( np.abs( self.field_t - dalist[ind][0] ) )
             stop = np.argmin( np.abs( self.field_t - dalist[ind][1] ) )
-            self.index_t = np.arange(start,stop,stride)
+            self.index_t = np.arange(start,stop,self.stridet)
             if self.verbose: print "**** OK. t values. comp over interval ",self.field_t[start],self.field_t[stop]," nvalues=",self.index_t.size
         elif self.method_t == "fixed":
             self.index_t.append( np.argmin( np.abs( self.field_t - dalist[ind][0] ) ))
@@ -1387,9 +1391,9 @@ class onerequest():
     # get list of index to be retrieved for vertical axis
     ### TBD: il faudrait ne prendre que les indices qui correspondent a l interieur d un plot (dans all)
     # -------------------------------
-    def getindexvert(self,dalist=None,ind=None,stride=1):
+    def getindexvert(self,dalist=None,ind=None):
         if self.method_z == "free": 
-            self.index_z = np.arange(0,self.dim_z,stride)
+            self.index_z = np.arange(0,self.dim_z,self.stridez)
             if self.dim_z > 1:  
                 self.dimplot = self.dimplot + 1
                 if self.verbose: print "**** OK. z values. all."
@@ -1399,7 +1403,7 @@ class onerequest():
         elif self.method_z == "comp":
             start = np.argmin( np.abs( self.field_z - dalist[ind][0] ) )
             stop = np.argmin( np.abs( self.field_z - dalist[ind][1] ) )
-            self.index_z = np.arange(start,stop,stride)
+            self.index_z = np.arange(start,stop,self.stridez)
             if self.verbose: print "**** OK. z values. comp over interval",self.field_z[start],self.field_z[stop]," nvalues=",self.index_z.size
         elif self.method_z == "fixed":
             self.index_z.append( np.argmin( np.abs( self.field_z - dalist[ind][0] ) ))
@@ -1415,7 +1419,7 @@ class onerequest():
     # NB: to append index we use lists (the most convenient) then we convert into a numpy.array
     ### TBD: il faudrait ne prendre que les indices qui correspondent a l interieur d un plot (dans all)
     # -------------------------------
-    def getindexhori(self,dalistx=None,dalisty=None,indx=None,indy=None,stridex=1,stridey=1):
+    def getindexhori(self,dalistx=None,dalisty=None,indx=None,indy=None):
         ## get what is the method over x and y axis
         test = self.method_x+self.method_y
         ## CASE 0, EASY CASES: 
@@ -1424,7 +1428,7 @@ class onerequest():
         ## - LAT IS COMP AND LON IS FREE
         ## - LON IS COMP AND LAT IS FREE
         if self.method_x == "free" or test in ["compfree","compcomp"]:
-            self.index_x = range(0,self.dim_x,stridex)
+            self.index_x = range(0,self.dim_x,self.stridex)
             if self.dim_x > 1:  
                 if self.method_x == "free": self.dimplot = self.dimplot + 1
                 if self.verbose: print "**** OK. x values. all."
@@ -1432,7 +1436,7 @@ class onerequest():
                 self.method_x = "fixed"
                 if self.verbose: print "**** OK. no x dimension."
         if self.method_y == "free" or test in ["freecomp","compcomp"]:
-            self.index_y = range(0,self.dim_y,stridey)
+            self.index_y = range(0,self.dim_y,self.stridey)
             if self.dim_y > 1:  
                 if self.method_y == "free": self.dimplot = self.dimplot + 1
                 if self.verbose: print "**** OK. y values. all."
@@ -1564,6 +1568,12 @@ class onerequest():
           # we are OK with 1D coordinates
           self.field_x = self.field_x[self.index_y2d, self.index_x2d]
           self.field_y = self.field_y[self.index_y2d, self.index_x2d]
+          # ... there are special cases with strides
+          # ... some other fixes will be needed probably TBD
+          if self.method_x == "free" and self.stridex != 1:
+              self.field_x = self.field_x[self.index_x]
+          if self.method_y == "free" and self.stridey != 1: 
+              self.field_y = self.field_y[self.index_y]
         self.field_z = self.field_z[self.index_z]
         self.field_t = self.field_t[self.index_t]
         # extract relevant horizontal points
@@ -1572,6 +1582,7 @@ class onerequest():
         if test in ["fixedfixed","freefree"]:
           pass
         elif test in ["fixedfree","fixedcomp"] or test in ["freefixed","compfixed"]: 
+         if self.stridex == 1 and self.stridey == 1:
           time0 = timelib.time()
           # now have to obtain the new indexes which correspond to the extracted self.field
           # for it to work with unique index, ensure that any index_* is a numpy array
@@ -1605,6 +1616,9 @@ class onerequest():
           # we only keep the one value that was modified on the dimension which is not free
           if what_I_am_supposed_to_do == "keepx":     self.field = self.field[:,:,0,:] ; ny = 1 ; self.field = np.reshape(self.field,(nt,nz,ny,nx))
           elif what_I_am_supposed_to_do == "keepy":   self.field = self.field[:,:,:,0] ; nx = 1 ; self.field = np.reshape(self.field,(nt,nz,ny,nx))
+         else:
+          # there is a problem above if stride != 1. a fix must be found. rewrite might be necessary. TBD
+          pass
         # make a mask in case there are non-NaN missing values. (what about NaN missing values?)
         # ... this is important for computations below (see ppcompute)
         masked = np.ma.masked_where(np.abs(self.field) > 1e25,self.field)

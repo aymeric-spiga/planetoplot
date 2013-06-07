@@ -475,7 +475,10 @@ class plot1d(plot):
         if self.ymax is not None: y2 = self.ymax
         ax.set_ybound(lower=y1,upper=y2)
         ## set with .div the number of ticks. (is it better than automatic?)
-        ax.xaxis.set_major_locator(MaxNLocator(self.div/2))
+        if not self.logx:
+            ax.xaxis.set_major_locator(MaxNLocator(self.div/2))
+        else:
+            print "!! WARNING. in logx mode, ticks are set automatically."
 
 ################################
 # a subclass to make a 2D plot #
@@ -726,18 +729,23 @@ class plot2d(plot):
         ############################################################################################
         ### not expecting NaN in self.addvecx and self.addvecy. masked arrays is just enough.
         stride = 3
-        #stride = 1
-        if self.addvecx is not None and self.addvecy is not None and self.mapmode:
-                ### for metwinds only ???
-                [vecx,vecy] = m.rotate_vector(self.addvecx,self.addvecy,self.absc,self.ordi) 
-                #vecx,vecy = self.addvecx,self.addvecy
+        stride = 1 ## no need to stride. done with data. except if you want to stride wind and not field TBD.
+        if self.addvecx is not None and self.addvecy is not None: 
+                if self.mapmode: [vecx,vecy] = m.rotate_vector(self.addvecx,self.addvecy,self.absc,self.ordi) # for metwinds only ?
+                else: vecx,vecy = self.addvecx,self.addvecy ; x,y = np.meshgrid(x,y)
                 # reference vector is scaled
                 if self.wscale is None: self.wscale = ppcompute.mean(np.sqrt(self.addvecx*self.addvecx+self.addvecy*self.addvecy))
                 # make vector field
-                q = m.quiver( x[::stride,::stride],y[::stride,::stride],\
-                              vecx[::stride,::stride],vecy[::stride,::stride],\
-                              angles='xy',color=self.colorvec,pivot='middle',\
-                              scale=self.wscale*reducevec,width=widthvec )
+                if self.mapmode: 
+                    q = m.quiver( x[::stride,::stride],y[::stride,::stride],\
+                                  vecx[::stride,::stride],vecy[::stride,::stride],\
+                                  angles='xy',color=self.colorvec,pivot='tail',\
+                                  scale=self.wscale*reducevec,width=widthvec )
+                else:
+                    q = mpl.quiver( x[::stride,::stride],y[::stride,::stride],\
+                                    vecx[::stride,::stride],vecy[::stride,::stride],\
+                                    angles='xy',color=self.colorvec,pivot='tail',\
+                                    scale=self.wscale*reducevec,width=widthvec )
                 # make vector key.
                 #keyh = 1.025 ; keyv = 1.05 # upper right corner over colorbar
                 keyh = 0.97 ; keyv = 1.05
