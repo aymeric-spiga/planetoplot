@@ -627,6 +627,8 @@ class pp():
               if self.nploty > 1: self.l[count] = self.l[count] + "y="+str(self.y[y])+'_'
               if self.nplotz > 1: self.l[count] = self.l[count] + "z="+str(self.z[z])+'_'
               if self.nplott > 1: self.l[count] = self.l[count] + "t="+str(self.t[t])+'_'
+              # close the file
+              obj.closefile()
               count = count + 1
         ## make it simple: self.f is simply the data array if self.nrequest=1
         if self.nrequest == 1: self.f = self.f[0]
@@ -1212,6 +1214,12 @@ class onerequest():
         if self.var not in self.f.variables.keys(): 
             print '!! ERROR !! File '+self.file+' does not contain variable: '+self.var
             print '..... try instead with ',self.f.variables.keys() ; exit()
+
+    # close a file
+    # ------------
+    def closefile(self):
+        print "close", self.file
+        self.f.close()
 
     # copy attributes from another existing object
     # --------------------------------------------
