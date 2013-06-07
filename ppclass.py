@@ -1218,7 +1218,6 @@ class onerequest():
     # close a file
     # ------------
     def closefile(self):
-        print "close", self.file
         self.f.close()
 
     # copy attributes from another existing object
