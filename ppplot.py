@@ -247,6 +247,17 @@ def bounds(what_I_plot,zevmin,zevmax,miss=9e+35):
     what_I_plot[ what_I_plot > zevmax ] = zevmax*(1.-small_enough)
     return what_I_plot
 
+# a function to change labels with modulo
+# ---------------------------------------
+def labelmodulo(ax,mod):
+    mpl.draw()
+    strtab = []
+    for tick in ax.get_xaxis().get_ticklabels():
+        num = float(tick.get_text())
+        strtab.append(num % mod)
+    ax.get_xaxis().set_ticklabels(strtab)
+    return ax
+
 # a function to output an ascii file
 # ----------------------------------
 def writeascii (field=None,absc=None,name=None):
@@ -264,12 +275,6 @@ def writeascii (field=None,absc=None,name=None):
             myfile.close()
         else:
             print "!! WARNING !! Not printing the file, 2D fields not supported yet."
-#    mydata = np.transpose([absc,np.transpose(field)]) #tab
-#    for line in mydata:
-#        zeline = str(line)
-#        zeline = zeline.replace('[','')
-#        zeline = zeline.replace(']','')
-#        myfile.write(zeline + '\n')
     return
 
 # a generic function to show (GUI) or save a plot (PNG,EPS,PDF,...)
@@ -332,6 +337,7 @@ class plot():
                  fmt=None,\
                  colorb="jet",\
                  units="",\
+                 modx=None,\
                  title=""):
         ## what could be defined by the user
         self.var = var
@@ -351,6 +357,7 @@ class plot():
         self.fmt = fmt
         self.units = units
         self.colorb = colorb
+        self.modx = modx
         ## other useful arguments
         ## ... not used here in ppplot but need to be attached to plot object
         self.axisbg = "white"
@@ -504,6 +511,9 @@ class plot1d(plot):
             ax.xaxis.set_major_locator(MaxNLocator(self.div/2))
         else:
             print "!! WARNING. in logx mode, ticks are set automatically."
+        ## specific modulo labels
+        if self.modx is not None:
+            ax = labelmodulo(ax,self.modx)
 
 ################################
 # a subclass to make a 2D plot #

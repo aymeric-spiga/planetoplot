@@ -161,6 +161,7 @@ class pp():
                       changetime=None,\
                       units=None,\
                       savtxt=False,\
+                      modx=None,\
                       title=None):
         self.request = None
         self.nrequest = 0
@@ -200,6 +201,7 @@ class pp():
         self.includedate = includedate
         self.changetime = changetime
         self.savtxt = savtxt
+        self.modx = modx
         ## here are user-defined plot settings 
         ## -- if not None, valid on all plots in the pp() objects
         self.xlabel = xlabel ; self.xcoeff = xcoeff
@@ -264,6 +266,7 @@ class pp():
             self.includedate = other.includedate
             self.changetime = other.changetime
             self.savtxt = other.savtxt
+            self.modx = other.modx
         else:
             print "!! ERROR !! argument must be a pp object." ; exit()
 
@@ -796,6 +799,7 @@ class pp():
                     if self.title is not None: plobj.title = self.title
                     if self.units is not None: plobj.units = self.units
                     if self.colorb is not None: plobj.colorb = self.colorb
+                    if self.modx is not None: plobj.modx = self.modx
                     # -- 1D specific
                     if dp == 1:
                         if self.lstyle is not None: plobj.lstyle = self.lstyle
@@ -1177,7 +1181,11 @@ class pp():
             except:
                 try: self.p[iii].ymax = opt.ymax[0]
                 except: pass
-
+            ###
+            try: self.p[iii].modx = opt.modx[iii]
+            except:
+                try: self.p[iii].modx = opt.modx[0]
+                except: pass
 
 
 ##########################################################

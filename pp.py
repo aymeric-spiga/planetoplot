@@ -82,6 +82,7 @@ parser.add_option('--xmin',action='append',dest='xmin',type="float",default=None
 parser.add_option('--ymin',action='append',dest='ymin',type="float",default=None,help="[1D] min bound y axis")
 parser.add_option('--xmax',action='append',dest='xmax',type="float",default=None,help="[1D] max bound x axis")
 parser.add_option('--ymax',action='append',dest='ymax',type="float",default=None,help="[1D] max bound y axis")
+parser.add_option('--modx',action='append',dest='modx',type="float",default=None,help="[1D] change xticks with a modulo")
 # -- 2D plot
 parser.add_option('-C','--colorb',action='append',dest='colorb',type="string",default=None,help="[2D] colormap: http://micropore.files.wordpress.com/2010/06/colormaps.png")
 parser.add_option('-P','--proj',action='append',dest='proj',type="string",default=None,help="[2D] map projection: 'cyl' 'npstere' 'spstere' 'ortho' 'moll' 'robin' 'lcc' 'laea' 'merc' 'noproj'")
