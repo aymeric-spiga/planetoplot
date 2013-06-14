@@ -247,6 +247,31 @@ def bounds(what_I_plot,zevmin,zevmax,miss=9e+35):
     what_I_plot[ what_I_plot > zevmax ] = zevmax*(1.-small_enough)
     return what_I_plot
 
+# a function to output an ascii file
+# ----------------------------------
+def writeascii (field=None,absc=None,name=None):
+    if name is None:
+        name = "prof"
+        for ttt in timelib.gmtime():
+            name = name + "_" + str(ttt)
+    if field is None or absc is None:
+        print "!! WARNING !! Not printing the file, incorrect field or absc."
+    else:
+        if field.ndim == 1:
+            myfile = open(name, 'w')
+            for ix in range(len(absc)):
+                myfile.write("%15.5e%15.5e\n" % ( absc[ix], field[ix] ))
+            myfile.close()
+        else:
+            print "!! WARNING !! Not printing the file, 2D fields not supported yet."
+#    mydata = np.transpose([absc,np.transpose(field)]) #tab
+#    for line in mydata:
+#        zeline = str(line)
+#        zeline = zeline.replace('[','')
+#        zeline = zeline.replace(']','')
+#        myfile.write(zeline + '\n')
+    return
+
 # a generic function to show (GUI) or save a plot (PNG,EPS,PDF,...)
 # -------------------------------
 def save(mode="gui",filename="plot",folder="./",includedate=True,res=150,custom=False):

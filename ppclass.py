@@ -160,6 +160,7 @@ class pp():
                       label=None,\
                       changetime=None,\
                       units=None,\
+                      savtxt=False,\
                       title=None):
         self.request = None
         self.nrequest = 0
@@ -198,6 +199,7 @@ class pp():
         self.folder = folder
         self.includedate = includedate
         self.changetime = changetime
+        self.savtxt = savtxt
         ## here are user-defined plot settings 
         ## -- if not None, valid on all plots in the pp() objects
         self.xlabel = xlabel ; self.xcoeff = xcoeff
@@ -261,6 +263,7 @@ class pp():
             self.title = other.title
             self.includedate = other.includedate
             self.changetime = other.changetime
+            self.savtxt = other.savtxt
         else:
             print "!! ERROR !! argument must be a pp object." ; exit()
 
@@ -942,6 +945,11 @@ class pp():
             if self.verbose: print "**** Done subplot %i / %i " %( self.n+1,self.howmanyplots ) 
             # finally make the plot
             pl.make()
+            # possibly print results in a text file
+            if self.savtxt:
+                if self.verbose: print "**** Printing results in a text file"
+                name = pl.var + "%04d" % self.n
+                ppplot.writeascii(field=pl.field,absc=pl.absc,name=name) 
             # increment plot count (and propagate this in plotin)
             self.n = self.n+1
             if self.plotin is not None: self.plotin.n = self.n
@@ -1298,8 +1306,17 @@ class onerequest():
             self.field_z = np.array(range(self.dim_z))
             self.name_z = "z grid points"
           else:
-            self.field_z = self.f.variables[self.name_z][:] # specify dimension
-                                                            # TBD: have to check that this is not a 3D field
+            tabalt = self.f.variables[self.name_z]
+            # (consider the case where tabtime is not dim 1) TBD: 2D and 3D cases
+            if tabalt.ndim == 4: 
+                try:
+                    self.field_z = tabalt[1,:,0,0] # 4D case. alt is usually third dimension.
+                                                   # 1 for time to avoid initial 0s
+                except:
+                    self.field_z = tabalt[0,:,0,0]
+                if self.verbose: print "!! WARNING !! "+self.name_z+" is 4D var. We made it 1D."
+            else: 
+                self.field_z = self.f.variables[self.name_z][:] # specify dimension
           if self.dim_z > 1: 
                if self.verbose: print "**** OK. z axis %4.0f values [%5.1f,%5.1f]" % (self.dim_z,self.field_z.min(),self.field_z.max())
           # TIME. Try preset fields.

@@ -12,6 +12,7 @@ UM ; %.1f ; jet ; Zonal wind ; m s$^{-1}$
 V ; %.1f ; jet ; Meridional wind ; m s$^{-1}$
 VM ; %.1f ; jet ; Meridional wind ; m s$^{-1}$
 W ; %.2f ; jet ; Vertical wind ; m s$^{-1}$
+U025 ; %.1f ; jet ; Wind speed 25cm above the surface ; m s$^{-1}$
 WIND ; %.0f ; YlOrRd ; Wind speed ; m s$^{-1}$
 UV ; %.0f ; YlOrRd ; Wind speed ; m s$^{-1}$
 UVMET ; %.0f ; YlOrRd ; Wind speed ; m s$^{-1}$

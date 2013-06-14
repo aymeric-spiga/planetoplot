@@ -54,6 +54,7 @@ parser.add_option('-o','--output',action='store',dest='filename',type="string",d
 parser.add_option('-d','--directory',action='store',dest='folder',type="string",default="./",help="directory of output files")
 parser.add_option('-s','--changetime',action='store',dest='changetime',type="string",default=None,\
                   help="transformation on time axis : [None] | mars_sol2ls | mars_meso_ls | mars_meso_sol | mars_meso_utc | mars_meso_lt ")
+parser.add_option('-p','--print',action='store_true',dest='savtxt',default=False,help="[1D] output field+coord in an ASCII file")
 parser.add_option('--stridex',action='store',dest='stridex',type="int",default=1,help="Load data every stridex grid points over x dimension")
 parser.add_option('--stridey',action='store',dest='stridey',type="int",default=1,help="Load data every stridex grid points over y dimension")
 parser.add_option('--stridez',action='store',dest='stridez',type="int",default=1,help="Load data every stridex grid points over z dimension")
@@ -137,6 +138,7 @@ user.stridez = opt.stridez
 user.stridet = opt.stridet
 user.stridevecx = opt.stridevecx
 user.stridevecy = opt.stridevecy
+user.savtxt = opt.savtxt
 # define field
 user.define()
 # retrieve field
