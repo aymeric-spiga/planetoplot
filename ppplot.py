@@ -261,6 +261,8 @@ def labelmodulo(ax,mod):
 # a function to output an ascii file
 # ----------------------------------
 def writeascii (field=None,absc=None,name=None):
+    field = np.array(field)
+    absc = np.array(absc)
     if name is None:
         name = "prof"
         for ttt in timelib.gmtime():
@@ -367,6 +369,7 @@ class plot():
     # -------------------------------
     def check(self):
         if self.field is None: print "!! ERROR !! Please define a field to be plotted" ; exit()
+        else: self.field = np.array(self.field) # ensure this is a numpy array
 
     # define_from_var
     # ... this uses settings in set_var.txt
@@ -453,6 +456,8 @@ class plot1d(plot):
         if self.absc is None: 
             self.absc = np.array(range(self.field.shape[0]))
             print "!! WARNING !! dummy coordinates on x axis"
+        else:
+            self.absc = np.array(self.absc) # ensure this is a numpy array
         # swapping if requested
         if self.swap:  x = self.field ; y = self.absc
         else:          x = self.absc ; y = self.field
@@ -769,10 +774,14 @@ class plot2d(plot):
         ### not expecting NaN in self.addvecx and self.addvecy. masked arrays is just enough.
         if self.addvecx is not None and self.addvecy is not None: 
                 # vectors on map projection or simple 2D mapping
-                if self.mapmode: [vecx,vecy] = m.rotate_vector(self.addvecx,self.addvecy,self.absc,self.ordi) # for metwinds only ?
-                else: vecx,vecy = self.addvecx,self.addvecy ; x,y = np.meshgrid(x,y)
+                if self.mapmode: 
+                   [vecx,vecy] = m.rotate_vector(self.addvecx,self.addvecy,self.absc,self.ordi) # for metwinds only ?
+                else:
+                   vecx,vecy = self.addvecx,self.addvecy 
+                   if x.ndim < 2 and y.ndim < 2: x,y = np.meshgrid(x,y)
                 # reference vector is scaled
-                if self.wscale is None: self.wscale = ppcompute.mean(np.sqrt(self.addvecx*self.addvecx+self.addvecy*self.addvecy))
+                if self.wscale is None: 
+                    self.wscale = ppcompute.mean(np.sqrt(self.addvecx*self.addvecx+self.addvecy*self.addvecy))
                 # make vector field
                 if self.mapmode: 
                     q = m.quiver( x[::self.stridevecy,::self.stridevecx],y[::self.stridevecy,::self.stridevecx],\

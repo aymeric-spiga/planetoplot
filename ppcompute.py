@@ -100,6 +100,14 @@ def sum (field,axis=None):
 ################
 ### TBD: works with missing values
 
+def smooth2diter(field,n=1):
+        count = 0
+        result = field
+        while count < n:
+            result = smooth2d(result, window=2)
+            count = count + 1
+        return result
+
 ## Author: AS. uses gauss_kern and blur_image.
 def smooth2d(field, window=10):
 	## actually blur_image could work with different coeff on x and y

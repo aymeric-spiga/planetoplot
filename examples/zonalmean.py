@@ -5,7 +5,7 @@ from ppclass import pp
 temp = pp()
 temp.file = "/home/aymeric/Big_Data/DATAPLOT/diagfired.nc"
 temp.var = "temp"
-temp.x = "-180,180"
+temp.x = "-180,175"
 temp.y = "-90,90"
 temp.t = "0,1"
 temp.get()
@@ -17,7 +17,7 @@ temp.makeplot()
 u = pp()
 u.file = "/home/aymeric/Big_Data/DATAPLOT/diagfired.nc"
 u.var = "u"
-u.x = "-180,180"
+u.x = "-180,175"
 u.y = None
 u.t = "0.5"
 u.filename = "zonalmean"
