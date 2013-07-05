@@ -1370,7 +1370,14 @@ class onerequest():
             if self.verbose: print "**** OK. Converting time axis:",self.changetime
             ### option added by T. Navarro 
             if self.changetime == "mars_sol2ls": 
+                self.field_t =  self.field_t \
+                              + self.f.variables['controle'][3]%669 \
+                              + self.f.variables['controle'][26]
                 self.field_t = ppcompute.mars_sol2ls(self.field_t)
+            elif self.changetime == "marsdayini":
+                self.field_t =  self.field_t \
+                              + self.f.variables['controle'][3]%669 \
+                              + self.f.variables['controle'][26]
             ### options added by A. Spiga
             elif "mars_meso" in self.changetime:
                 if 'Times' not in self.f.variables.keys():
