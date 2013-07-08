@@ -340,6 +340,10 @@ class plot():
                  colorb="jet",\
                  units="",\
                  modx=None,\
+                 xmin=None,\
+                 ymin=None,\
+                 xmax=None,\
+                 ymax=None,\
                  title=""):
         ## what could be defined by the user
         self.var = var
@@ -360,6 +364,10 @@ class plot():
         self.units = units
         self.colorb = colorb
         self.modx = modx
+        self.xmin = xmin
+        self.ymin = ymin 
+        self.xmax = xmax
+        self.ymax = ymax
         ## other useful arguments
         ## ... not used here in ppplot but need to be attached to plot object
         self.axisbg = "white"
@@ -425,10 +433,6 @@ class plot1d(plot):
         self.color = color
         self.marker = marker
         self.label = label
-        self.xmin = None
-        self.ymin = None
-        self.xmax = None
-        self.ymax = None
 
     # define_from_var
     # ... this uses settings in set_var.txt
@@ -649,9 +653,14 @@ class plot2d(plot):
                          self.field, \
                          zelevels, cmap=palette)
             # make log axes and/or invert ordinate
+            ax = mpl.gca()
             if self.logx: mpl.semilogx()
             if self.logy: mpl.semilogy()
-            if self.invert: ax = mpl.gca() ; ax.set_ylim(ax.get_ylim()[::-1])
+            if self.invert: ax.set_ylim(ax.get_ylim()[::-1])
+            if self.xmin is not None: ax.set_xbound(lower=self.xmin)
+            if self.xmax is not None: ax.set_xbound(upper=self.xmax)
+            if self.ymin is not None: ax.set_ybound(lower=self.ymin)
+            if self.ymax is not None: ax.set_ybound(upper=self.ymax)
         else:
             ## A 2D MAP USING PROJECTIONS (basemap)
             #######################################
