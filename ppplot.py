@@ -180,6 +180,14 @@ if files_not_present != "":
 # useful functions #
 ####################
 
+# continuity with matplotlib
+def close():
+    mpl.close()
+
+# a function for predefined figure sizes
+def figuref(x=16,y=9):
+    mpl.figure(figsize=(x,y))
+
 # a function to change color lines according to a color map (idea by A. Pottier)
 # ... two optional arguments: color maps + a number telling how much intervals are needed
 def rainbow(cb="jet",num=8):
@@ -648,10 +656,14 @@ class plot2d(plot):
             if self.addcontour is not None: 
                 objC = mpl.contour(x, y, what_I_contour, \
                             zelevelsc, colors = ccol, linewidths = cline)
-                #mpl.clabel(objC, inline=1, fontsize=10)
+                #mpl.clabel(objC, inline=1, fontsize="small",\
+                #             inline_spacing=1,fmt="%.0f")
             mpl.contourf(x, y, \
                          self.field, \
                          zelevels, cmap=palette)
+            #mpl.pcolor(x,y,\
+            #             self.field, \
+            #             cmap=palette)
             # make log axes and/or invert ordinate
             ax = mpl.gca()
             if self.logx: mpl.semilogx()

@@ -95,6 +95,26 @@ def sum (field,axis=None):
            else:
               return np.array(field).sum(axis=axis)
 
+## compute mean over bins
+## author AS
+def meanbin(y,x,bins):
+    bins.sort() # sorting is needed for binning
+    meanvalues = []
+    for iii in range(len(bins)):
+        ## GET VALUES OVER RELEVANT INTERVALS
+        if iii == 0:
+          ind = x<bins[iii+1] ; ys = y[ind]
+        elif iii == len(bins)-1:
+          ind = x>=bins[iii-1] ; ys = y[ind]
+        else:
+          ind = x>=bins[iii-1] ; interm = x[ind] ; intermf = y[ind]
+          ind = interm<bins[iii+1] ; xs = interm[ind] ; ys = intermf[ind]
+        ## COMPUTE MEAN and TREAT NAN CASE
+        meanvalues.append(mean(ys))
+    ## RETURN A NUMPY ARRAY
+    meanvalues = np.array(meanvalues)
+    return meanvalues
+
 ################
 #### SMOOTH ####
 ################
