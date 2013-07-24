@@ -1689,6 +1689,8 @@ class onerequest():
                 self.area()
             else:
                 if self.verbose: print "!! WARNING !! No area accounted for (computing on t and/or z axis)."
+        # prepare quadratic mean
+        if "qmean" in self.compute: self.field = self.field*self.field
         # now ready to compute [TBD: we would like to have e.g. mean over x,y and min over t ??]
         if self.method_t == "comp":
             if self.verbose: print "**** OK. Computing over t axis."
@@ -1706,7 +1708,7 @@ class onerequest():
             nz = 1 ; self.field = np.reshape(self.field,(nt,nz,ny,nx))
         if self.method_y == "comp": 
             if self.verbose: print "**** OK. Computing over y axis."
-            if self.compute == "mean": self.field = ppcompute.mean(self.field,axis=2)
+            if "mean" in self.compute: self.field = ppcompute.mean(self.field,axis=2)
             elif self.compute == "min": self.field = ppcompute.min(self.field,axis=2)
             elif self.compute == "max": self.field = ppcompute.max(self.field,axis=2)
             elif self.compute == "meanarea": self.field = ppcompute.sum(self.field,axis=2)
@@ -1715,7 +1717,7 @@ class onerequest():
             if self.field_x.ndim == 2: self.field_x = self.field_x[0,:] # TBD: this is OK for regular grid but not for irregular
         if self.method_x == "comp":
             if self.verbose: print "**** OK. Computing over x axis."
-            if self.compute == "mean": self.field = ppcompute.mean(self.field,axis=3)
+            if "mean" in self.compute: self.field = ppcompute.mean(self.field,axis=3)
             elif self.compute == "min": self.field = ppcompute.min(self.field,axis=3)
             elif self.compute == "max": self.field = ppcompute.max(self.field,axis=3)
             elif self.compute == "meanarea": self.field = ppcompute.sum(self.field,axis=3)
@@ -1724,6 +1726,9 @@ class onerequest():
             if self.field_y.ndim == 2: self.field_y = self.field_y[:,0] # TBD: this is OK for regular grid but not for irregular
         # remove all dimensions with size 1 to prepare plot (and check the resulting dimension with dimplot)
         self.field = np.squeeze(self.field)
+        # take root mean square for quadratic mean
+        if self.compute == "qmean": self.field = np.sqrt(self.field)
+        # error handling and verbose
         if self.field.ndim != self.dimplot: 
             print "!! ERROR !! Problem: self.field is different than plot dimensions", self.field.ndim, self.dimplot ; exit()
         if self.verbose: 
