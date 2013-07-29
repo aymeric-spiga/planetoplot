@@ -1708,19 +1708,19 @@ class onerequest():
             nz = 1 ; self.field = np.reshape(self.field,(nt,nz,ny,nx))
         if self.method_y == "comp": 
             if self.verbose: print "**** OK. Computing over y axis."
-            if "mean" in self.compute: self.field = ppcompute.mean(self.field,axis=2)
+            if self.compute == "meanarea": self.field = ppcompute.sum(self.field,axis=2)
+            elif "mean" in self.compute: self.field = ppcompute.mean(self.field,axis=2)
             elif self.compute == "min": self.field = ppcompute.min(self.field,axis=2)
             elif self.compute == "max": self.field = ppcompute.max(self.field,axis=2)
-            elif self.compute == "meanarea": self.field = ppcompute.sum(self.field,axis=2)
             else: print "!! ERROR !! operation not supported." ; exit()
             ny = 1 ; self.field = np.reshape(self.field,(nt,nz,ny,nx))
             if self.field_x.ndim == 2: self.field_x = self.field_x[0,:] # TBD: this is OK for regular grid but not for irregular
         if self.method_x == "comp":
             if self.verbose: print "**** OK. Computing over x axis."
-            if "mean" in self.compute: self.field = ppcompute.mean(self.field,axis=3)
+            if self.compute == "meanarea": self.field = ppcompute.sum(self.field,axis=3)
+            elif "mean" in self.compute: self.field = ppcompute.mean(self.field,axis=3)
             elif self.compute == "min": self.field = ppcompute.min(self.field,axis=3)
             elif self.compute == "max": self.field = ppcompute.max(self.field,axis=3)
-            elif self.compute == "meanarea": self.field = ppcompute.sum(self.field,axis=3)
             else: print "!! ERROR !! operation not supported." ; exit()
             nx = 1 ; self.field = np.reshape(self.field,(nt,nz,ny,nx))
             if self.field_y.ndim == 2: self.field_y = self.field_y[:,0] # TBD: this is OK for regular grid but not for irregular
