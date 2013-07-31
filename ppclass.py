@@ -1368,13 +1368,14 @@ class onerequest():
     def performtimechange(self):
         if self.changetime is not None:
             if self.verbose: print "**** OK. Converting time axis:",self.changetime
-            ### option added by T. Navarro 
-            if self.changetime == "mars_sol2ls": 
-                self.field_t =  self.field_t \
-                              + self.f.variables['controle'][3]%669 \
-                              + self.f.variables['controle'][26]
+            ### option added by T. Navarro
+            if self.changetime == "mars_sol2ls":
+                if "controle" in self.f.variables: 
+                   self.field_t =  self.field_t \
+                                 + self.f.variables['controle'][3]%669 \
+                                 + self.f.variables['controle'][26]
                 self.field_t = ppcompute.mars_sol2ls(self.field_t)
-            elif self.changetime == "marsdayini":
+            elif self.changetime == "mars_dayini" and "controle" in self.f.variables:
                 self.field_t =  self.field_t \
                               + self.f.variables['controle'][3]%669 \
                               + self.f.variables['controle'][26]
