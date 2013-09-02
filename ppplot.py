@@ -261,8 +261,10 @@ def labelmodulo(ax,mod):
     mpl.draw()
     strtab = []
     for tick in ax.get_xaxis().get_ticklabels():
-        num = float(tick.get_text())
-        strtab.append(num % mod)
+        onetick = tick.get_text()
+        if len(onetick) > 0:
+          num = float(onetick)
+          strtab.append(num % mod)
     ax.get_xaxis().set_ticklabels(strtab)
     return ax
 
@@ -489,18 +491,22 @@ class plot1d(plot):
             mpl.plot(x,y,linestyle=self.lstyle,marker=self.marker,label=self.label)
         else:
             mpl.plot(x,y,marker=self.marker,label=self.label)
+        # AXES
+        ax = mpl.gca()
         # make log axes and/or invert ordinate
         # ... this must be after plot so that axis bounds are well-defined
         # ... also inverting must be after making the thing logarithmic
         if self.logx: mpl.xscale("log") # not mpl.semilogx() because excludes log on y
         if self.logy: mpl.yscale("log") # not mpl.semilogy() because excludes log on x
-        if self.invert: ax = mpl.gca() ; ax.set_ylim(ax.get_ylim()[::-1])
+        if self.invert: ax.set_ylim(ax.get_ylim()[::-1])
+        if self.xmin is not None and self.xmax is not None:
+          if self.xmin > self.xmax:
+            ax.set_xlim(ax.get_xlim()[::-1])
+            self.xmin,self.xmax = self.xmax,self.xmin
         # add a label for line(s)
         if self.label is not None:
             if self.label != "":
                 mpl.legend(loc="best",fancybox=True)
-        # AXES
-        ax = mpl.gca()
         # format labels
         if self.swap: ax.xaxis.set_major_formatter(FormatStrFormatter(self.fmt))
         else: ax.yaxis.set_major_formatter(FormatStrFormatter(self.fmt))
@@ -669,10 +675,19 @@ class plot2d(plot):
             if self.logx: mpl.semilogx()
             if self.logy: mpl.semilogy()
             if self.invert: ax.set_ylim(ax.get_ylim()[::-1])
+            if self.xmin is not None and self.xmax is not None:
+              if self.xmin > self.xmax: 
+                ax.set_xlim(ax.get_xlim()[::-1])
+                self.xmin,self.xmax = self.xmax,self.xmin
             if self.xmin is not None: ax.set_xbound(lower=self.xmin)
             if self.xmax is not None: ax.set_xbound(upper=self.xmax)
             if self.ymin is not None: ax.set_ybound(lower=self.ymin)
             if self.ymax is not None: ax.set_ybound(upper=self.ymax)
+            # set the number of ticks (hardcoded)
+            ax.xaxis.set_major_locator(MaxNLocator(10))
+            ## specific modulo labels
+            if self.modx is not None:
+                ax = labelmodulo(ax,self.modx)
         else:
             ## A 2D MAP USING PROJECTIONS (basemap)
             #######################################
