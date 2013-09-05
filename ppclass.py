@@ -1383,7 +1383,7 @@ class onerequest():
                 dalast = dafirst + (self.dim_t-1)*daint
                 self.field_t = np.linspace(dafirst,dalast,num=self.dim_t)
                 if self.verbose:
-                    print "!! WARNING !! WARNING !! Time axis is supposed to be equally spaced !!             
+                    print "!! WARNING !! WARNING !! Time axis is supposed to be equally spaced !!"
                     if dalast != tabtime[self.dim_t-1]:
                         print "!! WARNING !! Time axis has been recast to be monotonic",dalast,tabtime[self.dim_t-1]
           except:
