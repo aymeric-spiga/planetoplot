@@ -150,6 +150,7 @@ class pp():
                       res=150.,\
                       xlabel=None,ylabel=None,\
                       xcoeff=None,ycoeff=None,\
+                      nxticks=10,nyticks=10,\
                       proj=None,\
                       vmin=None,vmax=None,\
                       div=None,\
@@ -162,6 +163,8 @@ class pp():
                       units=None,\
                       savtxt=False,\
                       modx=None,\
+                      xp=16,yp=8,\
+                      missing=1.e25,\
                       title=None):
         self.request = None
         self.nrequest = 0
@@ -202,6 +205,7 @@ class pp():
         self.changetime = changetime
         self.savtxt = savtxt
         self.modx = modx
+        self.missing = missing
         ## here are user-defined plot settings 
         ## -- if not None, valid on all plots in the pp() objects
         self.xlabel = xlabel ; self.xcoeff = xcoeff
@@ -216,6 +220,8 @@ class pp():
         self.label = label
         self.units = units
         self.title = title
+        self.xp = xp ; self.yp = yp
+        self.nxticks = nxticks ; self.nyticks = nyticks
 
     # print status
     def printstatus(self):
@@ -224,6 +230,11 @@ class pp():
             pass
         else:
             print "**** PPCLASS. Done step: " + self.status
+
+    # print attributes
+    def printme(self):
+        for k, v in vars(self).items():
+            print k,v
 
     #####################################################
     # EMULATE OPERATORS + - * / ** << FOR PP() OBJECTS  #
@@ -267,6 +278,9 @@ class pp():
             self.changetime = other.changetime
             self.savtxt = other.savtxt
             self.modx = other.modx
+            self.xp = other.xp ; self.yp = other.yp
+            self.missing = other.missing
+            self.nxticks = other.nxticks ; self.nyticks = other.nyticks
         else:
             print "!! ERROR !! argument must be a pp object." ; exit()
 
@@ -588,6 +602,8 @@ class pp():
               obj.getindextime(dalist=st,ind=t)
               obj.getindexvert(dalist=sz,ind=z)
               obj.getindexhori(dalistx=sx,dalisty=sy,indx=x,indy=y)
+              # missing value
+              obj.missing = self.missing
         # change status
         self.status = "defined"
         return self
@@ -714,7 +730,12 @@ class pp():
             except IOError: print "!! ERROR !! Cannot find object file to load." ; exit()
             self.status = "definedplot" ; self.plotin = None
             self.nplot = len(self.p) ; self.howmanyplots = self.nplot
-            return
+            ## [BUG FIX: apparently info about missing values is not saved correctly]
+            for count in range(self.nplot):
+              pl = self.p[count]
+              masked = np.ma.masked_where(np.abs(pl.field) > self.missing,pl.field)
+              pl.field = masked ; pl.field[pl.field.mask] = np.NaN
+            return #self?
         # -----------------------------------------------------
         # REGULAR MODE
         # -----------------------------------------------------
@@ -801,6 +822,8 @@ class pp():
                     if self.units is not None: plobj.units = self.units
                     if self.colorb is not None: plobj.colorb = self.colorb
                     if self.modx is not None: plobj.modx = self.modx
+                    if self.nxticks is not None: plobj.nxticks = self.nxticks
+                    if self.nyticks is not None: plobj.nyticks = self.nyticks
                     # -- 1D specific
                     if dp == 1:
                         if self.lstyle is not None: plobj.lstyle = self.lstyle
@@ -895,7 +918,7 @@ class pp():
         # ---------------------------------
         if self.plotin is None:  
             # start from scratch
-            self.fig = mpl.figure(figsize=(16,8))
+            self.fig = ppplot.figuref(x=self.xp,y=self.yp)
             self.subv,self.subh = ppplot.definesubplot(self.howmanyplots,self.fig) 
             self.n = 0
             ## adapted space for labels etc
@@ -1219,6 +1242,7 @@ class onerequest():
         self.compute = None
         self.changetime = None
         self.stridex = 1 ; self.stridey = 1 ; self.stridez = 1 ; self.stridet = 1
+        self.missing = '!! missing value: I am not set, damned !!'
 
     # open a file. for now it is netcdf. TBD for other formats.
     # check that self.var is inside.
@@ -1308,7 +1332,7 @@ class onerequest():
           if self.dim_y > 1: 
                if self.verbose: print "**** OK. y axis %4.0f values [%5.1f,%5.1f]" % (self.dim_y,self.field_y.min(),self.field_y.max())
           # ALTITUDE. Try preset fields. If not present set grid points axis.
-          # WARNING: how do we do if several are available?
+          # WARNING: how do we do if several are available? the last one is chosen.
           self.name_z = "nothing"
           for c in glob_listz:
             if c in self.f.variables.keys():
@@ -1328,8 +1352,14 @@ class onerequest():
                 if self.verbose: print "!! WARNING !! "+self.name_z+" is 4D var. We made it 1D."
             else: 
                 self.field_z = self.f.variables[self.name_z][:] # specify dimension
+            # TBD: problems when self.dim_z != self.field_z.size
+            if self.field_z.size != self.dim_z:
+                if self.verbose: print "!! WARNING !! Cannot use this z coordinate. Not enough points. Use simple z axis."
+                self.field_z = np.array(range(self.dim_z))
+                self.name_z = "z grid points"
           if self.dim_z > 1: 
                if self.verbose: print "**** OK. z axis %4.0f values [%5.1f,%5.1f]" % (self.dim_z,self.field_z.min(),self.field_z.max())
+
           # TIME. Try preset fields.
           self.name_t = "nothing"
           for c in glob_listt:
@@ -1350,10 +1380,12 @@ class onerequest():
                 self.field_t = np.array([dafirst])
             else:
                 daint = tabtime[1] - dafirst
-                dalast = dafirst + (self.dim_t-1)*daint 
-                if dalast != tabtime[self.dim_t-1] and self.verbose:
-                    print "!! WARNING !! Time axis has been recast to be monotonic",dalast,tabtime[self.dim_t-1]
+                dalast = dafirst + (self.dim_t-1)*daint
                 self.field_t = np.linspace(dafirst,dalast,num=self.dim_t)
+                if self.verbose:
+                    print "!! WARNING !! WARNING !! Time axis is supposed to be equally spaced !!             
+                    if dalast != tabtime[self.dim_t-1]:
+                        print "!! WARNING !! Time axis has been recast to be monotonic",dalast,tabtime[self.dim_t-1]
           except:
             # ... or if a problem encountered, define a simple time axis
             if self.verbose: print "**** OK. There is something weird. Let us go for a simple time axis."
@@ -1368,7 +1400,7 @@ class onerequest():
     def performtimechange(self):
         if self.changetime is not None:
             if self.verbose: print "**** OK. Converting time axis:",self.changetime
-            ### option added by T. Navarro
+            ### options added by T. Navarro
             if self.changetime == "mars_sol2ls":
                 if "controle" in self.f.variables: 
                    self.field_t =  self.field_t \
@@ -1380,6 +1412,17 @@ class onerequest():
                               + self.f.variables['controle'][3]%669 \
                               + self.f.variables['controle'][26]
             ### options added by A. Spiga
+            elif self.changetime == "correctls":
+                # not regularly spaced + handle modulo 360. in files
+                dafirst = tabtime[0] + 0.
+                daint = tabtime[1] - dafirst
+                dalast = dafirst + (self.dim_t-1)*daint
+                year = 0.
+                add = np.linspace(dafirst,dalast,num=self.dim_t) ; add[0] = 0.
+                for iii in range(1,self.dim_t):
+                  if tabtime[iii] - tabtime[iii-1] < 0: year = year+1.
+                  add[iii] = year*360.
+                self.field_t = add + tabtime
             elif "mars_meso" in self.changetime:
                 if 'Times' not in self.f.variables.keys():
                     if self.verbose: print "!! WARNING !! Variable Times not in file. Cannot proceed to change of time axis."
@@ -1670,9 +1713,9 @@ class onerequest():
           pass
         # make a mask in case there are non-NaN missing values. (what about NaN missing values?)
         # ... this is important for computations below (see ppcompute)
-        masked = np.ma.masked_where(np.abs(self.field) > 1e25,self.field)
+        masked = np.ma.masked_where(np.abs(self.field) > self.missing,self.field)
         if masked.mask.any() == True:
-             if self.verbose: print "!! WARNING !! Values over +-1e25 are considered missing values."
+             if self.verbose: print "!! WARNING !! Values over %5.3e are considered missing values." % self.missing
              self.field = masked
              self.field.set_fill_value([np.NaN])
 

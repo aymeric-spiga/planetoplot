@@ -186,7 +186,8 @@ def close():
 
 # a function for predefined figure sizes
 def figuref(x=16,y=9):
-    mpl.figure(figsize=(x,y))
+    fig = mpl.figure(figsize=(x,y))
+    return fig
 
 # a function to change color lines according to a color map (idea by A. Pottier)
 # ... two optional arguments: color maps + a number telling how much intervals are needed
@@ -207,7 +208,7 @@ def definesubplot(numplot, fig):
         fig.subplots_adjust(wspace = wspace_t[numplot], hspace = hspace_t[numplot])
         subv, subh = subv_t[numplot],subh_t[numplot]
     except: 
-        print "!! WARNING !! no preset found from set_multiplot.txt, or this setting file was not found."
+        print "!! WARNING !! (ignore if superpose mode) no preset found from set_multiplot.txt, or this setting file was not found."
         subv = 1 ; subh = numplot
     return subv,subh
 
@@ -354,6 +355,8 @@ class plot():
                  ymin=None,\
                  xmax=None,\
                  ymax=None,\
+                 nxticks=10,\
+                 nyticks=10,\
                  title=""):
         ## what could be defined by the user
         self.var = var
@@ -378,6 +381,8 @@ class plot():
         self.ymin = ymin 
         self.xmax = xmax
         self.ymax = ymax
+        self.nxticks = nxticks
+        self.nyticks = nyticks
         ## other useful arguments
         ## ... not used here in ppplot but need to be attached to plot object
         self.axisbg = "white"
@@ -531,7 +536,7 @@ class plot1d(plot):
         ax.set_ybound(lower=y1,upper=y2)
         ## set with .div the number of ticks. (is it better than automatic?)
         if not self.logx:
-            ax.xaxis.set_major_locator(MaxNLocator(self.div/2))
+            ax.xaxis.set_major_locator(MaxNLocator(self.div/2)) #TBD: with nxticks?
         else:
             print "!! WARNING. in logx mode, ticks are set automatically."
         ## specific modulo labels
@@ -683,8 +688,11 @@ class plot2d(plot):
             if self.xmax is not None: ax.set_xbound(upper=self.xmax)
             if self.ymin is not None: ax.set_ybound(lower=self.ymin)
             if self.ymax is not None: ax.set_ybound(upper=self.ymax)
-            # set the number of ticks (hardcoded)
-            ax.xaxis.set_major_locator(MaxNLocator(10))
+            # set the number of ticks
+            if not self.logx:
+                ax.xaxis.set_major_locator(MaxNLocator(self.nxticks))
+            else:
+                print "!! WARNING. in logx mode, ticks are set automatically."
             ## specific modulo labels
             if self.modx is not None:
                 ax = labelmodulo(ax,self.modx)
@@ -772,9 +780,13 @@ class plot2d(plot):
             if self.back is not None:
               if self.back in back.keys():
                  print "**** info: loading a background, please wait.",self.back
-                 if self.back not in ["coast","sea"]:   m.warpimage(back[self.back],scale=0.75)
-                 elif self.back == "coast":             m.drawcoastlines()
-                 elif self.back == "sea":               m.drawlsmask(land_color='white',ocean_color='aqua')
+                 if self.back not in ["coast","sea"]:
+                    try: m.warpimage(back[self.back],scale=0.75)
+                    except: print "!! ERROR !! no background image could be loaded. probably not connected to the internet?"
+                 elif self.back == "coast":
+                    m.drawcoastlines()
+                 elif self.back == "sea":
+                    m.drawlsmask(land_color='white',ocean_color='aqua')
               else:
                  print "!! ERROR !! requested background not defined. change name or fill in set_back.txt" ; exit()
             # define x and y given the projection

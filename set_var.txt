@@ -3,7 +3,7 @@
 ## var ; format ; colormap ; label
 ##################################
 T ; %.0f ; gist_heat ; Temperature ; K
-TEMP ; %0.f ; gist_heat ; Temperature ; K 
+TEMP ; %.1f ; gist_heat ; Temperature ; K 
 TPOT ; %.0f ; Paired ; Potential temperature ; K  
 TSURF ; %.0f ; RdBu_r ; Surface temperature ; K
 TK ; %.0f ; gist_heat ; Temperature ; K

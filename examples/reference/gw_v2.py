@@ -20,6 +20,7 @@ gw.div = 30
 gw.xlabel = "East longitude (deg)"
 gw.ycoeff = 1./1000.
 gw.ylabel = "Altitude above MOLA reference (km)"
+gw.nxticks = 5
 
 # we define, get field and define, get plot
 gw.getplot()

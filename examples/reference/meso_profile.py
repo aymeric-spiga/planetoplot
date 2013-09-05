@@ -14,7 +14,7 @@ m.t = [6.,9.,12.,15.,18.,21.,24.] # setting 4 fixed t values
 
 # define settings
 m.superpose = True # superpose 1D plots
-#m.verbose = True # making the programe verbose
+m.verbose = True # making the programe verbose
 #m.out = "pdf" # output format
 m.colorb = "spectral" # color cycle according to a color map
 
