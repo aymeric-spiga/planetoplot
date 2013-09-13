@@ -577,6 +577,7 @@ class plot2d(plot):
                  wscale=None,\
                  stridevecx=1,\
                  stridevecy=1,\
+                 leftcorrect=False,\
                  colorvec="black"):
         ## get initialization from parent class
         plot.__init__(self)
@@ -597,6 +598,7 @@ class plot2d(plot):
         self.wscale = wscale
         self.stridevecx = stridevecx
         self.stridevecy = stridevecy
+        self.leftcorrect = leftcorrect
 
     # define_from_var
     # ... this uses settings in set_var.txt
@@ -771,8 +773,9 @@ class plot2d(plot):
                         boundinglat=self.blat,\
                         llcrnrlat=wlat[0],urcrnrlat=wlat[1],\
                         llcrnrlon=wlon[0],urcrnrlon=wlon[1])
-            # some projections need to be translated to the left for colorbar + labels
-            if self.proj in ["ortho","cyl"]:
+            # in some case need to translated to the left for colorbar + labels
+            # TBD: break stuff. a better solution should be found.
+            if self.leftcorrect:
                 ax = mpl.gca()
                 pos = ax.get_position().bounds
                 newpos = [0.,pos[1],pos[2],pos[3]]
