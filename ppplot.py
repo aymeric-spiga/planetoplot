@@ -771,6 +771,12 @@ class plot2d(plot):
                         boundinglat=self.blat,\
                         llcrnrlat=wlat[0],urcrnrlat=wlat[1],\
                         llcrnrlon=wlon[0],urcrnrlon=wlon[1])
+            # some projections need to be translated to the left for colorbar + labels
+            if self.proj in ["ortho","cyl"]:
+                ax = mpl.gca()
+                pos = ax.get_position().bounds
+                newpos = [0.,pos[1],pos[2],pos[3]]
+                ax.set_position(newpos)
             # draw meridians and parallels
             ft = int(mpl.rcParams['font.size']*3./4.)
             zelatmax = 85.
