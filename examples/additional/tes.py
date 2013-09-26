@@ -11,7 +11,7 @@ tes.y = 60.
 tes.z = 50.
 tes.superpose = True
 tes.getdefineplot()
-tes.p[0].label = "MY24"
-tes.p[1].label = "MY25"
-tes.p[2].label = "MY26"
+tes.p[0].legend = "MY24"
+tes.p[1].legend = "MY25"
+tes.p[2].legend = "MY26"
 tes.makeplot()

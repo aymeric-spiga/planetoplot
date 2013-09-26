@@ -317,6 +317,10 @@ def save(mode="gui",filename="plot",folder="./",includedate=True,res=150,custom=
       else:
           print "!! ERROR !! File format not supported. Supported: ",possiblesave
 
+# a necessary addition for people used to matplotlib
+def show():
+    mpl.show()
+
 ##################################
 # a generic class to make a plot #
 ##################################
@@ -335,8 +339,8 @@ class plot():
     # -------------------------------
     def __init__(self,\
                  var=None,\
-                 field=None,\
-                 absc=None,\
+                 f=None,\
+                 x=None,\
                  xlabel="",\
                  ylabel="",\
                  div=20,\
@@ -348,7 +352,7 @@ class plot():
                  xcoeff=1.,\
                  ycoeff=1.,\
                  fmt=None,\
-                 colorb="jet",\
+                 colorbar="jet",\
                  units="",\
                  modx=None,\
                  xmin=None,\
@@ -360,8 +364,8 @@ class plot():
                  title=""):
         ## what could be defined by the user
         self.var = var
-        self.field = field
-        self.absc = absc
+        self.f = f
+        self.x = x
         self.xlabel = xlabel
         self.ylabel = ylabel
         self.title = title
@@ -375,7 +379,7 @@ class plot():
         self.ycoeff = ycoeff
         self.fmt = fmt
         self.units = units
-        self.colorb = colorb
+        self.colorbar = colorbar
         self.modx = modx
         self.xmin = xmin
         self.ymin = ymin 
@@ -391,8 +395,8 @@ class plot():
     # check
     # -------------------------------
     def check(self):
-        if self.field is None: print "!! ERROR !! Please define a field to be plotted" ; exit()
-        else: self.field = np.array(self.field) # ensure this is a numpy array
+        if self.f is None: print "!! ERROR !! Please define a field to be plotted" ; exit()
+        else: self.f = np.array(self.f) # ensure this is a numpy array
 
     # define_from_var
     # ... this uses settings in set_var.txt
@@ -417,8 +421,8 @@ class plot():
            mpl.ylabel(self.xlabel)
         mpl.title(self.title)
         # if masked array, set masked values to filled values (e.g. np.nan) for plotting purposes
-        if type(self.field).__name__ in 'MaskedArray':
-            self.field[self.field.mask] = self.field.fill_value
+        if type(self.f).__name__ in 'MaskedArray':
+            self.f[self.f.mask] = self.f.fill_value
 
 ################################
 # a subclass to make a 1D plot #
@@ -437,17 +441,17 @@ class plot1d(plot):
     # -- 2. yeah = pp() ; yeah.title = "foo"
     # -------------------------------
     def __init__(self,\
-                 lstyle=None,\
+                 linestyle=None,\
                  color=None,\
                  marker='x',\
-                 label=None):
+                 legend=None):
         ## get initialization from parent class
         plot.__init__(self)
         ## what could be defined by the user
-        self.lstyle = lstyle
+        self.linestyle = linestyle
         self.color = color
         self.marker = marker
-        self.label = label
+        self.legend = legend
 
     # define_from_var
     # ... this uses settings in set_var.txt
@@ -470,16 +474,16 @@ class plot1d(plot):
         if self.fmt is None: self.fmt = '%.0f'
         # add specific stuff
         mpl.grid(color='grey')
-        if self.lstyle == "": self.lstyle = " " # to allow for no line at all with ""
+        if self.linestyle == "": self.linestyle = " " # to allow for no line at all with ""
         # set dummy x axis if not defined
-        if self.absc is None: 
-            self.absc = np.array(range(self.field.shape[0]))
+        if self.x is None: 
+            self.x = np.array(range(self.f.shape[0]))
             print "!! WARNING !! dummy coordinates on x axis"
         else:
-            self.absc = np.array(self.absc) # ensure this is a numpy array
+            self.x = np.array(self.x) # ensure this is a numpy array
         # swapping if requested
-        if self.swap:  x = self.field ; y = self.absc
-        else:          x = self.absc ; y = self.field
+        if self.swap:  x = self.f ; y = self.x
+        else:          x = self.x ; y = self.f
         # coefficients on axis
         x=x*self.xcoeff ; y=y*self.ycoeff
         # check axis
@@ -488,14 +492,14 @@ class plot1d(plot):
             exit()
         # make the 1D plot
         # either request linestyle or let matplotlib decide
-        if self.lstyle is not None and self.color is not None:
-            mpl.plot(x,y,self.color+self.lstyle,marker=self.marker,label=self.label)
+        if self.linestyle is not None and self.color is not None:
+            mpl.plot(x,y,self.color+self.linestyle,marker=self.marker,label=self.legend)
         elif self.color is not None:
-            mpl.plot(x,y,color=self.color,marker=self.marker,label=self.label)
-        elif self.lstyle is not None:
-            mpl.plot(x,y,linestyle=self.lstyle,marker=self.marker,label=self.label)
+            mpl.plot(x,y,color=self.color,marker=self.marker,label=self.legend)
+        elif self.linestyle is not None:
+            mpl.plot(x,y,linestyle=self.linestyle,marker=self.marker,label=self.legend)
         else:
-            mpl.plot(x,y,marker=self.marker,label=self.label)
+            mpl.plot(x,y,marker=self.marker,label=self.legend)
         # AXES
         ax = mpl.gca()
         # make log axes and/or invert ordinate
@@ -509,8 +513,8 @@ class plot1d(plot):
             ax.set_xlim(ax.get_xlim()[::-1])
             self.xmin,self.xmax = self.xmax,self.xmin
         # add a label for line(s)
-        if self.label is not None:
-            if self.label != "":
+        if self.legend is not None:
+            if self.legend != "":
                 mpl.legend(loc="best",fancybox=True)
         # format labels
         if self.swap: ax.xaxis.set_major_formatter(FormatStrFormatter(self.fmt))
@@ -543,6 +547,12 @@ class plot1d(plot):
         if self.modx is not None:
             ax = labelmodulo(ax,self.modx)
 
+    # makeshow = make + show
+    # -------------------------------
+    def makeshow(self):
+        self.make()
+        mpl.show()
+
 ################################
 # a subclass to make a 2D plot #
 ################################
@@ -560,14 +570,14 @@ class plot2d(plot):
     # -- 2. yeah = pp() ; yeah.title = "foo"
     # -------------------------------
     def __init__(self,\
-                 ordi=None,\
+                 y=None,\
                  mapmode=False,\
                  proj="cyl",\
                  back=None,\
                  trans=1.0,\
-                 addvecx=None,\
-                 addvecy=None,\
-                 addcontour=None,\
+                 vx=None,\
+                 vy=None,\
+                 c=None,\
                  blon=None,\
                  blat=None,\
                  area=None,\
@@ -575,29 +585,29 @@ class plot2d(plot):
                  vmax=None,\
                  showcb=True,\
                  wscale=None,\
-                 stridevecx=1,\
-                 stridevecy=1,\
+                 svx=1,\
+                 svy=1,\
                  leftcorrect=False,\
                  colorvec="black"):
         ## get initialization from parent class
         plot.__init__(self)
         ## what could be defined by the user
-        self.ordi = ordi
+        self.y = y
         self.mapmode = mapmode
         self.proj = proj
         self.back = back
         self.trans = trans
-        self.addvecx = addvecx
-        self.addvecy = addvecy
+        self.vx = vx
+        self.vy = vy
         self.colorvec = colorvec
-        self.addcontour = addcontour
+        self.c = c
         self.blon = blon ; self.blat = blat
         self.area = area
         self.vmin = vmin ; self.vmax = vmax
         self.showcb = showcb
         self.wscale = wscale
-        self.stridevecx = stridevecx
-        self.stridevecy = stridevecy
+        self.svx = svx
+        self.svy = svy
         self.leftcorrect = leftcorrect
 
     # define_from_var
@@ -609,7 +619,7 @@ class plot2d(plot):
         # add specific stuff
         if self.var is not None:
          if self.var.upper() in vl.keys():
-          self.colorb = vc[self.var.upper()]
+          self.colorbar = vc[self.var.upper()]
           self.fmt = vf[self.var.upper()]
 
     # make
@@ -623,34 +633,34 @@ class plot2d(plot):
         ### PRE-SETTINGS
         ############################################################################################
         # set dummy xy axis if not defined
-        if self.absc is None: 
-            self.absc = np.array(range(self.field.shape[0]))
+        if self.x is None: 
+            self.x = np.array(range(self.f.shape[0]))
             self.mapmode = False
             print "!! WARNING !! dummy coordinates on x axis"
-        if self.ordi is None: 
-            self.ordi = np.array(range(self.field.shape[1]))
+        if self.y is None: 
+            self.y = np.array(range(self.f.shape[1]))
             self.mapmode = False
             print "!! WARNING !! dummy coordinates on y axis"
         # transposing if necessary
-        shape = self.field.shape
+        shape = self.f.shape
         if shape[0] != shape[1]:
-         if len(self.absc) == shape[0] and len(self.ordi) == shape[1]:
+         if len(self.x) == shape[0] and len(self.y) == shape[1]:
             print "!! WARNING !! Transposing axes"
-            self.field = np.transpose(self.field)
+            self.f = np.transpose(self.f)
         # bound field
-        zevmin, zevmax = calculate_bounds(self.field,vmin=self.vmin,vmax=self.vmax)
-        what_I_plot = bounds(self.field,zevmin,zevmax)
+        zevmin, zevmax = calculate_bounds(self.f,vmin=self.vmin,vmax=self.vmax)
+        what_I_plot = bounds(self.f,zevmin,zevmax)
         # define contour field levels. define color palette
         ticks = self.div + 1
         zelevels = np.linspace(zevmin,zevmax,ticks)
-        palette = get_cmap(name=self.colorb)
+        palette = get_cmap(name=self.colorbar)
         # do the same thing for possible contourline entries
-        if self.addcontour is not None:
+        if self.c is not None:
             # if masked array, set masked values to filled values (e.g. np.nan) for plotting purposes
-            if type(self.addcontour).__name__ in 'MaskedArray':
-               self.addcontour[self.addcontour.mask] = self.addcontour.fill_value
-            zevminc, zevmaxc = calculate_bounds(self.addcontour)
-            what_I_contour = bounds(self.addcontour,zevminc,zevmaxc)
+            if type(self.c).__name__ in 'MaskedArray':
+               self.c[self.c.mask] = self.c.fill_value
+            zevminc, zevmaxc = calculate_bounds(self.c)
+            what_I_contour = bounds(self.c,zevminc,zevmaxc)
             ticks = self.div + 1
             zelevelsc = np.linspace(zevminc,zevmaxc,ticks)
         ############################################################################################
@@ -661,21 +671,21 @@ class plot2d(plot):
             ## A SIMPLE 2D PLOT
             ###################
             # swapping if requested
-            if self.swap:  x = self.ordi ; y = self.absc
-            else:          x = self.absc ; y = self.ordi
+            if self.swap:  x = self.y ; y = self.x
+            else:          x = self.x ; y = self.y
             # coefficients on axis
             x=x*self.xcoeff ; y=y*self.ycoeff
             # make shaded and line contours
-            if self.addcontour is not None: 
+            if self.c is not None: 
                 objC = mpl.contour(x, y, what_I_contour, \
                             zelevelsc, colors = ccol, linewidths = cline)
                 #mpl.clabel(objC, inline=1, fontsize="small",\
                 #             inline_spacing=1,fmt="%.0f")
             mpl.contourf(x, y, \
-                         self.field, \
+                         self.f, \
                          zelevels, cmap=palette)
             #mpl.pcolor(x,y,\
-            #             self.field, \
+            #             self.f, \
             #             cmap=palette)
             # make log axes and/or invert ordinate
             ax = mpl.gca()
@@ -707,11 +717,11 @@ class plot2d(plot):
             if self.proj is None: self.proj = "cyl"
             # get lon and lat in 2D version.
             # (but first ensure we do have 2D coordinates)
-            if self.absc.ndim == 1: 	[self.absc,self.ordi] = np.meshgrid(self.absc,self.ordi)
-            elif self.absc.ndim > 2:    print "!! ERROR !! lon and lat arrays must be 1D or 2D"
+            if self.x.ndim == 1: 	[self.x,self.y] = np.meshgrid(self.x,self.y)
+            elif self.x.ndim > 2:    print "!! ERROR !! lon and lat arrays must be 1D or 2D"
             # get lat lon intervals and associated settings
-            wlon = [np.min(self.absc),np.max(self.absc)]
-            wlat = [np.min(self.ordi),np.max(self.ordi)]
+            wlon = [np.min(self.x),np.max(self.x)]
+            wlat = [np.min(self.y),np.max(self.y)]
             # -- area presets are in set_area.txt
             if self.area is not None:
              if self.area in area.keys():
@@ -799,9 +809,9 @@ class plot2d(plot):
               else:
                  print "!! ERROR !! requested background not defined. change name or fill in set_back.txt" ; exit()
             # define x and y given the projection
-            x, y = m(self.absc, self.ordi)
+            x, y = m(self.x, self.y)
             # contour field. first line contour then shaded contour.
-            if self.addcontour is not None: 
+            if self.c is not None: 
                 objC2 = m.contour(x, y, what_I_contour, \
                             zelevelsc, colors = ccol, linewidths = cline)
                 #mpl.clabel(objC2, inline=1, fontsize=10)
@@ -828,26 +838,26 @@ class plot2d(plot):
         ############################################################################################
         ### VECTORS. must be after the colorbar. we could also leave possibility for streamlines.
         ############################################################################################
-        ### not expecting NaN in self.addvecx and self.addvecy. masked arrays is just enough.
-        if self.addvecx is not None and self.addvecy is not None: 
+        ### not expecting NaN in self.vx and self.vy. masked arrays is just enough.
+        if self.vx is not None and self.vy is not None: 
                 # vectors on map projection or simple 2D mapping
                 if self.mapmode: 
-                   [vecx,vecy] = m.rotate_vector(self.addvecx,self.addvecy,self.absc,self.ordi) # for metwinds only ?
+                   [vecx,vecy] = m.rotate_vector(self.vx,self.vy,self.x,self.y) # for metwinds only ?
                 else:
-                   vecx,vecy = self.addvecx,self.addvecy 
+                   vecx,vecy = self.vx,self.vy 
                    if x.ndim < 2 and y.ndim < 2: x,y = np.meshgrid(x,y)
                 # reference vector is scaled
                 if self.wscale is None: 
-                    self.wscale = ppcompute.mean(np.sqrt(self.addvecx*self.addvecx+self.addvecy*self.addvecy))
+                    self.wscale = ppcompute.mean(np.sqrt(self.vx*self.vx+self.vy*self.vy))
                 # make vector field
                 if self.mapmode: 
-                    q = m.quiver( x[::self.stridevecy,::self.stridevecx],y[::self.stridevecy,::self.stridevecx],\
-                                  vecx[::self.stridevecy,::self.stridevecx],vecy[::self.stridevecy,::self.stridevecx],\
+                    q = m.quiver( x[::self.svy,::self.svx],y[::self.svy,::self.svx],\
+                                  vecx[::self.svy,::self.svx],vecy[::self.svy,::self.svx],\
                                   angles='xy',color=self.colorvec,pivot='tail',\
                                   scale=self.wscale*reducevec,width=widthvec )
                 else:
-                    q = mpl.quiver( x[::self.stridevecy,::self.stridevecx],y[::self.stridevecy,::self.stridevecx],\
-                                    vecx[::self.stridevecy,::self.stridevecx],vecy[::self.stridevecy,::self.stridevecx],\
+                    q = mpl.quiver( x[::self.svy,::self.svx],y[::self.svy,::self.svx],\
+                                    vecx[::self.svy,::self.svx],vecy[::self.svy,::self.svx],\
                                     angles='xy',color=self.colorvec,pivot='tail',\
                                     scale=self.wscale*reducevec,width=widthvec )
                 # make vector key.
@@ -879,3 +889,9 @@ class plot2d(plot):
             f.close()
         except IOError:
             pass
+
+    # makeshow = make + show
+    # -------------------------------
+    def makeshow(self):
+        self.make()
+        mpl.show()

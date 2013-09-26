@@ -16,7 +16,7 @@ m.t = [6.,9.,12.,15.,18.,21.,24.] # setting 4 fixed t values
 m.superpose = True # superpose 1D plots
 m.verbose = True # making the programe verbose
 #m.out = "pdf" # output format
-m.colorb = "spectral" # color cycle according to a color map
+m.colorbar = "spectral" # color cycle according to a color map
 
 # get data and make plot with default settings
 m.getplot()
@@ -42,7 +42,7 @@ S = tpot.func(z)
 
 # change a few plot settings
 for curve in S.p: 
-    curve.lstyle = "--"
+    curve.linestyle = "--"
     curve.marker = ""
 S.p[0].swaplab = False
 S.p[0].ylabel="Geopotential height (km)"

@@ -132,10 +132,10 @@ class pp():
     def __init__(self,file=None,var="notset",\
                       filegoal=None,vargoal=None,\
                       x=None,y=None,z=None,t=None,\
-                      stridex=1,stridey=1,\
-                      stridez=1,stridet=1,\
-                      stridevecx=1,\
-                      stridevecy=1,\
+                      sx=1,sy=1,\
+                      sz=1,st=1,\
+                      svx=1,\
+                      svy=1,\
                       compute="mean",\
                       verbose=False,\
                       quiet=False,\
@@ -154,11 +154,11 @@ class pp():
                       proj=None,\
                       vmin=None,vmax=None,\
                       div=None,\
-                      colorb=None,\
-                      lstyle=None,\
+                      colorbar=None,\
+                      linestyle=None,\
                       marker=None,\
                       color=None,\
-                      label=None,\
+                      legend=None,\
                       changetime=None,\
                       units=None,\
                       savtxt=False,\
@@ -186,10 +186,10 @@ class pp():
         self.vargoal = vargoal
         self.x = x ; self.y = y   ## if None, free dimension
         self.z = z ; self.t = t   ## if None, free dimension
-        self.stridex = stridex ; self.stridey = stridey
-        self.stridez = stridez ; self.stridet = stridet
-        self.stridevecx = stridevecx
-        self.stridevecy = stridevecy
+        self.sx = sx ; self.sy = sy
+        self.sz = sz ; self.st = st
+        self.svx = svx
+        self.svy = svy
         self.compute = compute
         self.verbose = verbose
         self.quiet = quiet
@@ -213,11 +213,11 @@ class pp():
         self.proj = proj
         self.vmin = vmin ; self.vmax = vmax
         self.div = div
-        self.colorb = colorb
-        self.lstyle = lstyle
+        self.colorbar = colorbar
+        self.linestyle = linestyle
         self.marker = marker
         self.color = color
-        self.label = label
+        self.legend = legend
         self.units = units
         self.title = title
         self.xp = xp ; self.yp = yp
@@ -252,8 +252,8 @@ class pp():
             self.vargoal = other.vargoal
             self.x = other.x ; self.y = other.y   ## if None, free dimension
             self.z = other.z ; self.t = other.t   ## if None, free dimension
-            self.stridex = other.stridex ; self.stridey = other.stridey
-            self.stridez = other.stridez ; self.stridet = other.stridet
+            self.sx = other.sx ; self.sy = other.sy
+            self.sz = other.sz ; self.st = other.st
             self.verbose = other.verbose
             self.noproj = other.noproj
             self.plotin = other.plotin
@@ -267,11 +267,11 @@ class pp():
             self.proj = other.proj
             self.vmin = other.vmin ; self.vmax = other.vmax
             self.div = other.div
-            self.colorb = other.colorb
-            self.lstyle = other.lstyle
+            self.colorbar = other.colorbar
+            self.linestyle = other.linestyle
             self.marker = other.marker
             self.color = other.color
-            self.label = other.label
+            self.legend = other.legend
             self.units = other.units
             self.title = other.title
             self.includedate = other.includedate
@@ -596,8 +596,8 @@ class pp():
               obj.changetime = self.changetime
               obj.performtimechange()
               # get strides
-              obj.stridex = self.stridex ; obj.stridey = self.stridey
-              obj.stridez = self.stridez ; obj.stridet = self.stridet
+              obj.sx = self.sx ; obj.sy = self.sy
+              obj.sz = self.sz ; obj.st = self.st
               ### get index
               obj.getindextime(dalist=st,ind=t)
               obj.getindexvert(dalist=sz,ind=z)
@@ -642,7 +642,7 @@ class pp():
                   obj.computations()
               # save fields in self.f for the user
               self.f[count] = obj.field
-              # save a label in self.l for the user
+              # save a legend in self.l for the user
               self.l[count] = "_"
               if self.nfin > 1:   self.l[count] = self.l[count] + "f=#"+str(int(i+1))+'_'
               if self.nvin > 1:   self.l[count] = self.l[count] + "v="+obj.var+'_'
@@ -733,8 +733,8 @@ class pp():
             ## [BUG FIX: apparently info about missing values is not saved correctly]
             for count in range(self.nplot):
               pl = self.p[count]
-              masked = np.ma.masked_where(np.abs(pl.field) > self.missing,pl.field)
-              pl.field = masked ; pl.field[pl.field.mask] = np.NaN
+              masked = np.ma.masked_where(np.abs(pl.f) > self.missing,pl.f)
+              pl.f = masked ; pl.f[pl.f.mask] = np.NaN
             return #self?
         # -----------------------------------------------------
         # REGULAR MODE
@@ -790,24 +790,24 @@ class pp():
                     plobj.var = obj.var 
                     plobj.define_from_var()
                     # generic 1D/2D: load field and coord in plot object 
-                    plobj.field = obj.field    # field to be plotted
-                    plobj.absc = obj.absc      # abscissa (or longitude)
-                    plobj.ordi = obj.ordi      # ordinate (or latitude)
+                    plobj.f = obj.field    # field to be plotted
+                    plobj.x = obj.absc      # abscissa (or longitude)
+                    plobj.y = obj.ordi      # ordinate (or latitude)
                                                # -- useless in 1D but not used anyway
                     # specific 1D plot stuff
                     if dp == 1:
-                        # -- a default label
-                        plobj.label = ""
-                        if self.nfin > 1: plobj.label = plobj.label + " file #"+str(i+1)
-                        if self.nvin > 1: plobj.label = plobj.label + " var "+plobj.var
-                        if self.nplott > 1: plobj.label = plobj.label + " t="+str(self.t[t])
-                        if self.nplotz > 1: plobj.label = plobj.label + " z="+str(self.z[z])
-                        if self.nploty > 1: plobj.label = plobj.label + " y="+str(self.y[y])
-                        if self.nplotx > 1: plobj.label = plobj.label + " x="+str(self.x[x])
+                        # -- a default legend
+                        plobj.legend = ""
+                        if self.nfin > 1: plobj.legend = plobj.legend + " file #"+str(i+1)
+                        if self.nvin > 1: plobj.legend = plobj.legend + " var "+plobj.var
+                        if self.nplott > 1: plobj.legend = plobj.legend + " t="+str(self.t[t])
+                        if self.nplotz > 1: plobj.legend = plobj.legend + " z="+str(self.z[z])
+                        if self.nploty > 1: plobj.legend = plobj.legend + " y="+str(self.y[y])
+                        if self.nplotx > 1: plobj.legend = plobj.legend + " x="+str(self.x[x])
                     # specific 2d plot stuff
                     if dp == 2:
                         # -- light grey background for missing values
-                        if type(plobj.field).__name__ in 'MaskedArray': plobj.axisbg = '0.75'
+                        if type(plobj.f).__name__ in 'MaskedArray': plobj.axisbg = '0.75'
                         # -- define if it is a map or a plot
                         plobj.mapmode = ( obj.method_x+obj.method_y == "freefree" \
                                        and "grid points" not in obj.name_x \
@@ -820,23 +820,23 @@ class pp():
                     if self.ycoeff is not None: plobj.ycoeff = self.ycoeff
                     if self.title is not None: plobj.title = self.title
                     if self.units is not None: plobj.units = self.units
-                    if self.colorb is not None: plobj.colorb = self.colorb
+                    if self.colorbar is not None: plobj.colorbar = self.colorbar
                     if self.modx is not None: plobj.modx = self.modx
                     if self.nxticks is not None: plobj.nxticks = self.nxticks
                     if self.nyticks is not None: plobj.nyticks = self.nyticks
                     # -- 1D specific
                     if dp == 1:
-                        if self.lstyle is not None: plobj.lstyle = self.lstyle
+                        if self.linestyle is not None: plobj.linestyle = self.linestyle
                         if self.marker is not None: plobj.marker = self.marker
                         if self.color is not None: plobj.color = self.color
-                        if self.label is not None: plobj.label = self.label
+                        if self.legend is not None: plobj.legend = self.legend
                     # -- 2D specific
                     elif dp == 2:
                         if self.proj is not None and not self.noproj: plobj.proj = self.proj
                         if self.vmin is not None: plobj.vmin = self.vmin
                         if self.vmax is not None: plobj.vmax = self.vmax
-                        plobj.stridevecx = self.stridevecx
-                        plobj.stridevecy = self.stridevecy
+                        plobj.svx = self.svx
+                        plobj.svy = self.svy
                     # finally append plot object
                     self.p.append(plobj)
                     count = count + 1
@@ -870,9 +870,9 @@ class pp():
                   # NB: contour is expected to be right after main otherwise it is not displayed
                   ##########################################
                   if condvar == "contour":
-                      plobj.addcontour = self.request[i][j+1][t][z][y][x].field ; found += 1
+                      plobj.c = self.request[i][j+1][t][z][y][x].field ; found += 1
                   if condfile == "contour":
-                      plobj.addcontour = self.request[i+1][j][t][z][y][x].field ; found += 1
+                      plobj.c = self.request[i+1][j][t][z][y][x].field ; found += 1
                   # see if there is a vector requested...
                   # (we use try because we might be at the end of the list)
                   try:    condvar = self.vargoal[j+found+1]+self.vargoal[j+found+2]
@@ -882,11 +882,11 @@ class pp():
                   # ... get vector and go directly to the next iteration
                   # (in some cases we would do this twice but this is cheap)
                   if "vector" in condvar:
-                      plobj.addvecx = self.request[i][j+found+1][t][z][y][x].field
-                      plobj.addvecy = self.request[i][j+found+2][t][z][y][x].field
+                      plobj.vx = self.request[i][j+found+1][t][z][y][x].field
+                      plobj.vy = self.request[i][j+found+2][t][z][y][x].field
                   if "vector" in condfile:
-                      plobj.addvecx = self.request[i+found+1][j][t][z][y][x].field
-                      plobj.addvecy = self.request[i+found+2][j][t][z][y][x].field
+                      plobj.vx = self.request[i+found+1][j][t][z][y][x].field
+                      plobj.vy = self.request[i+found+2][j][t][z][y][x].field
                   count = count + 1
         # COUNT PLOTS. if 0 just exit.
         # self.howmanyplots is self.nplot + possible extraplots 
@@ -923,7 +923,7 @@ class pp():
             self.n = 0
             ## adapted space for labels etc
             ## ... except for ortho because there is no label anyway
-            self.customplot = self.p[0].field.ndim == 2 \
+            self.customplot = self.p[0].f.ndim == 2 \
                         and self.p[0].mapmode == True \
                         and self.p[0].proj not in ["ortho"]
             if self.customplot:
@@ -952,11 +952,11 @@ class pp():
                     sav = pl.xlabel,pl.ylabel,pl.xcoeff,pl.ycoeff,pl.title,pl.swaplab # save titles and labels
                     # possibility to color lines according to a color map
                     # ... made so that all plots span the whole color map automatically.
-                    if self.colorb is not None: 
-                        if self.verbose: print "**** OK. We make a rainbow spaghetti plot with color map ",self.colorb
-                        ppplot.rainbow(cb=self.colorb,num=self.howmanyplots)
+                    if self.colorbar is not None: 
+                        if self.verbose: print "**** OK. We make a rainbow spaghetti plot with color map ",self.colorbar
+                        ppplot.rainbow(cb=self.colorbar,num=self.howmanyplots)
                 else: 
-                    pl.invert = False ; pl.lstyle = None # don't invert again axis
+                    pl.invert = False ; pl.linestyle = None # don't invert again axis
                     # set saved titles and labels
                     if self.plotin is None:
                         pl.xlabel,pl.ylabel,pl.xcoeff,pl.ycoeff,pl.title,pl.swaplab = sav 
@@ -977,7 +977,7 @@ class pp():
             if self.savtxt:
                 if self.verbose: print "**** Printing results in a text file"
                 name = pl.var + "%04d" % self.n
-                ppplot.writeascii(field=pl.field,absc=pl.absc,name=name) 
+                ppplot.writeascii(field=pl.f,absc=pl.x,name=name) 
             # increment plot count (and propagate this in plotin)
             self.n = self.n+1
             if self.plotin is not None: self.plotin.n = self.n
@@ -1043,17 +1043,17 @@ class pp():
         count = 0
         while count < self.howmanyplots:
            sobj = self.p[count] ; oobj = other.p[count]
-           if sobj.field.ndim !=1 or oobj.field.ndim !=1:
+           if sobj.f.ndim !=1 or oobj.f.ndim !=1:
                if self.verbose: print "!! WARNING !! Flattening arrays because more than one-dimensional."
-               sobj.field = np.ravel(sobj.field)
-               oobj.field = np.ravel(oobj.field)
-           sobj.absc = oobj.field
+               sobj.f = np.ravel(sobj.f)
+               oobj.f = np.ravel(oobj.f)
+           sobj.x = oobj.f
            sobj.xlabel = oobj.ylabel
-           if sobj.absc.size > sobj.field.size:
+           if sobj.x.size > sobj.f.size:
                if self.verbose:
-                   print "!! WARNING !! Trying to define y=f(x) with x and y not at the same size.",sobj.absc.size,sobj.field.size
+                   print "!! WARNING !! Trying to define y=f(x) with x and y not at the same size.",sobj.x.size,sobj.f.size
                    print "!! WARNING !! Modifying x to fit y size but please check." 
-               sobj.absc = sobj.absc[0:sobj.field.size]
+               sobj.x = sobj.x[0:sobj.f.size]
            count = count + 1
         return self
 
@@ -1082,9 +1082,9 @@ class pp():
             try: self.p[iii].logy = opt.logy
             except: pass
             ###
-            try: self.p[iii].colorb = opt.colorb[iii]
+            try: self.p[iii].colorbar = opt.colorbar[iii]
             except: 
-                try: self.p[iii].colorb = opt.colorb[0] ; self.colorb = opt.colorb[0]
+                try: self.p[iii].colorbar = opt.colorbar[0] ; self.colorbar = opt.colorbar[0]
                 except: pass
             ###
             if opt.void:
@@ -1111,9 +1111,9 @@ class pp():
                 try: self.p[iii].ylabel = opt.ylabel[0]
                 except: pass
             ###
-            try: self.p[iii].lstyle = opt.lstyle[iii]
+            try: self.p[iii].linestyle = opt.linestyle[iii]
             except: 
-                try: self.p[iii].lstyle = opt.lstyle[0]
+                try: self.p[iii].linestyle = opt.linestyle[0]
                 except: pass
             ###
             try: self.p[iii].color = opt.color[iii]
@@ -1126,9 +1126,9 @@ class pp():
                 try: self.p[iii].marker = opt.marker[0]
                 except: pass
             ###
-            try: self.p[iii].label = opt.label[iii]
+            try: self.p[iii].legend = opt.legend[iii]
             except:
-                try: self.p[iii].label = opt.label[0]
+                try: self.p[iii].legend = opt.legend[0]
                 except: pass
             ###
             try: self.p[iii].proj = opt.proj[iii]
@@ -1241,7 +1241,7 @@ class onerequest():
         self.swap_axes = False ; self.invert_axes = False
         self.compute = None
         self.changetime = None
-        self.stridex = 1 ; self.stridey = 1 ; self.stridez = 1 ; self.stridet = 1
+        self.sx = 1 ; self.sy = 1 ; self.sz = 1 ; self.st = 1
         self.missing = '!! missing value: I am not set, damned !!'
 
     # open a file. for now it is netcdf. TBD for other formats.
@@ -1461,7 +1461,7 @@ class onerequest():
     # -------------------------------
     def getindextime(self,dalist=None,ind=None):
         if self.method_t == "free": 
-            self.index_t = np.arange(0,self.dim_t,self.stridet)
+            self.index_t = np.arange(0,self.dim_t,self.st)
             if self.dim_t > 1:  
                 self.dimplot = self.dimplot + 1 
                 if self.verbose: print "**** OK. t values. all."
@@ -1471,7 +1471,7 @@ class onerequest():
         elif self.method_t == "comp":
             start = np.argmin( np.abs( self.field_t - dalist[ind][0] ) )
             stop = np.argmin( np.abs( self.field_t - dalist[ind][1] ) )
-            self.index_t = np.arange(start,stop,self.stridet)
+            self.index_t = np.arange(start,stop,self.st)
             if self.verbose: print "**** OK. t values. comp over interval ",self.field_t[start],self.field_t[stop]," nvalues=",self.index_t.size
         elif self.method_t == "fixed":
             self.index_t.append( np.argmin( np.abs( self.field_t - dalist[ind][0] ) ))
@@ -1485,7 +1485,7 @@ class onerequest():
     # -------------------------------
     def getindexvert(self,dalist=None,ind=None):
         if self.method_z == "free": 
-            self.index_z = np.arange(0,self.dim_z,self.stridez)
+            self.index_z = np.arange(0,self.dim_z,self.sz)
             if self.dim_z > 1:  
                 self.dimplot = self.dimplot + 1
                 if self.verbose: print "**** OK. z values. all."
@@ -1495,7 +1495,7 @@ class onerequest():
         elif self.method_z == "comp":
             start = np.argmin( np.abs( self.field_z - dalist[ind][0] ) )
             stop = np.argmin( np.abs( self.field_z - dalist[ind][1] ) )
-            self.index_z = np.arange(start,stop,self.stridez)
+            self.index_z = np.arange(start,stop,self.sz)
             if self.verbose: print "**** OK. z values. comp over interval",self.field_z[start],self.field_z[stop]," nvalues=",self.index_z.size
         elif self.method_z == "fixed":
             self.index_z.append( np.argmin( np.abs( self.field_z - dalist[ind][0] ) ))
@@ -1520,7 +1520,7 @@ class onerequest():
         ## - LAT IS COMP AND LON IS FREE
         ## - LON IS COMP AND LAT IS FREE
         if self.method_x == "free" or test in ["compfree","compcomp"]:
-            self.index_x = range(0,self.dim_x,self.stridex)
+            self.index_x = range(0,self.dim_x,self.sx)
             if self.dim_x > 1:  
                 if self.method_x == "free": self.dimplot = self.dimplot + 1
                 if self.verbose: print "**** OK. x values. all."
@@ -1528,7 +1528,7 @@ class onerequest():
                 self.method_x = "fixed"
                 if self.verbose: print "**** OK. no x dimension."
         if self.method_y == "free" or test in ["freecomp","compcomp"]:
-            self.index_y = range(0,self.dim_y,self.stridey)
+            self.index_y = range(0,self.dim_y,self.sy)
             if self.dim_y > 1:  
                 if self.method_y == "free": self.dimplot = self.dimplot + 1
                 if self.verbose: print "**** OK. y values. all."
@@ -1662,9 +1662,9 @@ class onerequest():
           self.field_y = self.field_y[self.index_y2d, self.index_x2d]
           # ... there are special cases with strides
           # ... some other fixes will be needed probably TBD
-          if self.method_x == "free" and self.stridex != 1:
+          if self.method_x == "free" and self.sx != 1:
               self.field_x = self.field_x[self.index_x]
-          if self.method_y == "free" and self.stridey != 1: 
+          if self.method_y == "free" and self.sy != 1: 
               self.field_y = self.field_y[self.index_y]
         self.field_z = self.field_z[self.index_z]
         self.field_t = self.field_t[self.index_t]
@@ -1674,7 +1674,7 @@ class onerequest():
         if test in ["fixedfixed","freefree"]:
           pass
         elif test in ["fixedfree","fixedcomp"] or test in ["freefixed","compfixed"]: 
-         if self.stridex == 1 and self.stridey == 1:
+         if self.sx == 1 and self.sy == 1:
           time0 = timelib.time()
           # now have to obtain the new indexes which correspond to the extracted self.field
           # for it to work with unique index, ensure that any index_* is a numpy array

@@ -27,7 +27,7 @@ u.makeplot()
 
 # we simply change the colorbar
 # ... no need to reload data
-u.p[0].colorb = "RdBu"
+u.p[0].colorbar = "RdBu"
 u.filename = "myplot"
 u.makeplot()
 

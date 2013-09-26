@@ -26,8 +26,8 @@ wind = wind**0.5
 wind.plotin = v
 wind.filename = "windspeed"
 wind.defineplot()
-wind.p[2].title = "$\sqrt{u^2+v^2}$"
 wind.p[2].proj = "ortho"
+wind.p[2].title = "$\sqrt{u^2+v^2}$"
 wind.makeplot() # plot within the previous one (show because complete)
 
 

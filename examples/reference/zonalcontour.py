@@ -11,7 +11,7 @@ u.filename = "zonalcontour"
 u.get()
 u.defineplot()
 u.p[0].div = 30.
-u.p[0].colorb = "spectral"
+u.p[0].colorbar = "spectral"
 u.makeplot()
 
 

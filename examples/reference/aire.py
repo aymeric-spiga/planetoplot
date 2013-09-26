@@ -10,14 +10,14 @@ tpond.y = "-90,90"
 tpond.verbose = True
 tpond.compute = "meanarea"
 tpond.superpose = True
-tpond.label = "mean with ponderation by mesh area"
+tpond.legend = "mean with ponderation by mesh area"
 tpond.getplot(extraplot=1)
 
 tnormal = pp()
 tnormal << tpond
 tnormal.compute = "mean"
 tnormal.plotin = tpond
-tnormal.label = "simple mean (kind of wrong)"
+tnormal.legend = "simple mean (kind of wrong)"
 tnormal.filename = "aire"
 tnormal.getplot()
 

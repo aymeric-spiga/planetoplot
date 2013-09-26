@@ -21,7 +21,7 @@ addplot = pp(file=fi,var="ps",t=0.5,y=0.).get() - eqmeanps
 addplot.plotin = waveref
 addplot.title = "Tide signal at the equator"
 addplot.ylabel = "$p_s$ diurnal anomaly (Pa)"
-addplot.lstyle = ""
+addplot.linestyle = ""
 addplot.marker = "."
 addplot.plot()
 

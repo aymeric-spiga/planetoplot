@@ -14,7 +14,7 @@ gw.filename = "gw"
 
 # we define global settings for plot
 # (must be done before defineplot)
-gw.colorb = "RdBu_r"
+gw.colorbar = "RdBu_r"
 gw.vmin = -1. ; gw.vmax = 1.
 gw.div = 30
 gw.xlabel = "East longitude (deg)"

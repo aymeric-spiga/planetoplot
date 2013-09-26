@@ -31,7 +31,7 @@ for plot in gw.p:
     plot.ylabel = "Altitude above MOLA reference (km)"
     plot.div = 30
     plot.nxticks = 5
-gw.p[0].colorb = "RdBu_r"
+gw.p[0].colorbar = "RdBu_r"
 gw.p[0].vmin = -1.
 gw.p[0].vmax = 1.
 gw.makeplot()

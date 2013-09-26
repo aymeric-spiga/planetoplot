@@ -11,16 +11,16 @@ u.filename = "vector"
 
 # stride both x and y
 # this impacts field + vector
-u.stridex = 3
-u.stridey = 3
+u.sx = 3
+u.sy = 3
 u.getplot()
-u.stridex = 1 # (reinitialise)
-u.stridey = 1 # (reinitialise)
+u.sx = 1 # (reinitialise)
+u.sy = 1 # (reinitialise)
 
 # stride vectors only
 # not field (here topography)
-u.stridevecx = 3
-u.stridevecy = 3
+u.sx = 3
+u.sy = 3
 u.getplot()
 
 
@@ -30,7 +30,7 @@ u.filename = "myplot"
 u.getplot()
 
 
-u.p[0].colorb = "jet"
+u.p[0].colorbar = "jet"
 u.p[0].trans = 0.0
 u.p[0].back = "vis"
 

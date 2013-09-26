@@ -24,7 +24,7 @@ u.filename = "zonalmean"
 u.get()
 u.defineplot()
 u.p[0].div = 30.
-u.p[0].colorb = "RdBu_r"
+u.p[0].colorbar = "RdBu_r"
 u.p[0].title = "This is a zonal mean"
 u.makeplot()
 
@@ -34,7 +34,7 @@ u.filename = "zonalmin"
 u.get()
 u.defineplot()
 u.p[0].div = 30.
-u.p[0].colorb = "cool"
+u.p[0].colorbar = "cool"
 u.p[0].title = "This is minimum over zonal axis"
 u.makeplot()
 
@@ -44,7 +44,7 @@ u.filename = "myplot"
 u.get()
 u.defineplot()
 u.p[0].div = 30.
-u.p[0].colorb = "hot"
+u.p[0].colorbar = "hot"
 u.p[0].title = "This is maximum over zonal axis"
 u.makeplot()
 

@@ -25,7 +25,7 @@ temp.superpose = True
 #temp.out = "png"
 temp.filename = name
 temp.includedate = False
-temp.colorb = "hot"
+temp.colorbar = "hot"
 
 # this is doing defineplot amongst other things
 temp.func(press)
@@ -42,7 +42,7 @@ for yeah in temp.p:
     yeah.xmax = 230.
     yeah.xmin = 70.
     yeah.div = 32
-    yeah.label = labs[count]
+    yeah.legend = labs[count]
     yeah.title = "Equilibrium profile with a 1D globally-averaged model after 50 Saturn years"
     count = count+1
 

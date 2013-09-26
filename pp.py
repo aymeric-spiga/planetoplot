@@ -55,10 +55,10 @@ parser.add_option('-d','--directory',action='store',dest='folder',type="string",
 parser.add_option('-s','--changetime',action='store',dest='changetime',type="string",default=None,\
                   help="transformation on time axis : [None] | correctls | mars_sol2ls | mars_dayini | mars_meso_ls | mars_meso_sol | mars_meso_utc | mars_meso_lt ")
 parser.add_option('-p','--print',action='store_true',dest='savtxt',default=False,help="[1D] output field+coord in an ASCII file")
-parser.add_option('--stridex',action='store',dest='stridex',type="int",default=1,help="Load data every stridex grid points over x dimension")
-parser.add_option('--stridey',action='store',dest='stridey',type="int",default=1,help="Load data every stridex grid points over y dimension")
-parser.add_option('--stridez',action='store',dest='stridez',type="int",default=1,help="Load data every stridex grid points over z dimension")
-parser.add_option('--stridet',action='store',dest='stridet',type="int",default=1,help="Load data every stridex grid points over t dimension")
+parser.add_option('--sx',action='store',dest='sx',type="int",default=1,help="Load data every sx grid points over x dimension")
+parser.add_option('--sy',action='store',dest='sy',type="int",default=1,help="Load data every sy grid points over y dimension")
+parser.add_option('--sz',action='store',dest='sz',type="int",default=1,help="Load data every sz grid points over z dimension")
+parser.add_option('--st',action='store',dest='st',type="int",default=1,help="Load data every st grid points over t dimension")
 # plot --> upper case
 # -- generic
 parser.add_option('-T','--title',action='append',dest='title',type="string",default=None,help="change 'title'")
@@ -71,11 +71,11 @@ parser.add_option('-O','--save',action='store',dest='out',type="string",default=
 parser.add_option('-V','--void',action='store_true',dest='void',default=False,help="no colorbar, no title, no labels")
 parser.add_option('-U','--units',action='append',dest='units',type="string",default=None,help="units for the field")
 # -- 1D plot
-parser.add_option('-L','--lstyle',action='append',dest='lstyle',type="string",default=None,help="[1D] linestyle: '-' '--' '.' '..'")
+parser.add_option('-L','--linestyle',action='append',dest='linestyle',type="string",default=None,help="[1D] linestyle: '-' '--' '.' '..'")
 parser.add_option('-Q','--color',action='append',dest='color',type="string",default=None,help="[1D] color: 'b' 'g' 'r' etc")
 parser.add_option('-K','--marker',action='append',dest='marker',type="string",default=None,help="[1D] marker: '' 'x' 'o' etc")
 parser.add_option('-S','--superpose',action='store_true',dest='superpose',default=False,help="[1D] use same axis for all plots")
-parser.add_option('-E','--label',action='append',dest='label',type="string",default=None,help="[1D] label for line")
+parser.add_option('-E','--legend',action='append',dest='legend',type="string",default=None,help="[1D] legend for line")
 parser.add_option('--xcoeff',action='append',dest='xcoeff',type="float",default=None,help="[1D] multiply x axis")
 parser.add_option('--ycoeff',action='append',dest='ycoeff',type="float",default=None,help="[1D] multiply y axis")
 parser.add_option('--xmin',action='append',dest='xmin',type="float",default=None,help="[1D] min bound x axis")
@@ -84,7 +84,7 @@ parser.add_option('--xmax',action='append',dest='xmax',type="float",default=None
 parser.add_option('--ymax',action='append',dest='ymax',type="float",default=None,help="[1D] max bound y axis")
 parser.add_option('--modx',action='append',dest='modx',type="float",default=None,help="[1D] change xticks with a modulo")
 # -- 2D plot
-parser.add_option('-C','--colorb',action='append',dest='colorb',type="string",default=None,help="[2D] colormap: http://micropore.files.wordpress.com/2010/06/colormaps.png")
+parser.add_option('-C','--colorbar',action='append',dest='colorbar',type="string",default=None,help="[2D] colormap: http://micropore.files.wordpress.com/2010/06/colormaps.png")
 parser.add_option('-P','--proj',action='append',dest='proj',type="string",default=None,help="[2D] map projection: 'cyl' 'npstere' 'spstere' 'ortho' 'moll' 'robin' 'lcc' 'laea' 'merc' 'noproj'")
 parser.add_option('-B','--back',action='append',dest='back',type="string",default=None,help='[2D] predefined map background (cf. set_back.txt)')
 parser.add_option('-A','--area',action='append',dest='area',type="string",default=None,help='[2D] predefined region of mapping (cf. set_area.txt)')
@@ -93,8 +93,8 @@ parser.add_option('-J','--blat',action='append',dest='blat',type="float",default
 parser.add_option('-N','--vmin',action='append',dest='vmin',type="float",default=None,help='[2D] float: minimum value for displayed field')
 parser.add_option('-M','--vmax',action='append',dest='vmax',type="float",default=None,help='[2D] float: maximum value for displayed field')
 parser.add_option('-W','--wscale',action='append',dest='wscale',type="float",default=None,help='[2D] float: set size of reference wind vector')
-parser.add_option('--stridevecx',action='store',dest='stridevecx',type="int",default=1,help="Define an abscissa stride on vectors only -- not on field")
-parser.add_option('--stridevecy',action='store',dest='stridevecy',type="int",default=1,help="Define an ordinate stride on vectors only -- not on field")
+parser.add_option('--svx',action='store',dest='svx',type="int",default=1,help="Define an abscissa stride on vectors only -- not on field")
+parser.add_option('--svy',action='store',dest='svy',type="int",default=1,help="Define an ordinate stride on vectors only -- not on field")
 ###########################
 (opt,args) = parser.parse_args()
 # remains F G R  
@@ -133,12 +133,9 @@ user.z = opt.z ; user.t = opt.t
 user.verbose = opt.verbose
 user.compute = opt.compute
 user.changetime = opt.changetime
-user.stridex = opt.stridex
-user.stridey = opt.stridey
-user.stridez = opt.stridez
-user.stridet = opt.stridet
-user.stridevecx = opt.stridevecx
-user.stridevecy = opt.stridevecy
+user.sx = opt.sx ; user.sy = opt.sy
+user.sz = opt.sz ; user.st = opt.st
+user.svx = opt.svx ; user.svy = opt.svy
 user.savtxt = opt.savtxt
 # define field
 user.define()
