@@ -1,6 +1,6 @@
 #! /bin/bash
 
-cd reference
+cd ppclass_reference
 
 ./aire.py
 ./function.py
