@@ -814,7 +814,7 @@ class plot2d(plot):
             if self.c is not None: 
                 objC2 = m.contour(x, y, what_I_contour, \
                             zelevelsc, colors = ccol, linewidths = cline)
-                #mpl.clabel(objC2, inline=1, fontsize=10)
+                #mpl.clabel(objC2, inline=1, fontsize=10,manual=True,fmt='-%2.0f$^{\circ}$C',colors='r')
             m.contourf(x, y, what_I_plot, zelevels, cmap = palette, alpha = self.trans)
         ############################################################################################
         ### COLORBAR

@@ -56,6 +56,12 @@ def inspect(filename):
         except: pass
         print output ; output = ""
 
+# request a given attribute (and test if it is here)
+def ncattr(filename,char):
+    nc = netCDF4.Dataset(filename)
+    if hasattr(nc,char): ncattr=getattr(nc,char)
+    return ncattr
+
 # check a tab and exit if wrong. if just one string make it a list.
 # (if allownumber, convert this into a string).
 def checktab(tab,mess="",allownone=False,allownumber=False):
@@ -163,6 +169,7 @@ class pp():
                       units=None,\
                       savtxt=False,\
                       modx=None,\
+                      fmt=None,\
                       xp=16,yp=8,\
                       missing=1.e25,\
                       title=None):
@@ -222,6 +229,7 @@ class pp():
         self.title = title
         self.xp = xp ; self.yp = yp
         self.nxticks = nxticks ; self.nyticks = nyticks
+        self.fmt = fmt
 
     # print status
     def printstatus(self):
@@ -281,6 +289,7 @@ class pp():
             self.xp = other.xp ; self.yp = other.yp
             self.missing = other.missing
             self.nxticks = other.nxticks ; self.nyticks = other.nyticks
+            self.fmt = other.fmt
         else:
             print "!! ERROR !! argument must be a pp object." ; exit()
 
@@ -824,6 +833,7 @@ class pp():
                     if self.modx is not None: plobj.modx = self.modx
                     if self.nxticks is not None: plobj.nxticks = self.nxticks
                     if self.nyticks is not None: plobj.nyticks = self.nyticks
+                    if self.fmt is not None: plobj.fmt = self.fmt
                     # -- 1D specific
                     if dp == 1:
                         if self.linestyle is not None: plobj.linestyle = self.linestyle
@@ -1209,6 +1219,11 @@ class pp():
             try: self.p[iii].modx = opt.modx[iii]
             except:
                 try: self.p[iii].modx = opt.modx[0]
+                except: pass
+            ###
+            try: self.p[iii].fmt = opt.fmt[iii]
+            except:
+                try: self.p[iii].fmt = opt.fmt[0]
                 except: pass
 
 

@@ -70,6 +70,7 @@ parser.add_option('-Z','--logy',action='store_true',dest='logy',default=False,he
 parser.add_option('-O','--save',action='store',dest='out',type="string",default="gui",help="save mode: 'gui' 'png' 'pdf' 'eps' 'svg' 'ps'")
 parser.add_option('-V','--void',action='store_true',dest='void',default=False,help="no colorbar, no title, no labels")
 parser.add_option('-U','--units',action='append',dest='units',type="string",default=None,help="units for the field")
+parser.add_option('-F','--fmt',action='append',dest='fmt',type="string",default=None,help="values formatting. ex: '%.0f' '%3.1e'")
 # -- 1D plot
 parser.add_option('-L','--linestyle',action='append',dest='linestyle',type="string",default=None,help="[1D] linestyle: '-' '--' '.' '..'")
 parser.add_option('-Q','--color',action='append',dest='color',type="string",default=None,help="[1D] color: 'b' 'g' 'r' etc")
