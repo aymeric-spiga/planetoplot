@@ -16,11 +16,11 @@ u.get()
 ## we smooth the field a little bit
 #u.smooth(15)
 
-# we define the plot, then set a few personal stuff
-u.defineplot() 
+# we define the plot
 u.title = "This is what we name $u$"
 u.proj = "robin"
 u.filename = "simple"
+u.defineplot() 
 
 # we plot
 u.makeplot()

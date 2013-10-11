@@ -22,30 +22,30 @@ u.y = None
 u.t = "0.5"
 u.filename = "zonalmean"
 u.get()
-u.defineplot()
 u.div = 30.
 u.colorbar = "RdBu_r"
 u.title = "This is a zonal mean"
+u.defineplot()
 u.makeplot()
 
 ## ZONAL MINIMUM
 u.compute = "min"
 u.filename = "zonalmin"
 u.get()
-u.defineplot()
 u.div = 30.
 u.colorbar = "cool"
 u.title = "This is minimum over zonal axis"
+u.defineplot()
 u.makeplot()
 
 ## ZONAL MAXIMUM
 u.compute = "max"
 u.filename = "myplot"
 u.get()
-u.defineplot()
 u.div = 30.
 u.colorbar = "hot"
 u.title = "This is maximum over zonal axis"
+u.defineplot()
 u.makeplot()
 
 ## MAP OF MAXIMUM OVER TIME
@@ -55,10 +55,7 @@ u.y = None
 u.t = "0,1"
 u.z = 20000.
 u.get()
-u.defineplot()
 u.div = 30.
 u.title = "This is maximum over time"
-
-u.out = "png"
-
+u.defineplot()
 u.makeplot()
