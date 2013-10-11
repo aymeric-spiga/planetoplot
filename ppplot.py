@@ -43,6 +43,7 @@ how_many_sigma = 3.0
 # (contours)
 ccol = 'black'
 cline = 0.55
+cline = 0.8
 # (vectors)
 widthvec = 0.002
 reducevec = 30.
@@ -745,7 +746,8 @@ class plot2d(plot):
             elif self.proj in ["ortho","moll","robin"]:
                 wlat[0] = None ; wlat[1] = None ; wlon[0] = None ; wlon[1] = None
                 steplon = 30. ; steplat = 30.
-                if self.proj in ["robin","moll"]: steplon = 60.
+                if self.proj in ["moll"]: steplon = 60.
+                if self.proj in ["robin"]: steplon = 90.
                 mertab = np.r_[-360.:360.:steplon]
                 partab = np.r_[-90.:90.:steplat]
                 if self.proj == "ortho": 
@@ -815,7 +817,7 @@ class plot2d(plot):
                 objC2 = m.contour(x, y, what_I_contour, \
                             zelevelsc, colors = ccol, linewidths = cline)
                 #mpl.clabel(objC2, inline=1, fontsize=10,manual=True,fmt='-%2.0f$^{\circ}$C',colors='r')
-            m.contourf(x, y, what_I_plot, zelevels, cmap = palette, alpha = self.trans)
+            m.contourf(x, y, what_I_plot, zelevels, cmap = palette, alpha = self.trans, antialiased=True)
         ############################################################################################
         ### COLORBAR
         ############################################################################################

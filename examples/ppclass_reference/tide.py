@@ -10,6 +10,7 @@ waveref = pp(file=fi,var=v,vargoal=vg,t=0.5).get() - meanps
 waveref.smooth(5)
 waveref.title = "$p_s$ diurnal anomaly"
 waveref.proj = "moll"
+
 waveref.vmin = -10
 waveref.vmax = 10
 waveref.div = 10

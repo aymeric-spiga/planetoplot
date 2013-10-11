@@ -172,6 +172,8 @@ class pp():
                       fmt=None,\
                       xp=16,yp=8,\
                       missing=1.e25,\
+                      trans=None,back=None,\
+                      showcb=None,\
                       title=None):
         self.request = None
         self.nrequest = 0
@@ -230,6 +232,8 @@ class pp():
         self.xp = xp ; self.yp = yp
         self.nxticks = nxticks ; self.nyticks = nyticks
         self.fmt = fmt
+        self.trans = trans ; self.back = back
+        self.showcb = showcb
 
     # print status
     def printstatus(self):
@@ -290,6 +294,8 @@ class pp():
             self.missing = other.missing
             self.nxticks = other.nxticks ; self.nyticks = other.nyticks
             self.fmt = other.fmt
+            self.trans = other.trans ; self.back = other.back
+            self.showcb = other.showcb
         else:
             print "!! ERROR !! argument must be a pp object." ; exit()
 
@@ -834,6 +840,7 @@ class pp():
                     if self.nxticks is not None: plobj.nxticks = self.nxticks
                     if self.nyticks is not None: plobj.nyticks = self.nyticks
                     if self.fmt is not None: plobj.fmt = self.fmt
+                    if self.showcb is not None: plobj.showcb = self.showcb
                     # -- 1D specific
                     if dp == 1:
                         if self.linestyle is not None: plobj.linestyle = self.linestyle
@@ -845,6 +852,8 @@ class pp():
                         if self.proj is not None and not self.noproj: plobj.proj = self.proj
                         if self.vmin is not None: plobj.vmin = self.vmin
                         if self.vmax is not None: plobj.vmax = self.vmax
+                        if self.trans is not None: plobj.trans = self.trans
+			if self.back is not None: plobj.back = self.back
                         plobj.svx = self.svx
                         plobj.svy = self.svy
                     # finally append plot object

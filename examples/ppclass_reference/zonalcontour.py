@@ -10,14 +10,13 @@ u.t = "0.5"
 u.filename = "zonalcontour"
 u.get()
 u.defineplot()
-u.p[0].div = 30.
-u.p[0].colorbar = "spectral"
+u.div = 30.
+u.colorbar = "spectral"
 u.makeplot()
-
 
 u.var = ["u","u"]
 u.vargoal = ["main","contour"]
 u.get()
 u.defineplot()
-u.p[0].div = 30.
+u.div = 30.
 u.makeplot()

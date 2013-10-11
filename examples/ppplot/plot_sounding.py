@@ -24,4 +24,7 @@ sdg.xlabel = "Temperature ($^{\circ}$C)"
 sdg.ylabel = "Altitude (km)"
 sdg.makeshow()
 
+sdg.make()
+ppplot.save(mode="png",filename="plot",res=50,includedate=False)
+
 

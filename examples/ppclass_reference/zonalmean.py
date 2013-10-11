@@ -10,7 +10,7 @@ temp.y = "-90,90"
 temp.t = "0,1"
 temp.get()
 temp.defineplot()
-temp.p[0].title = "This is an averaged temperature profile"
+temp.title = "This is an averaged temperature profile"
 temp.makeplot()
 
 ## ZONAL MEAN
@@ -23,9 +23,9 @@ u.t = "0.5"
 u.filename = "zonalmean"
 u.get()
 u.defineplot()
-u.p[0].div = 30.
-u.p[0].colorbar = "RdBu_r"
-u.p[0].title = "This is a zonal mean"
+u.div = 30.
+u.colorbar = "RdBu_r"
+u.title = "This is a zonal mean"
 u.makeplot()
 
 ## ZONAL MINIMUM
@@ -33,9 +33,9 @@ u.compute = "min"
 u.filename = "zonalmin"
 u.get()
 u.defineplot()
-u.p[0].div = 30.
-u.p[0].colorbar = "cool"
-u.p[0].title = "This is minimum over zonal axis"
+u.div = 30.
+u.colorbar = "cool"
+u.title = "This is minimum over zonal axis"
 u.makeplot()
 
 ## ZONAL MAXIMUM
@@ -43,9 +43,9 @@ u.compute = "max"
 u.filename = "myplot"
 u.get()
 u.defineplot()
-u.p[0].div = 30.
-u.p[0].colorbar = "hot"
-u.p[0].title = "This is maximum over zonal axis"
+u.div = 30.
+u.colorbar = "hot"
+u.title = "This is maximum over zonal axis"
 u.makeplot()
 
 ## MAP OF MAXIMUM OVER TIME
@@ -56,6 +56,9 @@ u.t = "0,1"
 u.z = 20000.
 u.get()
 u.defineplot()
-u.p[0].div = 30.
-u.p[0].title = "This is maximum over time"
+u.div = 30.
+u.title = "This is maximum over time"
+
+u.out = "png"
+
 u.makeplot()

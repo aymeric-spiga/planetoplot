@@ -23,15 +23,12 @@ u.sx = 3
 u.sy = 3
 u.getplot()
 
-
-
 u.z = "50"
 u.filename = "myplot"
 u.getplot()
 
-
-u.p[0].colorbar = "jet"
-u.p[0].trans = 0.0
-u.p[0].back = "vis"
+u.colorbar = "jet"
+u.trans = 0.0
+u.back = "vis"
 
 u.makeplot()

@@ -18,8 +18,8 @@ u.get()
 
 # we define the plot, then set a few personal stuff
 u.defineplot() 
-u.p[0].title = "This is what we name $u$"
-u.p[0].proj = "robin"
+u.title = "This is what we name $u$"
+u.proj = "robin"
 u.filename = "simple"
 
 # we plot
@@ -27,7 +27,7 @@ u.makeplot()
 
 # we simply change the colorbar
 # ... no need to reload data
-u.p[0].colorbar = "RdBu"
+u.colorbar = "RdBu"
 u.filename = "myplot"
 u.makeplot()
 
