@@ -642,6 +642,13 @@ class plot2d(plot):
             self.y = np.array(range(self.f.shape[1]))
             self.mapmode = False
             print "!! WARNING !! dummy coordinates on y axis"
+        # check sizes
+        if self.addcontour is not None:
+            if self.addcontour.ndim != 2:
+                print "!! WARNING !! Contour is not a 2D field. No contour.",self.addcontour.ndim
+                self.addcontour = None
+        if self.field.ndim != 2:
+            print "!! ERROR !! Field is not two-dimensional" ; exit()
         # transposing if necessary
         shape = self.f.shape
         if shape[0] != shape[1]:
