@@ -1262,6 +1262,7 @@ class onerequest():
         self.name_x = None ; self.name_y = None ; self.name_z = None ; self.name_t = None
         self.dim_x = None ; self.dim_y = None ; self.dim_z = None ; self.dim_t = None
         self.field_x = None ; self.field_y = None ; self.field_z = None ; self.field_t = None
+        self.tabtime = None
         self.dimplot = 0
         self.nplot = 1
         self.absc = None ; self.ordi = None ; self.absclab = None ; self.ordilab = None
@@ -1396,24 +1397,24 @@ class onerequest():
              if self.verbose: print "**** OK. Found time variable: ",c
           try:
             # speed up: only get first value, last one.
-            tabtime = self.f.variables[self.name_t]
+            self.tabtime = self.f.variables[self.name_t]
             # (consider the case where tabtime is not dim 1)
             # (time is most often the first dimension)
-            if tabtime.ndim == 2: tabtime = tabtime[:,0]
-            elif tabtime.ndim == 3: tabtime = tabtime[:,0,0]
-            elif tabtime.ndim == 4: tabtime = tabtime[:,0,0,0]
+            if self.tabtime.ndim == 2: self.tabtime = self.tabtime[:,0]
+            elif self.tabtime.ndim == 3: self.tabtime = self.tabtime[:,0,0]
+            elif self.tabtime.ndim == 4: self.tabtime = self.tabtime[:,0,0,0]
             # (now proceed) (the +0. just ensures this is a number)
-            dafirst = tabtime[0] + 0.
+            dafirst = self.tabtime[0] + 0.
             if self.dim_t == 1:
                 self.field_t = np.array([dafirst])
             else:
-                daint = tabtime[1] - dafirst
+                daint = self.tabtime[1] - dafirst
                 dalast = dafirst + (self.dim_t-1)*daint
                 self.field_t = np.linspace(dafirst,dalast,num=self.dim_t)
                 if self.verbose:
                     print "!! WARNING !! WARNING !! Time axis is supposed to be equally spaced !!"
-                    if dalast != tabtime[self.dim_t-1]:
-                        print "!! WARNING !! Time axis has been recast to be monotonic",dalast,tabtime[self.dim_t-1]
+                    if dalast != self.tabtime[self.dim_t-1]:
+                        print "!! WARNING !! Time axis has been recast to be monotonic",dalast,self.tabtime[self.dim_t-1]
           except:
             # ... or if a problem encountered, define a simple time axis
             if self.verbose: print "**** OK. There is something weird. Let us go for a simple time axis."
@@ -1441,16 +1442,15 @@ class onerequest():
                               + self.f.variables['controle'][26]
             ### options added by A. Spiga
             elif self.changetime == "correctls":
-                # not regularly spaced + handle modulo 360. in files
-                dafirst = tabtime[0] + 0.
-                daint = tabtime[1] - dafirst
+                dafirst = self.tabtime[0] + 0.
+                daint = self.tabtime[1] - dafirst
                 dalast = dafirst + (self.dim_t-1)*daint
                 year = 0.
                 add = np.linspace(dafirst,dalast,num=self.dim_t) ; add[0] = 0.
                 for iii in range(1,self.dim_t):
-                  if tabtime[iii] - tabtime[iii-1] < 0: year = year+1.
+                  if self.tabtime[iii] - self.tabtime[iii-1] < 0: year = year+1.
                   add[iii] = year*360.
-                self.field_t = add + tabtime
+                self.field_t = add + self.tabtime
             elif "mars_meso" in self.changetime:
                 if 'Times' not in self.f.variables.keys():
                     if self.verbose: print "!! WARNING !! Variable Times not in file. Cannot proceed to change of time axis."
