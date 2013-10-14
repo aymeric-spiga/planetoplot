@@ -1442,7 +1442,10 @@ class onerequest():
                               + self.f.variables['controle'][26]
             ### options added by A. Spiga
             elif self.changetime == "correctls":
-                dafirst = self.tabtime[0] + 0.
+              dafirst = self.tabtime[0] + 0.
+              if self.dim_t == 1:
+                self.field_t = np.array([dafirst])
+              else:
                 daint = self.tabtime[1] - dafirst
                 dalast = dafirst + (self.dim_t-1)*daint
                 year = 0.
