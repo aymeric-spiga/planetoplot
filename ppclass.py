@@ -174,6 +174,7 @@ class pp():
                       missing=1.e25,\
                       trans=None,back=None,\
                       showcb=None,\
+                      logy=None,\
                       title=None):
         self.request = None
         self.nrequest = 0
@@ -234,6 +235,7 @@ class pp():
         self.fmt = fmt
         self.trans = trans ; self.back = back
         self.showcb = showcb
+        self.logy = logy
 
     # print status
     def printstatus(self):
@@ -296,6 +298,7 @@ class pp():
             self.fmt = other.fmt
             self.trans = other.trans ; self.back = other.back
             self.showcb = other.showcb
+            self.logy = other.logy
         else:
             print "!! ERROR !! argument must be a pp object." ; exit()
 
@@ -841,6 +844,7 @@ class pp():
                     if self.nyticks is not None: plobj.nyticks = self.nyticks
                     if self.fmt is not None: plobj.fmt = self.fmt
                     if self.showcb is not None: plobj.showcb = self.showcb
+                    if self.logy is not None: plobj.logy = self.logy
                     # -- 1D specific
                     if dp == 1:
                         if self.linestyle is not None: plobj.linestyle = self.linestyle
