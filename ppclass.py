@@ -49,12 +49,27 @@ except IOError:
 def inspect(filename):
     print "**** INSPECT FILE",filename
     test = netCDF4.Dataset(filename)
+    #for obj in test.dimensions.values(): print obj
     print "**** VARIABLES: ",test.variables.keys()
-    for dim in test.dimensions.keys():
-        output = "**** DIMENSION: "+str(dim)+" "+str(len(test.dimensions[dim]))
-        try: output = output + " ----> "+str(test.variables[dim][0])+"  "+str(test.variables[dim][-1])
-        except: pass
-        print output ; output = ""
+    findinlist(test,glob_listx,"**** FOUND X-AXIS ---> ")
+    findinlist(test,glob_listy,"**** FOUND Y-AXIS ---> ")
+    findinlist(test,glob_listz,"**** FOUND Z-AXIS ---> ")
+    findinlist(test,glob_listt,"**** FOUND T-AXIS ---> ")
+    print "**** ( according to settings in "+whereset+zefile+" )"
+# -- function defined for the above function inspect
+def findinlist(netcdfobj,extlist,message):
+    found = False
+    for c in extlist:
+      if c in netcdfobj.variables.keys():
+        found = True
+        output = message+str(c)
+        if c in netcdfobj.dimensions.keys():
+          output = output+" ---- has "+str(len(netcdfobj.dimensions[c]))+" values"
+          try: output = output + " ---- from "+str(netcdfobj.variables[c][0])+" to "+str(netcdfobj.variables[c][-1])
+          except: pass
+        print output ; output = "" 
+    if not found:
+      print message+"not found. will simply use index."       
 
 # request a given attribute (and test if it is here)
 def ncattr(filename,char):
