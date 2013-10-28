@@ -47,15 +47,21 @@ except IOError:
 
 # inspect variables and dimensions in a netCDF file
 def inspect(filename):
+    print "---------------------------------------------------------------"
     print "**** INSPECT FILE",filename
     test = netCDF4.Dataset(filename)
-    #for obj in test.dimensions.values(): print obj
+    print "---------------------------------------------------------------"
+    print "**** DIMENSIONS:"
+    for obj in test.dimensions.values(): print obj
+    print "---------------------------------------------------------------"
     print "**** VARIABLES: ",test.variables.keys()
+    print "---------------------------------------------------------------"
     findinlist(test,glob_listx,"**** FOUND X-AXIS ---> ")
     findinlist(test,glob_listy,"**** FOUND Y-AXIS ---> ")
     findinlist(test,glob_listz,"**** FOUND Z-AXIS ---> ")
     findinlist(test,glob_listt,"**** FOUND T-AXIS ---> ")
     print "**** ( according to settings in "+whereset+zefile+" )"
+    print "---------------------------------------------------------------"
 # -- function defined for the above function inspect
 def findinlist(netcdfobj,extlist,message):
     found = False
@@ -69,7 +75,7 @@ def findinlist(netcdfobj,extlist,message):
           except: pass
         print output ; output = "" 
     if not found:
-      print message+"not found. will simply use index."       
+      print message+"not found. will simply use index (check out dimensions)."
 
 # request a given attribute (and test if it is here)
 def ncattr(filename,char):
