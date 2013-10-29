@@ -1250,6 +1250,21 @@ class pp():
                 try: self.p[iii].ymax = opt.ymax[0]
                 except: pass
             ###
+            try: self.p[iii].nxticks = opt.nxticks[iii]
+            except:
+                try: self.p[iii].nxticks = opt.nxticks[0]
+                except: pass
+            ###
+            try: self.p[iii].nyticks = opt.nyticks[iii]
+            except:
+                try: self.p[iii].nyticks = opt.nyticks[0]
+                except: pass
+            ###
+            try: self.p[iii].cbticks = opt.cbticks[iii]
+            except:
+                try: self.p[iii].cbticks = opt.cbticks[0]
+                except: pass
+            ###
             try: self.p[iii].modx = opt.modx[iii]
             except:
                 try: self.p[iii].modx = opt.modx[0]

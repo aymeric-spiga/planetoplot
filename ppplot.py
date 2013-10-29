@@ -54,6 +54,8 @@ zefrac = 0.05
 pad_inches_value=0.25
 # (negative mode)
 def_negative = False
+# (xkcd mode)
+def_xkcd = False
 ###############################################
 
 ### settings for 'negative-like' mode
@@ -65,6 +67,11 @@ if def_negative:
     mpl.rcParams['ytick.color'] = 'w'
     mpl.rcParams['grid.color'] = 'w'
     mpl.rc('savefig',facecolor='k',edgecolor='k')
+
+### settings for xkcd mode (only with matplotlib 1.3)
+### ... you must have Humori-Sans Font installed
+if def_xkcd:
+    mpl.xkcd()
 
 ##########################
 # executed when imported #
@@ -362,6 +369,7 @@ class plot():
                  ymax=None,\
                  nxticks=10,\
                  nyticks=10,\
+                 cbticks=None,\
                  title=""):
         ## what could be defined by the user
         self.var = var
@@ -388,6 +396,7 @@ class plot():
         self.ymax = ymax
         self.nxticks = nxticks
         self.nyticks = nyticks
+        self.cbticks = cbticks
         ## other useful arguments
         ## ... not used here in ppplot but need to be attached to plot object
         self.axisbg = "white"
@@ -539,11 +548,15 @@ class plot1d(plot):
         if self.ymin is not None: y1 = self.ymin
         if self.ymax is not None: y2 = self.ymax
         ax.set_ybound(lower=y1,upper=y2)
-        ## set with .div the number of ticks. (is it better than automatic?)
+        ## set with .div the number of ticks.
         if not self.logx:
-            ax.xaxis.set_major_locator(MaxNLocator(self.div/2)) #TBD: with nxticks?
+            ax.xaxis.set_major_locator(MaxNLocator(self.nxticks))
         else:
             print "!! WARNING. in logx mode, ticks are set automatically."
+        if not self.logy:
+            ax.yaxis.set_major_locator(MaxNLocator(self.nyticks))
+        else:
+            print "!! WARNING. in logy mode, ticks are set automatically."
         ## specific modulo labels
         if self.modx is not None:
             ax = labelmodulo(ax,self.modx)
@@ -713,6 +726,10 @@ class plot2d(plot):
                 ax.xaxis.set_major_locator(MaxNLocator(self.nxticks))
             else:
                 print "!! WARNING. in logx mode, ticks are set automatically."
+            if not self.logy:
+                ax.yaxis.set_major_locator(MaxNLocator(self.nyticks))
+            else:
+                print "!! WARNING. in logy mode, ticks are set automatically."
             ## specific modulo labels
             if self.modx is not None:
                 ax = labelmodulo(ax,self.modx)
@@ -834,7 +851,9 @@ class plot2d(plot):
             elif self.proj in ['moll']: orientation="horizontal" ; frac = 0.08 ; pad = 0.03 ; lu = 1.0
             elif self.proj in ['cyl']: orientation="vertical" ; frac = 0.023 ; pad = 0.03 ; lu = 0.5
             else: orientation = zeorientation ; frac = zefrac ; pad = 0.03 ; lu = 0.5
-            zelevpal = np.linspace(zevmin,zevmax,num=min([ticks/2+1,21]))
+            if self.cbticks is None:
+                self.cbticks = min([ticks/2+1,21])
+            zelevpal = np.linspace(zevmin,zevmax,num=self.cbticks)
             zecb = mpl.colorbar(fraction=frac,pad=pad,\
                                 format=self.fmt,orientation=orientation,\
                                 ticks=zelevpal,\
