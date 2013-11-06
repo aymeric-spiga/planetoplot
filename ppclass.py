@@ -1778,9 +1778,17 @@ class onerequest():
          else:
           # there is a problem above if stride != 1. a fix must be found. rewrite might be necessary. TBD
           pass
-        # make a mask in case there are non-NaN missing values. (what about NaN missing values?)
+        # check if 'not finite' values are present
+        # (happens with some netCDF files where -- appears in arrays)
+        # (but isn't it that netcdf4 returns masked arrays?)
+        w = np.where(np.isfinite(self.field) != True)
+        self.field[w] = np.NaN
+        ## catch netCDF missing values (TBD: add a test try)
+        #miss = self.f.variables[self.var].missing_value
+        #if miss is not None: self.missing = miss
+        # make a mask in case there are non-NaN missing values.
         # ... this is important for computations below (see ppcompute)
-        masked = np.ma.masked_where(np.abs(self.field) > self.missing,self.field)
+        masked = np.ma.masked_where(np.abs(self.field) >= self.missing,self.field)
         if masked.mask.any() == True:
              if self.verbose: print "!! WARNING !! Values over %5.3e are considered missing values." % self.missing
              self.field = masked
