@@ -1787,8 +1787,10 @@ class onerequest():
         # check if 'not finite' values are present
         # (happens with some netCDF files where -- appears in arrays)
         # (but isn't it that netcdf4 returns masked arrays?)
-        w = np.where(np.isfinite(self.field) != True)
-        self.field[w] = np.NaN
+        # -- we do not perform this correction for computations for which -- are handled correctly
+        if "comp" not in self.method_t+self.method_z+self.method_y+self.method_x:
+          w = np.where(np.isfinite(self.field) != True)
+          self.field[w] = np.NaN
         ## catch netCDF missing values (TBD: add a test try)
         #miss = self.f.variables[self.var].missing_value
         #if miss is not None: self.missing = miss
