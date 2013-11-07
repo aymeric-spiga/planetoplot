@@ -94,7 +94,7 @@ try:
         if "#" in line: pass
         else:
             var, format, colorb, label, units = line.strip().split(';')
-            ind = var.strip() 
+            ind = var.strip().upper()
             vf[ind] = format.strip()
             vc[ind] = colorb.strip()
             vl[ind] = label.strip()
