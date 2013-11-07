@@ -756,7 +756,11 @@ class plot2d(plot):
             steplat = int(abs(wlat[1]-wlat[0])/3.)
             #mertab = np.r_[wlon[0]:wlon[1]:steplon] ; merlab = [0,0,0,1]
             #partab = np.r_[wlat[0]:wlat[1]:steplat] ; parlab = [1,0,0,0]
-            mertab = np.r_[-180.:180.:steplon] ; merlab = [0,0,0,1] #-360:360.
+            if np.abs(wlon[0]) < 180.1 and np.abs(wlon[1]) < 180.1:
+                mertab = np.r_[-180.:180.:steplon]
+            else:
+                mertab = np.r_[0.:360.:steplon]
+            merlab = [0,0,0,1]
             partab = np.r_[-90.:90.:steplat] ; parlab = [1,0,0,0]
             format = '%.1f'
             # -- center of domain and bounding lats
@@ -769,6 +773,7 @@ class plot2d(plot):
             # ... global projections
             elif self.proj in ["ortho","moll","robin"]:
                 wlat[0] = None ; wlat[1] = None ; wlon[0] = None ; wlon[1] = None
+                lon_0 = np.ceil(lon_0) # reverse map if lon_0 is slightly below 180 with [0,360]
                 steplon = 30. ; steplat = 30.
                 if self.proj in ["moll"]: steplon = 60.
                 if self.proj in ["robin"]: steplon = 90.
