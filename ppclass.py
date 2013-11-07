@@ -1112,6 +1112,12 @@ class pp():
         # -- if as many as number of plots --> OK, each plot has its own setting
         # (except a few cases such as trans)
         for iii in range(self.howmanyplots):
+            ## solve the bug about reversed labels with swaplab
+            if opt.xlabel is None and opt.ylabel is None:
+                self.p[iii].swaplab = True
+            else:
+                self.p[iii].swaplab = False
+            ##
             if opt.void:
                 self.p[iii].showcb = False
             else:
