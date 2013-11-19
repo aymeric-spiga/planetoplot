@@ -164,6 +164,7 @@ class pp():
                       svx=1,\
                       svy=1,\
                       compute="mean",\
+                      kind3d="tyx",\
                       verbose=False,\
                       quiet=False,\
                       noproj=False,\
@@ -222,6 +223,7 @@ class pp():
         self.svx = svx
         self.svy = svy
         self.compute = compute
+        self.kind3d = kind3d
         self.verbose = verbose
         self.quiet = quiet
         self.noproj = noproj
@@ -289,6 +291,8 @@ class pp():
             self.z = other.z ; self.t = other.t   ## if None, free dimension
             self.sx = other.sx ; self.sy = other.sy
             self.sz = other.sz ; self.st = other.st
+            self.compute = other.compute
+            self.kind3d = other.kind3d
             self.verbose = other.verbose
             self.noproj = other.noproj
             self.plotin = other.plotin
@@ -627,6 +631,8 @@ class pp():
               obj.method_z = mz ; obj.method_t = mt
               # indicate the computation method
               obj.compute = self.compute
+              # indicate the kind of 3D fields
+              obj.kind3d = self.kind3d
               # open the files (the same file might be opened several times but this is cheap)
               obj.openfile()
               ### get x,y,z,t dimensions from file
@@ -748,6 +754,7 @@ class pp():
                   #obj.field = ppcompute.smooth1d(obj.field,window=window)
               elif obj.field.ndim == 2:
                   obj.field = ppcompute.smooth2d(obj.field,window=window)
+                  #obj.field = ppcompute.smooth2diter(obj.field,n=window)
 
     ##############################################################################################  
     # defineplot method
@@ -1314,6 +1321,7 @@ class onerequest():
         self.changetime = None
         self.sx = 1 ; self.sy = 1 ; self.sz = 1 ; self.st = 1
         self.missing = '!! missing value: I am not set, damned !!'
+        self.kind3d = '!! kind3d: I am not set, damned !!'
 
     # open a file. for now it is netcdf. TBD for other formats.
     # check that self.var is inside.
@@ -1355,7 +1363,15 @@ class onerequest():
               self.dim_x = shape[1] ; self.dim_y = shape[0] ; self.dim_z = 1 ; self.dim_t = 1
           elif self.dim == 3:
               if self.verbose: print "**** OK. 3D field. I assume this is time-varying lat-lon map."
-              self.dim_x = shape[2] ; self.dim_y = shape[1] ; self.dim_z = 1 ; self.dim_t = shape[0]
+              ## see below for comment
+              if self.kind3d == "tyx":
+                self.dim_x = shape[2] ; self.dim_y = shape[1] ; self.dim_z = 1 ; self.dim_t = shape[0]
+              elif self.kind3d == "tzy":
+                self.dim_x = 1 ; self.dim_y = shape[2] ; self.dim_z = shape[1] ; self.dim_t = shape[0]
+              else:
+                print "!! ERROR !! This kind of 3D field is not supported. Please send feedback."
+                print self.kind3d
+                exit() 
           elif self.dim == 4:
               if self.verbose: print "**** OK. 4D field."
               self.dim_x = shape[3] ; self.dim_y = shape[2] ; self.dim_z = shape[1] ; self.dim_t = shape[0]
@@ -1702,8 +1718,16 @@ class onerequest():
             nt = 1 ; nz = 1 ; ny = self.index_y.size ; nx = self.index_x.size
             self.field = self.f.variables[self.var][self.index_y,self.index_x]
         elif self.dim == 3:
-            nt = self.index_t.size ; nz = 1 ; ny = self.index_y.size ; nx = self.index_x.size
-            self.field = self.f.variables[self.var][self.index_t,self.index_y,self.index_x]
+            ## DEFAULT tyx (time-varying 2D field)
+            if self.kind3d == "tyx":
+               nt = self.index_t.size ; nz = 1 ; ny = self.index_y.size ; nx = self.index_x.size
+               self.field = self.f.variables[self.var][self.index_t,self.index_y,self.index_x]
+            ## CASE tzy (e.g. time-varying zonal mean y-z field)
+            elif self.kind3d == "tzy":
+               nt = self.index_t.size ; nz = self.index_z.size ; ny = self.index_y.size ; nx = 1
+               self.field = self.f.variables[self.var][self.index_t,self.index_z,self.index_y]
+            else:
+               print "!! ERROR !! This kind of 3D field is not supported. Please send feedback." ; exit()
             # this is far faster than retrieving each term with a loop
         elif self.dim == 4:
             nt = self.index_t.size ; nz = self.index_z.size ; ny = self.index_y.size ; nx = self.index_x.size
