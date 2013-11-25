@@ -908,7 +908,7 @@ class pp():
               obj = self.request[i][j][t][z][y][x]
               if "mainmain" in goal and obj.dimplot == 2:
                   # the plot object we consider in the loop
-                  pl = self.p[count]
+                  plobj = self.p[count]
                   # -- see if there is a contour requested...
                   # (we use try because we might be at the end of the list)
                   found = 0
