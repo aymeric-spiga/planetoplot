@@ -43,7 +43,7 @@ how_many_sigma = 3.0
 # (contours)
 ccol = 'black'
 cline = 0.55
-cline = 0.8
+#cline = 0.8
 # (vectors)
 widthvec = 0.002
 reducevec = 30.
