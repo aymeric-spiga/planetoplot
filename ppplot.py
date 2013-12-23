@@ -312,7 +312,7 @@ def save(mode="gui",filename="plot",folder="./",includedate=True,res=150,custom=
           name = folder+'/'+filename
           if includedate:
               for ttt in timelib.gmtime():
-                  name = name + "_" + str(ttt)
+                  name = name + "_" + "%03d" % (ttt)
           name = name +"."+mode
           ## save file
           print "**** Saving file in "+mode+" format... Please wait."
@@ -321,6 +321,7 @@ def save(mode="gui",filename="plot",folder="./",includedate=True,res=150,custom=
               mpl.savefig(name,dpi=res,pad_inches=pad_inches_value,bbox_inches='tight')
           else:
               # ... mapping mode, adapted space for labels etc...
+              # TBD: not impacted by pad_inches_value. why?
               mpl.savefig(name,dpi=res)
       else:
           print "!! ERROR !! File format not supported. Supported: ",possiblesave
@@ -761,7 +762,7 @@ class plot2d(plot):
             else:
                 mertab = np.r_[0.:360.:steplon]
             merlab = [0,0,0,1]
-            partab = np.r_[-90.:90.:steplat] ; parlab = [1,0,0,0]
+            partab = np.r_[-90.:90.+steplat:steplat] ; parlab = [1,0,0,0]
             format = '%.1f'
             # -- center of domain and bounding lats
             lon_0 = 0.5*(wlon[0]+wlon[1])
@@ -778,7 +779,7 @@ class plot2d(plot):
                 if self.proj in ["moll"]: steplon = 60.
                 if self.proj in ["robin"]: steplon = 90.
                 mertab = np.r_[-360.:360.:steplon]
-                partab = np.r_[-90.:90.:steplat]
+                partab = np.r_[-90.:90.+steplat:steplat]
                 if self.proj == "ortho": 
                     merlab = [0,0,0,0] ; parlab = [0,0,0,0]
                     # in ortho projection, blon and blat can be used to set map center
