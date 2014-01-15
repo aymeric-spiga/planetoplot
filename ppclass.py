@@ -178,6 +178,8 @@ class pp():
                       res=150.,\
                       xlabel=None,ylabel=None,\
                       xcoeff=None,ycoeff=None,\
+                      xmin=None,ymin=None,\
+                      xmax=None,ymax=None,\
                       nxticks=10,nyticks=10,\
                       proj=None,\
                       vmin=None,vmax=None,\
@@ -243,6 +245,8 @@ class pp():
         ## -- if not None, valid on all plots in the pp() objects
         self.xlabel = xlabel ; self.xcoeff = xcoeff
         self.ylabel = ylabel ; self.ycoeff = ycoeff
+        self.xmin = xmin ; self.xmax = xmax
+        self.ymin = ymin ; self.ymax = ymax
         self.proj = proj
         self.vmin = vmin ; self.vmax = vmax
         self.div = div
@@ -305,6 +309,8 @@ class pp():
             self.ylabel = other.ylabel ; self.ycoeff = other.ycoeff
             self.proj = other.proj
             self.vmin = other.vmin ; self.vmax = other.vmax
+            self.xmin = other.xmin ; self.xmax = other.xmax
+            self.ymin = other.ymin ; self.ymax = other.ymax
             self.div = other.div
             self.colorbar = other.colorbar
             self.linestyle = other.linestyle
@@ -873,6 +879,10 @@ class pp():
                     if self.fmt is not None: plobj.fmt = self.fmt
                     if self.showcb is not None: plobj.showcb = self.showcb
                     if self.logy is not None: plobj.logy = self.logy
+                    if self.xmin is not None: plobj.xmin = self.xmin
+                    if self.xmax is not None: plobj.xmax = self.xmax
+                    if self.ymin is not None: plobj.ymin = self.ymin
+                    if self.ymax is not None: plobj.ymax = self.ymax
                     # -- 1D specific
                     if dp == 1:
                         if self.linestyle is not None: plobj.linestyle = self.linestyle
@@ -1010,15 +1020,20 @@ class pp():
                     pl.invert = False ; pl.linestyle = None # don't invert again axis
                     # set saved titles and labels
                     if self.plotin is None:
-                        pl.xlabel,pl.ylabel,pl.xcoeff,pl.ycoeff,pl.title,pl.swaplab = sav 
+                        pl.xlabel,pl.ylabel,\
+                        pl.xcoeff,pl.ycoeff,\
+                        pl.nxticks,pl.nyticks,\
+                        pl.xmin,pl.xmax,\
+                        pl.ymin,pl.ymax,\
+                        pl.title,pl.swaplab = sav 
                     else:
                         prev_plot = self.plotin.p[self.n-1]
-                        pl.xlabel = prev_plot.xlabel
-                        pl.ylabel = prev_plot.ylabel
-                        pl.xcoeff = prev_plot.xcoeff
-                        pl.ycoeff = prev_plot.ycoeff
-                        pl.title = prev_plot.title
-                        pl.swaplab = prev_plot.swaplab
+                        pl.xlabel = prev_plot.xlabel ; pl.ylabel = prev_plot.ylabel
+                        pl.xcoeff = prev_plot.xcoeff ; pl.ycoeff = prev_plot.ycoeff
+                        pl.nxticks = prev_plot.nxticks ; pl.nyticks = prev_plot.nyticks
+                        pl.xmin = prev_plot.xmin ; pl.xmax = prev_plot.xmax
+                        pl.ymin = prev_plot.ymin ; pl.ymax = prev_plot.ymax
+                        pl.title = prev_plot.title ; pl.swaplab = prev_plot.swaplab
             else:
                 self.fig.add_subplot(self.subv,self.subh,self.n+1,axisbg=pl.axisbg)
             if self.verbose: print "**** Done subplot %i / %i " %( self.n+1,self.howmanyplots ) 
