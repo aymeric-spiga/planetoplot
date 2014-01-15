@@ -757,6 +757,8 @@ class plot2d(plot):
             steplat = int(abs(wlat[1]-wlat[0])/3.)
             #mertab = np.r_[wlon[0]:wlon[1]:steplon] ; merlab = [0,0,0,1]
             #partab = np.r_[wlat[0]:wlat[1]:steplat] ; parlab = [1,0,0,0]
+            if steplon < 1: steplon = 1
+            if steplat < 1: steplat = 1
             if np.abs(wlon[0]) < 180.1 and np.abs(wlon[1]) < 180.1:
                 mertab = np.r_[-180.:180.:steplon]
             else:
@@ -881,7 +883,7 @@ class plot2d(plot):
                    vecx,vecy = self.vx,self.vy 
                    if x.ndim < 2 and y.ndim < 2: x,y = np.meshgrid(x,y)
                 # reference vector is scaled
-                if self.wscale is None: 
+                if self.wscale is None:
                     self.wscale = ppcompute.mean(np.sqrt(self.vx*self.vx+self.vy*self.vy))
                 # make vector field
                 if self.mapmode: 
