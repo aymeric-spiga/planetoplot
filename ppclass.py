@@ -1515,6 +1515,9 @@ class onerequest():
                               + self.f.variables['controle'][26]
             ### options added by A. Spiga
             elif self.changetime == "correctls":
+             if self.tabtime is None:
+              print "!! WARNING !! Encountered a problem with correctls. Check your time dimension. Skipping this part."
+             else: 
               dafirst = self.tabtime[0] + 0.
               if self.dim_t == 1:
                 self.field_t = np.array([dafirst])
