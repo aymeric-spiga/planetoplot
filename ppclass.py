@@ -1010,7 +1010,12 @@ class pp():
             if pl.superpose:
                 if self.n == 0: 
                     self.fig.add_subplot(1,1,1,axisbg=pl.axisbg) # define one subplot (still needed for user-defined font sizes)
-                    sav = pl.xlabel,pl.ylabel,pl.xcoeff,pl.ycoeff,pl.title,pl.swaplab # save titles and labels
+                    sav = pl.xlabel,pl.ylabel,\
+                          pl.xcoeff,pl.ycoeff,\
+                          pl.nxticks,pl.nyticks,\
+                          pl.xmin,pl.xmax,\
+                          pl.ymin,pl.ymax,\
+                          pl.title,pl.swaplab # save titles and labels
                     # possibility to color lines according to a color map
                     # ... made so that all plots span the whole color map automatically.
                     if self.colorbar is not None: 
