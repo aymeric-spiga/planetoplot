@@ -1583,7 +1583,7 @@ class onerequest():
         elif self.method_t == "comp":
             start = np.argmin( np.abs( self.field_t - dalist[ind][0] ) )
             stop = np.argmin( np.abs( self.field_t - dalist[ind][1] ) )
-            self.index_t = np.arange(start,stop,self.st)
+            self.index_t = np.arange(start,stop+1,self.st)
             if self.verbose: print "**** OK. t values. comp over interval ",self.field_t[start],self.field_t[stop]," nvalues=",self.index_t.size
         elif self.method_t == "fixed":
             self.index_t.append( np.argmin( np.abs( self.field_t - dalist[ind][0] ) ))
@@ -1607,7 +1607,7 @@ class onerequest():
         elif self.method_z == "comp":
             start = np.argmin( np.abs( self.field_z - dalist[ind][0] ) )
             stop = np.argmin( np.abs( self.field_z - dalist[ind][1] ) )
-            self.index_z = np.arange(start,stop,self.sz)
+            self.index_z = np.arange(start,stop+1,self.sz)
             if self.verbose: print "**** OK. z values. comp over interval",self.field_z[start],self.field_z[stop]," nvalues=",self.index_z.size
         elif self.method_z == "fixed":
             self.index_z.append( np.argmin( np.abs( self.field_z - dalist[ind][0] ) ))
