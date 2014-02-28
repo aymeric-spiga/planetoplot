@@ -213,6 +213,10 @@ class pp():
         self.customplot = False
         self.f = None
         self.l = None
+        self.x = None
+        self.y = None
+        self.z = None
+        self.t = None
         ## what could be defined by the user
         self.file = file
         self.var = var
@@ -677,6 +681,10 @@ class pp():
         ## --> see example easy_get_field
         self.f = [ [] for iii in range(self.nrequest) ]
         self.l = [ [] for iii in range(self.nrequest) ]
+        self.x = [ [] for iii in range(self.nrequest) ]
+        self.y = [ [] for iii in range(self.nrequest) ]
+        self.z = [ [] for iii in range(self.nrequest) ]
+        self.t = [ [] for iii in range(self.nrequest) ]
         count = 0
         ## first get fields
         ## ... only what is needed is extracted from the files
@@ -693,6 +701,10 @@ class pp():
                   obj.computations()
               # save fields in self.f for the user
               self.f[count] = obj.field
+              self.x[count] = obj.field_x
+              self.y[count] = obj.field_y
+              self.z[count] = obj.field_z
+              self.t[count] = obj.field_t
               # save a legend in self.l for the user
               self.l[count] = "_"
               if self.nfin > 1:   self.l[count] = self.l[count] + "f=#"+str(int(i+1))+'_'
@@ -705,7 +717,12 @@ class pp():
               obj.closefile()
               count = count + 1
         ## make it simple: self.f is simply the data array if self.nrequest=1
-        if self.nrequest == 1: self.f = self.f[0]
+        if self.nrequest == 1: 
+            self.f = self.f[0]
+            self.x = self.x[0]
+            self.y = self.y[0]
+            self.z = self.z[0]
+            self.t = self.t[0]
         # change status
         self.status = "retrieved"
         return self
@@ -729,9 +746,19 @@ class pp():
         return self.f
 
     ############################################################
+    # getfd: a shortcut method for the define + retrieve chain #
+    #       ... in which the output is self.f,x,y,z,t          #
+    #       ... and the ppclass is kept quiet                  #
+    ############################################################
+    def getfd(self):
+        self.quiet = True
+        self.get()
+        return self.f,self.x,self.y,self.z,self.t
+
+    ############################################################
     # getfl: a shortcut method for the define + retrieve chain #
     #       ... in which the output is self.f, self.l          #
-    #       ... and the ppclass is kept quiet                 #
+    #       ... and the ppclass is kept quiet                  #
     ############################################################
     def getfl(self):
         self.quiet = True
