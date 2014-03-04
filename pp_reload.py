@@ -10,6 +10,7 @@ from ppplot import rainbow
 # -----------------------------------------------------------------------
 parser = OptionParser()
 parser.add_option('-O','--out',action='store',dest='out',type="string",default="gui",help='Specify a new output format')
+parser.add_option('-R','--res',action='store',dest='res',type="string",default=150.,help='Picture resolution')
 parser.add_option('-T','--title',action='store',dest='title',type="string",default=None,help='Give a new title')
 parser.add_option('-K','--marker',action='store',dest='marker',type="string",default=None,help="[1D] Define a new marker")
 parser.add_option('-P','--proj',action='store',dest='proj',type="string",default=None,help='[2D] Define a new map projection')
@@ -29,6 +30,7 @@ for files in args:
     yeah.quiet = True
     yeah.defineplot(loadfile=files)
     yeah.out = opt.out
+    yeah.res = opt.res
 
     if opt.proj is not None:
       for plot in yeah.p:
