@@ -889,12 +889,12 @@ class plot2d(plot):
                 if self.mapmode: 
                     q = m.quiver( x[::self.svy,::self.svx],y[::self.svy,::self.svx],\
                                   vecx[::self.svy,::self.svx],vecy[::self.svy,::self.svx],\
-                                  angles='xy',color=self.colorvec,pivot='tail',\
+                                  angles='xy',color=self.colorvec,pivot='middle',\
                                   scale=self.wscale*reducevec,width=widthvec )
                 else:
                     q = mpl.quiver( x[::self.svy,::self.svx],y[::self.svy,::self.svx],\
                                     vecx[::self.svy,::self.svx],vecy[::self.svy,::self.svx],\
-                                    angles='xy',color=self.colorvec,pivot='tail',\
+                                    angles='xy',color=self.colorvec,pivot='middle',\
                                     scale=self.wscale*reducevec,width=widthvec )
                 # make vector key.
                 #keyh = 1.025 ; keyv = 1.05 # upper right corner over colorbar
