@@ -1450,7 +1450,11 @@ class onerequest():
           # 2. complex 3D case (time-varying, actually just copied over time axis)
           elif len(self.field_x.shape)*len(self.field_y.shape) == 9:
                if self.verbose: print "**** OK. reducing lon and lat as 2D fields. get rid of time."
-               self.field_x = self.field_x[0,:,:]
+               # if longitudes are crossing 180 deg limit, then modify longitude vector
+	       self.field_x = self.field_x[0,:,:]
+               for j in range(self.field_x[0,:].size-1):
+	       		if (self.field_x[0,j+1]-self.field_x[0,j] < 0.):
+				self.field_x[:,j+1]=self.field_x[:,j+1]+360.
                self.field_y = self.field_y[0,:,:]
           # if xy axis are apparently undefined, set 2D grid points axis.
           if "grid points" not in self.name_x:
