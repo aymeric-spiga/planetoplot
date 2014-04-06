@@ -33,7 +33,7 @@ def findset(whereset,string="planetoplot_v2"):
 
 ## compute min
 ## author AS + AC
-def min (field,axis=None): 
+def min(field,axis=None): 
         if field is None: return None
         if type(field).__name__=='MaskedArray':
               field.set_fill_value(np.NaN)
@@ -44,7 +44,7 @@ def min (field,axis=None):
 
 ## compute max
 ## author AS + AC
-def max (field,axis=None):
+def max(field,axis=None):
         if field is None: return None
         if type(field).__name__=='MaskedArray':
               field.set_fill_value(np.NaN)
@@ -55,7 +55,7 @@ def max (field,axis=None):
 
 ## compute mean
 ## author AS + AC
-def mean (field,axis=None):
+def mean(field,axis=None):
         if field is None: return None
         else: 
            if type(field).__name__=='MaskedArray':
@@ -76,7 +76,7 @@ def mean (field,axis=None):
 
 ## compute sum
 ## author AS + AC
-def sum (field,axis=None):
+def sum(field,axis=None):
         if field is None: return None
         else:
            if type(field).__name__=='MaskedArray':
@@ -114,6 +114,22 @@ def meanbin(y,x,bins):
     ## RETURN A NUMPY ARRAY
     meanvalues = np.array(meanvalues)
     return meanvalues
+
+## compute perturbation to mean
+## -- the whole dimension must exist!
+## author AS
+def perturbation(field,axis=None):
+    # calculate mean (averaged dim is reduced)
+    mm = mean(field,axis=axis)
+    # include back the reduced dim
+    if field.ndim == 4: mm = np.tile(mm,(field.shape[axis],1,1,1))
+    elif field.ndim == 3: mm = np.tile(mm,(field.shape[axis],1,1))
+    elif field.ndim == 2: mm = np.tile(mm,(field.shape[axis],1))
+    # array has right shape but not in good order: fix this.
+    mm = np.reshape(mm,field.shape)
+    # compute perturbations
+    field = field - mm
+    return field
 
 ################
 #### SMOOTH ####

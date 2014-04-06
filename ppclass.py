@@ -870,9 +870,9 @@ class pp():
                     plobj.define_from_var()
                     # generic 1D/2D: load field and coord in plot object 
                     plobj.f = obj.field    # field to be plotted
-                    plobj.x = obj.absc      # abscissa (or longitude)
-                    plobj.y = obj.ordi      # ordinate (or latitude)
-                                               # -- useless in 1D but not used anyway
+                    plobj.x = obj.absc     # abscissa (or longitude)
+                    plobj.y = obj.ordi     # ordinate (or latitude)
+                                           # -- useless in 1D but not used anyway
                     # specific 1D plot stuff
                     if dp == 1:
                         # -- a default legend
@@ -1688,7 +1688,7 @@ class onerequest():
                 yeah = (self.field_x >= dalistx[indx][0])*(self.field_x <= dalistx[indx][1])
                 self.index_x = yeah[0,:]
             if self.method_y == "comp":
-                yeah = (self.field_y >= dalisty[indy][0]) * (self.field_y <= dalisty[indy][1])
+                yeah = (self.field_y >= dalisty[indy][0])*(self.field_y <= dalisty[indy][1])
                 self.index_y = yeah[:,0]
             self.index_x2d = self.index_x
             self.index_y2d = self.index_y
@@ -1755,39 +1755,41 @@ class onerequest():
           elif self.dimplot == 0 and self.verbose:   print "**** OK. 0D value requested."
           elif self.dimplot == 1 and self.verbose:   print "**** OK. 1D plot requested."
           elif self.verbose:                         print "**** OK. 2D section requested."
-        # well, now get field from netcdf file
+        # well, now get field from netcdf file  
         # part below is necessary otherwise there is an index error below
         if self.index_x.size == 1: self.index_x = self.index_x[0]
         if self.index_y.size == 1: self.index_y = self.index_y[0]
         if self.index_z.size == 1: self.index_z = self.index_z[0]
         if self.index_t.size == 1: self.index_t = self.index_t[0]
-        # then retrieve what is requested by user
-        # each self.dim case corresponds to tests in the beginning of getdim.
-        time0 = timelib.time()
-        if self.verbose: print "**** OK. I am getting values from files. Please wait."
+        # set everything about dimensions and slices
+        # -- each self.dim case corresponds to tests in the beginning of getdim.
         if self.dim == 1:  
             nt = self.index_t.size ; nz = 1 ; ny = 1 ; nx = 1
-            self.field = self.f.variables[self.var][self.index_t]
+            tupledim = self.index_t
         elif self.dim == 2:
             nt = 1 ; nz = 1 ; ny = self.index_y.size ; nx = self.index_x.size
-            self.field = self.f.variables[self.var][self.index_y,self.index_x]
+            tupledim = self.index_y,self.index_x
         elif self.dim == 3:
             ## DEFAULT tyx (time-varying 2D field)
             if self.kind3d == "tyx":
                nt = self.index_t.size ; nz = 1 ; ny = self.index_y.size ; nx = self.index_x.size
-               self.field = self.f.variables[self.var][self.index_t,self.index_y,self.index_x]
+               tupledim = self.index_t,self.index_y,self.index_x
             ## CASE tzy (e.g. time-varying zonal mean y-z field)
             elif self.kind3d == "tzy":
                nt = self.index_t.size ; nz = self.index_z.size ; ny = self.index_y.size ; nx = 1
-               self.field = self.f.variables[self.var][self.index_t,self.index_z,self.index_y]
+               tupledim = self.index_t,self.index_z,self.index_y
             else:
                print "!! ERROR !! This kind of 3D field is not supported. Please send feedback." ; exit()
             # this is far faster than retrieving each term with a loop
         elif self.dim == 4:
             nt = self.index_t.size ; nz = self.index_z.size ; ny = self.index_y.size ; nx = self.index_x.size
-            self.field = self.f.variables[self.var][self.index_t,self.index_z,self.index_y,self.index_x]
+            tupledim = self.index_t,self.index_z,self.index_y,self.index_x
         else:
             print "!! ERROR !! field would have more than four dimensions ?" ; exit()
+        # then retrieve what is requested by user!
+        time0 = timelib.time()
+        if self.verbose: print "**** OK. I am getting values from files. Please wait."     
+        self.field = self.f.variables[self.var][tupledim]    
         # dirty hack (AS) ref1_dirty_hack
         # waiting for more fundamental modifications. case when self.index_y is a bool array.
         # ... be careful if no point...
@@ -1896,39 +1898,38 @@ class onerequest():
                 if self.verbose: print "!! WARNING !! No area accounted for (computing on t and/or z axis)."
         # prepare quadratic mean
         if "qmean" in self.compute: self.field = self.field*self.field
-        # now ready to compute [TBD: we would like to have e.g. mean over x,y and min over t ??]
-        if self.method_t == "comp":
-            if self.verbose: print "**** OK. Computing over t axis."
-            if "mean" in self.compute: self.field = ppcompute.mean(self.field,axis=0)
-            elif self.compute == "min": self.field = ppcompute.min(self.field,axis=0)
-            elif self.compute == "max": self.field = ppcompute.max(self.field,axis=0)
-            else: print "!! ERROR !! operation not supported." ; exit()
-            nt = 1 ; self.field = np.reshape(self.field,(nt,nz,ny,nx))
-        if self.method_z == "comp": 
-            if self.verbose: print "**** OK. Computing over z axis."
-            if "mean" in self.compute: self.field = ppcompute.mean(self.field,axis=1)
-            elif self.compute == "min": self.field = ppcompute.min(self.field,axis=1)
-            elif self.compute == "max": self.field = ppcompute.max(self.field,axis=1)
-            else: print "!! ERROR !! operation not supported." ; exit()
-            nz = 1 ; self.field = np.reshape(self.field,(nt,nz,ny,nx))
-        if self.method_y == "comp": 
-            if self.verbose: print "**** OK. Computing over y axis."
-            if self.compute == "meanarea": self.field = ppcompute.sum(self.field,axis=2)
-            elif "mean" in self.compute: self.field = ppcompute.mean(self.field,axis=2)
-            elif self.compute == "min": self.field = ppcompute.min(self.field,axis=2)
-            elif self.compute == "max": self.field = ppcompute.max(self.field,axis=2)
-            else: print "!! ERROR !! operation not supported." ; exit()
-            ny = 1 ; self.field = np.reshape(self.field,(nt,nz,ny,nx))
-            if self.field_x.ndim == 2: self.field_x = self.field_x[0,:] # TBD: this is OK for regular grid but not for irregular
-        if self.method_x == "comp":
-            if self.verbose: print "**** OK. Computing over x axis."
-            if self.compute == "meanarea": self.field = ppcompute.sum(self.field,axis=3)
-            elif "mean" in self.compute: self.field = ppcompute.mean(self.field,axis=3)
-            elif self.compute == "min": self.field = ppcompute.min(self.field,axis=3)
-            elif self.compute == "max": self.field = ppcompute.max(self.field,axis=3)
-            else: print "!! ERROR !! operation not supported." ; exit()
-            nx = 1 ; self.field = np.reshape(self.field,(nt,nz,ny,nx))
-            if self.field_y.ndim == 2: self.field_y = self.field_y[:,0] # TBD: this is OK for regular grid but not for irregular
+        # prepare and execute (possibly sequential) means
+        roll = [self.method_t, self.method_z, self.method_y, self.method_x]
+        reshapedim = [nt,nz,ny,nx]
+        for nr in range(len(roll)):
+          rrr = roll[nr]
+          if "comp" in rrr:
+            # a. computing
+            if self.verbose: print "**** OK. Computing over axis number ",zeaxis
+            if self.compute == "meanarea": self.field = ppcompute.sum  (self.field,axis=nr)
+            elif "mean" in self.compute:   self.field = ppcompute.mean (self.field,axis=nr)
+            elif self.compute == "min":    self.field = ppcompute.min  (self.field,axis=nr)
+            elif self.compute == "max":    self.field = ppcompute.max  (self.field,axis=nr)
+            else:                          print "!! ERROR !! operation not supported." ; exit()
+            # b. reshaping
+            reshapedim[nr] = 1
+            self.field = np.reshape(self.field,reshapedim) 
+            # c. particular cases for 2D coordinates
+            if nr == 2 and self.field_x.ndim == 2: self.field_x = self.field_x[0,:] # TBD: this is OK for regular grid but not for irregular
+            if nr == 3 and self.field_y.ndim == 2: self.field_y = self.field_y[:,0] # TBD: this is OK for regular grid but not for irregular
+        # computations for which only setting compute is needed
+        if   "_x" in self.compute: zeaxis = 3
+        elif "_y" in self.compute: zeaxis = 2
+        elif "_z" in self.compute: zeaxis = 1
+        elif "_t" in self.compute: zeaxis = 0
+        if   "pert" in self.compute: 
+           self.field = ppcompute.perturbation(self.field,axis=zeaxis)
+        elif "diff" in self.compute:
+           dadiff = np.diff(self.field,axis=zeaxis)
+           # (diff ouput has one value less in impacted dimension. fix this.)
+           reshapedim[zeaxis] = reshapedim[zeaxis]-1
+           self.field[:,:,:,:] = np.nan
+           self.field[0:reshapedim[0],0:reshapedim[1],0:reshapedim[2],0:reshapedim[3]] = dadiff
         # remove all dimensions with size 1 to prepare plot (and check the resulting dimension with dimplot)
         self.field = np.squeeze(self.field)
         # take root mean square for quadratic mean
