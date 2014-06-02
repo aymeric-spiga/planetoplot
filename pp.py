@@ -79,6 +79,8 @@ parser.add_option('--xmax',action='append',dest='xmax',type="float",default=None
 parser.add_option('--ymax',action='append',dest='ymax',type="float",default=None,help="max bound y axis [not for 2D map]")
 parser.add_option('--nxticks',action='append',dest='nxticks',type="float",default=None,help="ticks for x axis [not for 2D map]")
 parser.add_option('--nyticks',action='append',dest='nyticks',type="float",default=None,help="ticks for y axis [not for 2D map]")
+parser.add_option('--xp',action='store',dest='xp',type="int",default=None,help="x size of figure (integer)")
+parser.add_option('--yp',action='store',dest='yp',type="int",default=None,help="y size of figure (integer)")
 # -- 1D plot
 parser.add_option('-L','--linestyle',action='append',dest='linestyle',type="string",default=None,help="[1D] linestyle: '-' '--' '.' '..'")
 parser.add_option('-Q','--color',action='append',dest='color',type="string",default=None,help="[1D] color: 'b' 'g' 'r' etc")
@@ -96,8 +98,8 @@ parser.add_option('-J','--blat',action='append',dest='blat',type="float",default
 parser.add_option('-N','--vmin',action='append',dest='vmin',type="float",default=None,help='[2D] float: minimum value for displayed field')
 parser.add_option('-M','--vmax',action='append',dest='vmax',type="float",default=None,help='[2D] float: maximum value for displayed field')
 parser.add_option('-W','--wscale',action='append',dest='wscale',type="float",default=None,help='[2D] float: set size of reference wind vector')
-parser.add_option('--svx',action='store',dest='svx',type="int",default=1,help="Define an abscissa stride on vectors only -- not on field")
-parser.add_option('--svy',action='store',dest='svy',type="int",default=1,help="Define an ordinate stride on vectors only -- not on field")
+parser.add_option('--svx',action='store',dest='svx',type="int",default=None,help="Define an abscissa stride on vectors only -- not on field")
+parser.add_option('--svy',action='store',dest='svy',type="int",default=None,help="Define an ordinate stride on vectors only -- not on field")
 parser.add_option('--cbticks',action='append',dest='cbticks',type="float",default=None,help="ticks for colorbar")
 ###########################
 (opt,args) = parser.parse_args()
@@ -141,6 +143,8 @@ user.sx = opt.sx ; user.sy = opt.sy
 user.sz = opt.sz ; user.st = opt.st
 user.svx = opt.svx ; user.svy = opt.svy
 user.savtxt = opt.savtxt
+if opt.xp is not None: user.xp = opt.xp
+if opt.yp is not None: user.yp = opt.yp
 # define field
 user.define()
 # retrieve field

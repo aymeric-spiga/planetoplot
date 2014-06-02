@@ -161,8 +161,8 @@ class pp():
                       x=None,y=None,z=None,t=None,\
                       sx=1,sy=1,\
                       sz=1,st=1,\
-                      svx=1,\
-                      svy=1,\
+                      svx=None,\
+                      svy=None,\
                       compute="mean",\
                       kind3d="tyx",\
                       verbose=False,\
@@ -181,6 +181,9 @@ class pp():
                       xmax=None,ymax=None,\
                       nxticks=10,nyticks=10,\
                       proj=None,\
+                      blat=None,\
+                      blon=None,\
+                      wscale=None,\
                       vmin=None,vmax=None,\
                       div=None,\
                       colorbar=None,\
@@ -250,6 +253,8 @@ class pp():
         self.xmin = xmin ; self.xmax = xmax
         self.ymin = ymin ; self.ymax = ymax
         self.proj = proj
+        self.blat = blat ; self.blon = blon
+        self.wscale = wscale
         self.vmin = vmin ; self.vmax = vmax
         self.div = div
         self.colorbar = colorbar
@@ -307,6 +312,8 @@ class pp():
             self.xlabel = other.xlabel ; self.xcoeff = other.xcoeff
             self.ylabel = other.ylabel ; self.ycoeff = other.ycoeff
             self.proj = other.proj
+            self.blat = other.blat ; self.blon = other.blon
+            self.wscale = other.wscale
             self.vmin = other.vmin ; self.vmax = other.vmax
             self.xmin = other.xmin ; self.xmax = other.xmax
             self.ymin = other.ymin ; self.ymax = other.ymax
@@ -883,6 +890,9 @@ class pp():
                         plobj.proj = self.proj
                         plobj.svx = self.svx
                         plobj.svy = self.svy
+                        plobj.blat = self.blat
+                        plobj.blon = self.blon
+                        plobj.wscale = self.wscale
                         # -- light grey background for missing values
                         if type(plobj.f).__name__ in 'MaskedArray': plobj.axisbg = '0.75'
                         # -- define if it is a map or a plot

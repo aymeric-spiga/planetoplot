@@ -434,7 +434,7 @@ class plot():
          if self.swaplab:
            mpl.xlabel(self.ylabel)
            mpl.ylabel(self.xlabel)
-        mpl.title(self.title)
+        mpl.title(self.title,y=1.01) # raise a little bit for subscript
         # if masked array, set masked values to filled values (e.g. np.nan) for plotting purposes
         if type(self.f).__name__ in 'MaskedArray':
             self.f[self.f.mask] = self.f.fill_value
@@ -613,8 +613,8 @@ class plot2d(plot):
                  vmax=None,\
                  showcb=True,\
                  wscale=None,\
-                 svx=1,\
-                 svy=1,\
+                 svx=3,\
+                 svy=3,\
                  leftcorrect=False,\
                  colorvec="black"):
         ## get initialization from parent class
@@ -902,7 +902,12 @@ class plot2d(plot):
         if self.vx is not None and self.vy is not None: 
                 # vectors on map projection or simple 2D mapping
                 if self.mapmode: 
-                   [vecx,vecy] = m.rotate_vector(self.vx,self.vy,self.x,self.y) # for metwinds only ?
+                   try:
+                     [vecx,vecy] = m.rotate_vector(self.vx,self.vy,self.x,self.y) # for metwinds only ?
+                   except:
+                     print "!! ERROR !! Problem with field shapes for vector?" 
+                     print self.vx.shape,self.vy.shape,self.x.shape,self.y.shape
+                     exit()
                 else:
                    vecx,vecy = self.vx,self.vy 
                    if x.ndim < 2 and y.ndim < 2: x,y = np.meshgrid(x,y)
