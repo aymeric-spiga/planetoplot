@@ -50,7 +50,7 @@ parser.add_option('-i','--vecx',action='store',dest='vecx',type="string",default
 parser.add_option('-j','--vecy',action='store',dest='vecy',type="string",default=None,help="one 'variable' for wind vector y component")
 parser.add_option('-m','--mult',action='store',dest='mult',type="float",default=None,help="multiplicative factor on field")
 parser.add_option('-a','--add',action='store',dest='add',type="float",default=None,help="additive factor on field")
-parser.add_option('-o','--output',action='store',dest='filename',type="string",default="myplot",help="name of output files")
+parser.add_option('-o','--output',action='store',dest='filename',type="string",default=None,help="name of output files")
 parser.add_option('-d','--directory',action='store',dest='folder',type="string",default="./",help="directory of output files")
 parser.add_option('-s','--changetime',action='store',dest='changetime',type="string",default=None,\
                   help="transformation on time axis : [None] | correctls | mars_sol2ls | mars_dayini | mars_meso_ls | mars_meso_sol | mars_meso_utc | mars_meso_lt ")
@@ -67,7 +67,7 @@ parser.add_option('-Y','--ylabel',action='append',dest='ylabel',type="string",de
 parser.add_option('-D','--div',action='store',dest='div',type="int",default=20,help="integer for number of divisions")
 parser.add_option('-H','--trans',action='store',dest='trans',type="float",default=1.0,help="float for transparency (0=transp,1=opaque)")
 parser.add_option('-Z','--logy',action='store_true',dest='logy',default=False,help="set log for vertical axis")
-parser.add_option('-O','--save',action='store',dest='out',type="string",default="gui",help="save mode: 'gui' 'png' 'pdf' 'eps' 'svg' 'ps'")
+parser.add_option('-O','--save',action='store',dest='out',type="string",default=None,help="save mode: 'gui' 'png' 'pdf' 'eps' 'svg' 'ps'")
 parser.add_option('-V','--void',action='store_true',dest='void',default=False,help="no colorbar, no title, no labels")
 parser.add_option('-U','--units',action='append',dest='units',type="string",default=None,help="units for the field")
 parser.add_option('-F','--fmt',action='append',dest='fmt',type="string",default=None,help="values formatting. ex: '%.0f' '%3.1e'")
@@ -88,7 +88,7 @@ parser.add_option('-E','--legend',action='append',dest='legend',type="string",de
 parser.add_option('--modx',action='append',dest='modx',type="float",default=None,help="[1D] change xticks with a modulo")
 # -- 2D plot
 parser.add_option('-C','--colorbar',action='append',dest='colorbar',type="string",default=None,help="[2D] colormap: http://micropore.files.wordpress.com/2010/06/colormaps.png")
-parser.add_option('-P','--proj',action='append',dest='proj',type="string",default=None,help="[2D] map projection: 'cyl' 'npstere' 'spstere' 'ortho' 'moll' 'robin' 'lcc' 'laea' 'merc' 'noproj'")
+parser.add_option('-P','--proj',action='store',dest='proj',type="string",default=None,help="[2D] map projection: 'cyl' 'npstere' 'spstere' 'ortho' 'moll' 'robin' 'lcc' 'laea' 'merc'")
 parser.add_option('-B','--back',action='append',dest='back',type="string",default=None,help='[2D] predefined map background (cf. set_back.txt)')
 parser.add_option('-A','--area',action='append',dest='area',type="string",default=None,help='[2D] predefined region of mapping (cf. set_area.txt)')
 parser.add_option('-I','--blon',action='append',dest='blon',type="float",default=None,help='[2D] float: bounding longitude for stere (or center longitude for ortho)')
@@ -153,13 +153,7 @@ user.superpose = opt.superpose
 user.filename = opt.filename
 user.folder = opt.folder
 user.out = opt.out
-# if noproj is given for proj, no map mode
-if opt.proj is not None:
-    if 'noproj' in opt.proj: 
-        user.noproj = True
-# if user wants to give a name, we drop the indication of date
-if opt.filename != "myplot":
-    user.includedate = False
+user.proj = opt.proj
 # define plot
 user.defineplot()
 # user-defined plot settings
@@ -173,8 +167,9 @@ user.makeplot()
 ####################################
 command = ""
 for arg in sys.argv: command = command + arg + ' '
-try:
+if opt.filename is not None:
+  try:
     f = open(opt.folder+'/'+opt.filename+'.sh', 'w')
     f.write(command)	
-except IOError:
+  except IOError:
     print "!! WARNING !! pp.py command not saved. Probably do not have permission to write here."

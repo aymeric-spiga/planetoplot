@@ -298,16 +298,22 @@ def writeascii (field=None,absc=None,name=None):
             print "!! WARNING !! Not printing the file, 2D fields not supported yet."
     return
 
+# a necessary addition for people used to matplotlib
+def show():
+    mpl.show()
+
 # a generic function to show (GUI) or save a plot (PNG,EPS,PDF,...)
 # -------------------------------
-def save(mode="gui",filename="plot",folder="./",includedate=True,res=150,custom=False):
-    if mode != "nothing":
+def save(mode=None,filename=None,folder="./",includedate=False,res=150,custom=False):
+    # no filename or no mode set --> graphical user interface
+    if filename is None or mode is None:
+      show()
+    # otherwise --> an image is saved
+    else:
       # a few settings
       possiblesave = ['eps','ps','svg','png','jpg','pdf'] 
       # now the main instructions
-      if mode == "gui": 
-          mpl.show()
-      elif mode in possiblesave:
+      if mode in possiblesave:
           ## name of plot
           name = folder+'/'+filename
           if includedate:
@@ -326,9 +332,7 @@ def save(mode="gui",filename="plot",folder="./",includedate=True,res=150,custom=
       else:
           print "!! ERROR !! File format not supported. Supported: ",possiblesave
 
-# a necessary addition for people used to matplotlib
-def show():
-    mpl.show()
+
 
 ##################################
 # a generic class to make a plot #
@@ -553,11 +557,13 @@ class plot1d(plot):
         if not self.logx:
             ax.xaxis.set_major_locator(MaxNLocator(self.nxticks))
         else:
-            print "!! WARNING. in logx mode, ticks are set automatically."
+            # in logx mode, ticks are set automatically
+            pass
         if not self.logy:
             ax.yaxis.set_major_locator(MaxNLocator(self.nyticks))
         else:
-            print "!! WARNING. in logy mode, ticks are set automatically."
+            # in logy mode, ticks are set automatically
+            pass
         ## specific modulo labels
         if self.modx is not None:
             ax = labelmodulo(ax,self.modx)
@@ -567,6 +573,13 @@ class plot1d(plot):
     def makeshow(self):
         self.make()
         mpl.show()
+    # makesave = make + save
+    # -------------------------------
+    def makesave(self,mode="png",filename="plot",includedate=False,res=150):
+        self.make()
+        save(mode=mode,filename=filename,includedate=includedate,res=res)
+        close()
+
 
 ################################
 # a subclass to make a 2D plot #
@@ -647,6 +660,9 @@ class plot2d(plot):
         ############################################################################################
         ### PRE-SETTINGS
         ############################################################################################
+        # if no projection is set, set mapmode to False
+        if self.proj is None:
+            self.mapmode = False
         # set dummy xy axis if not defined
         if self.x is None: 
             self.x = np.array(range(self.f.shape[0]))
@@ -726,11 +742,13 @@ class plot2d(plot):
             if not self.logx:
                 ax.xaxis.set_major_locator(MaxNLocator(self.nxticks))
             else:
-                print "!! WARNING. in logx mode, ticks are set automatically."
+                pass
+                #print "!! WARNING. in logx mode, ticks are set automatically."
             if not self.logy:
                 ax.yaxis.set_major_locator(MaxNLocator(self.nyticks))
             else:
-                print "!! WARNING. in logy mode, ticks are set automatically."
+                pass
+                #print "!! WARNING. in logy mode, ticks are set automatically."
             ## specific modulo labels
             if self.modx is not None:
                 ax = labelmodulo(ax,self.modx)
@@ -773,6 +791,7 @@ class plot2d(plot):
             # ... cyl is good for global and regional
             if self.proj == "cyl":
                 format = '%.0f'
+                partab = np.r_[-90.,-60.,-30.,0.,30.,60.,90.]
             # ... global projections
             elif self.proj in ["ortho","moll","robin"]:
                 wlat[0] = None ; wlat[1] = None ; wlon[0] = None ; wlon[1] = None
@@ -781,7 +800,8 @@ class plot2d(plot):
                 if self.proj in ["moll"]: steplon = 60.
                 if self.proj in ["robin"]: steplon = 90.
                 mertab = np.r_[-360.:360.:steplon]
-                partab = np.r_[-90.:90.+steplat:steplat]
+                #partab = np.r_[-90.:90.+steplat:steplat]
+                partab = np.r_[-90.,-30.,0.,30.,90.]
                 if self.proj == "ortho": 
                     merlab = [0,0,0,0] ; parlab = [0,0,0,0]
                     # in ortho projection, blon and blat can be used to set map center
@@ -846,17 +866,21 @@ class plot2d(plot):
             x, y = m(self.x, self.y)
             # contour field. first line contour then shaded contour.
             if self.c is not None: 
+                #zelevelsc = np.arange(900.,1100.,5.)
                 objC2 = m.contour(x, y, what_I_contour, \
                             zelevelsc, colors = ccol, linewidths = cline)
                 #mpl.clabel(objC2, inline=1, fontsize=10,manual=True,fmt='-%2.0f$^{\circ}$C',colors='r')
+                #mpl.clabel(objC2, inline=0, fontsize=8, fmt='%.0f',colors='r', inline_spacing=0)
             m.contourf(x, y, what_I_plot, zelevels, cmap = palette, alpha = self.trans, antialiased=True)
         ############################################################################################
         ### COLORBAR
         ############################################################################################
         if self.trans > 0. and self.showcb:
             ## draw colorbar. settings are different with projections. or if not mapmode.
-            if not self.mapmode: orientation=zeorientation ; frac = 0.075 ; pad = 0.03 ; lu = 0.5
+            #if not self.mapmode: orientation=zeorientation ; frac = 0.075 ; pad = 0.03 ; lu = 0.5
+            if not self.mapmode: orientation=zeorientation ; frac = 0.15 ; pad = 0.04 ; lu = 0.5
             elif self.proj in ['moll']: orientation="horizontal" ; frac = 0.08 ; pad = 0.03 ; lu = 1.0
+            elif self.proj in ['robin']: orientation="horizontal" ; frac = 0.07 ; pad = 0.1 ; lu = 1.0
             elif self.proj in ['cyl']: orientation="vertical" ; frac = 0.023 ; pad = 0.03 ; lu = 0.5
             else: orientation = zeorientation ; frac = zefrac ; pad = 0.03 ; lu = 0.5
             if self.cbticks is None:
@@ -931,3 +955,11 @@ class plot2d(plot):
     def makeshow(self):
         self.make()
         mpl.show()
+
+    # makesave = make + save
+    # -------------------------------
+    def makesave(self,mode="png",filename="plot",includedate=False,res=150):
+        self.make()
+        save(mode=mode,filename=filename,includedate=includedate,res=res)
+        close()
+

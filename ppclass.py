@@ -167,14 +167,13 @@ class pp():
                       kind3d="tyx",\
                       verbose=False,\
                       quiet=False,\
-                      noproj=False,\
                       superpose=False,\
                       plotin=None,\
                       forcedimplot=-1,\
-                      out="gui",\
-                      filename="myplot",\
+                      out=None,\
+                      filename=None,\
                       folder="./",\
-                      includedate=True,\
+                      includedate=False,\
                       res=150.,\
                       xlabel=None,ylabel=None,\
                       xcoeff=None,ycoeff=None,\
@@ -232,7 +231,6 @@ class pp():
         self.kind3d = kind3d
         self.verbose = verbose
         self.quiet = quiet
-        self.noproj = noproj
         self.plotin = plotin
         self.superpose = superpose
         self.forcedimplot = forcedimplot
@@ -271,10 +269,7 @@ class pp():
     # print status
     def printstatus(self):
       if not self.quiet:
-        if self.filename == "THIS_IS_A_CLONE":
-            pass
-        else:
-            print "**** PPCLASS. Done step: " + self.status
+        print "**** PPCLASS. Done step: " + self.status
 
     # print attributes
     def printme(self):
@@ -302,7 +297,7 @@ class pp():
             self.compute = other.compute
             self.kind3d = other.kind3d
             self.verbose = other.verbose
-            self.noproj = other.noproj
+            self.quiet = other.quiet
             self.plotin = other.plotin
             self.superpose = other.superpose
             self.forcedimplot = other.forcedimplot
@@ -375,7 +370,7 @@ class pp():
            if k != "request":
                setattr(the_clone,k,v)
         the_clone.verbose = False
-        the_clone.filename = "THIS_IS_A_CLONE" # trick to avoid additional outputs
+        the_clone.quiet = True # trick to avoid additional outputs
         the_clone.define()
         for i in range(self.nfin):
          for j in range(self.nvin):
@@ -389,7 +384,7 @@ class pp():
                if k != "field":
                 setattr(obj,k,v)
         the_clone.status = "retrieved"
-        the_clone.filename = self.filename
+        the_clone.quiet = self.quiet
         return the_clone
 
     # define the operation + on two objects. or with an int/float.
@@ -885,12 +880,14 @@ class pp():
                         if self.nplotx > 1: plobj.legend = plobj.legend + " x="+str(self.x[x])
                     # specific 2d plot stuff
                     if dp == 2:
+                        plobj.proj = self.proj
+                        plobj.svx = self.svx
+                        plobj.svy = self.svy
                         # -- light grey background for missing values
                         if type(plobj.f).__name__ in 'MaskedArray': plobj.axisbg = '0.75'
                         # -- define if it is a map or a plot
                         plobj.mapmode = ( obj.method_x+obj.method_y == "freefree" \
-                                       and "grid points" not in obj.name_x \
-                                       and not self.noproj )
+                                       and "grid points" not in obj.name_x )
                     # possible user-defined plot settings shared by all plots
                     if self.div is not None: plobj.div = self.div
                     if self.xlabel is not None: plobj.xlabel = self.xlabel
@@ -918,13 +915,10 @@ class pp():
                         if self.legend is not None: plobj.legend = self.legend
                     # -- 2D specific
                     elif dp == 2:
-                        if self.proj is not None and not self.noproj: plobj.proj = self.proj
                         if self.vmin is not None: plobj.vmin = self.vmin
                         if self.vmax is not None: plobj.vmax = self.vmax
                         if self.trans is not None: plobj.trans = self.trans
 			if self.back is not None: plobj.back = self.back
-                        plobj.svx = self.svx
-                        plobj.svy = self.svy
                     # finally append plot object
                     self.p.append(plobj)
                     count = count + 1
@@ -1013,7 +1007,7 @@ class pp():
             ## ... except for ortho because there is no label anyway
             self.customplot = self.p[0].f.ndim == 2 \
                         and self.p[0].mapmode == True \
-                        and self.p[0].proj not in ["ortho"]
+                        and self.p[0].proj not in ["ortho","robin"]
             if self.customplot:
                 margin = 0.07
                 self.fig.subplots_adjust(left=margin,right=1-margin,bottom=margin,top=1-margin)
@@ -1025,6 +1019,7 @@ class pp():
             self.n = self.plotin.n
             self.howmanyplots = self.plotin.howmanyplots
             self.customplot = self.plotin.customplot
+            self.filename = self.plotin.filename
         # LOOP on all subplots
         # NB: cannot use 'for pl in self.p' if self.plotin not None
         # --------------------
@@ -1086,13 +1081,14 @@ class pp():
             ppplot.save(mode=self.out,filename=self.filename,folder=self.folder,custom=self.customplot,includedate=self.includedate,res=self.res)
             mpl.close()
         # SAVE A PICKLE FILE WITH THE self.p ARRAY OF OBJECTS
-        if self.verbose: print "**** Saving session in "+self.filename + ".ppobj"
-        savfile = self.folder + "/" + self.filename + ".ppobj"
-        try: 
-            filehandler = open(savfile, 'w')
-            pickle.dump(self.p, filehandler)
-        except IOError: 
-            if self.verbose: print "!! WARNING !! Saved object file not written. Probably do not have permission to write here."
+        if self.filename is not None:
+          if self.verbose: print "**** Saving session in "+self.filename + ".ppobj"
+          savfile = self.folder + "/" + self.filename + ".ppobj"
+          try: 
+              filehandler = open(savfile, 'w')
+              pickle.dump(self.p, filehandler)
+          except IOError: 
+              if self.verbose: print "!! WARNING !! Saved object file not written. Probably do not have permission to write here."
         return self
 
     ###########################################################
@@ -1234,12 +1230,7 @@ class pp():
             except:
                 try: self.p[iii].legend = opt.legend[0]
                 except: pass
-            ###
-            try: self.p[iii].proj = opt.proj[iii]
-            except: 
-                try: self.p[iii].proj = opt.proj[0]
-                except: pass
-            ###
+            ####
             try: self.p[iii].back = opt.back[iii]
             except: 
                 try: self.p[iii].back = opt.back[0]

@@ -122,11 +122,16 @@ def perturbation(field,axis=None):
     # calculate mean (averaged dim is reduced)
     mm = mean(field,axis=axis)
     # include back the reduced dim
-    if field.ndim == 4: mm = np.tile(mm,(field.shape[axis],1,1,1))
-    elif field.ndim == 3: mm = np.tile(mm,(field.shape[axis],1,1))
-    elif field.ndim == 2: mm = np.tile(mm,(field.shape[axis],1))
-    # array has right shape but not in good order: fix this.
-    mm = np.reshape(mm,field.shape)
+    if field.ndim == 4:
+      if axis == 0:   mm = mm[np.newaxis,:,:,:]
+      elif axis == 1: mm = mm[:,np.newaxis,:,:]
+      elif axis == 2: mm = mm[:,:,np.newaxis,:]
+      elif axis == 3: mm = mm[:,:,:,np.newaxis]
+    else:
+      print "not supported. yet!"
+      exit()
+    # repeat the calculated mean on this dimension
+    mm = np.repeat(mm,field.shape[axis],axis=axis)
     # compute perturbations
     field = field - mm
     return field
@@ -312,4 +317,58 @@ def timecorrect(time):
         if time[ind] < 0.: time[ind] = time[ind] + 24.
         if time[ind+1] < time[ind]: time[ind+1] = time[ind+1] + 24.
     return time
+
+#########################
+#### FLOW DIAGNOSTIC ####
+#########################
+
+def divort(u,v,lon,lat,rad):
+  ####################
+  # compute divergence and vorticity
+  # div,vorti = divort(u,v,lon,lat,rad)
+  ####################
+  # u: zonal wind
+  # v: meridional wind
+  # lon: longitude
+  # lat: latitude
+  # rad: radius of the planet
+  ####################
+
+  # compute gradients -- with normalized coordinates
+  du_y,du_x = np.gradient(u)
+  dv_y,dv_x = np.gradient(v)
+
+  # convert to radian
+  la = lon*np.pi/180.
+  ph = lat*np.pi/180.
+
+  # ensure 2D arrays for lon,lat
+  if lon.ndim == 1 and lat.ndim == 1:
+    [lar,phr] = np.meshgrid(la,ph)
+  elif lon.ndim == 2 and lat.ndim == 2:
+    lar,phr = la,ph
+  else:
+    print "ppcompute. there is a problem with lat/lon rank. stop."
+    exit()
+
+  # compute normalized gradients for lat/lon grid
+  dump,dla_x = np.gradient(lar)
+  dph_y,dump = np.gradient(phr)
+   
+  # compute cartesian differential coordinates
+  dx = dla_x*rad*np.cos(phr)
+  dy = dph_y*rad
+   
+  # eventually compute cartesian derivatives
+  du_dx = du_x / dx
+  du_dy = du_y / dy
+  dv_dx = dv_x / dx
+  dv_dy = dv_y / dy
+   
+  # vorticity
+  vorti = dv_dx - du_dy
+  div = du_dx + dv_dy 
+
+  return div,vorti
+
 
