@@ -11,7 +11,7 @@ U ; %.1f ; jet ; Zonal wind ; m s$^{-1}$
 UM ; %.1f ; jet ; Zonal wind ; m s$^{-1}$
 V ; %.1f ; jet ; Meridional wind ; m s$^{-1}$
 VM ; %.1f ; jet ; Meridional wind ; m s$^{-1}$
-W ; %.2f ; jet ; Vertical wind ; m s$^{-1}$
+W ; %.2f ; RdBu_r ; Vertical wind ; m s$^{-1}$
 U025 ; %.1f ; jet ; Wind speed 25cm above the surface ; m s$^{-1}$
 WIND ; %.0f ; YlOrRd ; Wind speed ; m s$^{-1}$
 UV ; %.0f ; YlOrRd ; Wind speed ; m s$^{-1}$
@@ -36,7 +36,7 @@ MTOT ; %.1e ; spectral ; Column vapor ; pr. $\mu$m
 ICETOT ; %.1e ; YlGnBu_r ; Column ice ; pr. $\mu$m
 TAU_ICE ; %.2f ; Blues ; Ice cloud opacity ; dimless
 TAUICE ; %.2f ; Blues ; Ice cloud opacity ; dimless
-VMR_ICE ; %.1e ; Blues ; Ice volume mix. rat. ; dimless
+VMR_ICE ; %.0f ; Blues ; Ice volume mix. rat. ; ppm
 VMR_H2OICE ; %.0f ; PuBu ; Ice volume mix. rat. ; dimless
 VMR_H2OVAP ; %.0f ; PuBu ; Vapor volume mix. rat. ; dimless
 QSURFICE ; %.0f ; hot_r ; Surface ice ; dimless
