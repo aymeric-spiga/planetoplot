@@ -1906,7 +1906,7 @@ class onerequest():
           rrr = roll[nr]
           if "comp" in rrr:
             # a. computing
-            if self.verbose: print "**** OK. Computing over axis number ",zeaxis
+            if self.verbose: print "**** OK. Computing over axis number ",nr
             if self.compute == "meanarea": self.field = ppcompute.sum  (self.field,axis=nr)
             elif "mean" in self.compute:   self.field = ppcompute.mean (self.field,axis=nr)
             elif self.compute == "min":    self.field = ppcompute.min  (self.field,axis=nr)
