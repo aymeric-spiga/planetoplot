@@ -1,0 +1,2 @@
+# import_binary function in CDO is needed to run the ic.py script. 
+# You can instal the corresponding CDO version by running the Install_pgi script in a directory of your choice.

@@ -1,0 +1,60 @@
+**************************************
+**************************************
+**************************************
+        MCS.PY DOCUMENTATION
+**************************************
+         Authors : AC
+**************************************
+  DON'T FORGET YOUR BEST FRIEND IS
+     mcs.py -h [or] mcs.py --help
+**************************************
+**************************************
+**************************************
+
+mcs.py transforms diagfi files from 
+a GCM format (i.e. spatial and temporal grid, with spatial-dependent localtime-binning) 
+to a certain degree of the MCS format.
+
+Examples:
+
+-------
+I have a diagfi.nc that I want to compare to MCS data
+by binning temperatures and co2ice at the correct localtimes as given in the MCS MY29 file.
+However, I want to keep my gcm grid !
+
+command -> mcs.py -f $YourSimulation/diagfi.nc -m /d5/lmlmd/MCS_processeddata/MCSdata_binned_MY29.nc --var temp,co2ice
+outputs -> diagfi_MCS.nc
+-------
+-------
+Ok, but after all, I want to interpolate these fields on the vertical grid used in the MCS data... (make sure to have rho in
+your file for a better interpolation. You also need aps, bps, ps and phisinit, at least in diagfi.nc or phisinit.nc.)
+
+command -> mcs.py -f $YourSimulation/diagfi.nc -m /d5/lmlmd/MCS_processeddata/MCSdata_binned_MY29.nc --var temp,co2ice -i
+outputs -> diagfi_P.nc , diagfi_P_MCS.nc
+-------
+-------
+Ok, but I dont care for the intermediary diagfi_P.nc file, it takes too much space. I want to remove it automatically
+after the computation
+
+command -> mcs.py -f $YourSimulation/diagfi.nc -m /d5/lmlmd/MCS_processeddata/MCSdata_binned_MY29.nc --var temp,co2ice -i --ditch
+output -> diagfi_P_MCS.nc
+-------
+-------
+I would also like to interpolate on the horizontal grid of MCS...
+
+command -> mcs.py -f $YourSimulation/diagfi.nc -m /d5/lmlmd/MCS_processeddata/MCSdata_binned_MY29.nc --var temp,co2ice -i --ditch -H
+output -> diagfi_h_P_MCS.nc
+-------
+-------
+I would like to use this command in a bash script in an automated way. As such, I dont want the script to recompute the recasted files
+if it is already there, and I want the script to use this recasted file instead.
+
+command -> mcs.py -f $YourSimulation/diagfi.nc -m /d5/lmlmd/MCS_processeddata/MCSdata_binned_MY29.nc --var temp,co2ice -i -H
+output -> diagfi_h_P_MCS.nc
+-------
+-------
+On the contrary, I want my script to override those already present files...
+
+command -> mcs.py -f $YourSimulation/diagfi.nc -m /d5/lmlmd/MCS_processeddata/MCSdata_binned_MY29.nc --var temp,co2ice -i -H --override
+output -> diagfi_P.nc , diagfi_h_P.nc , diagfi_h_P_MCS.nc
+-------

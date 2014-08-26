@@ -1,0 +1,57 @@
+############################
+## probe.sh
+## --------
+## tool to run 1D comparisons of single variables 
+## defined in callphys.def
+## --------
+## Author : A. Colaitis
+############################
+
+##
+
+# IT IS VERY STRONGLY RECOMMENDED TO RUN THIS SCRIPT
+# IN A LOCAL DIRECTORY OF THE PLANETO SERVERS (levan, viccaro, penn, under /home/local_home)
+# AS THE 1D MODEL RUNS HUNDREDS OF TIMES FASTER THAN ON NETWORK DISKS (/u, /planeto, /d..., /san ...)
+
+## Requirements:
+
+# You must have in the same folder as probe.sh:
+# - callphys.def
+# - traceur.def
+# - z2sig.def
+# - run.def
+# - a profile file if you use the corresponding mode in run.def
+# - the executable to test, i.e. testphys1d.e
+
+## Variable definition:
+
+# The variable to be explored must be set to a dummy value in callphys.def 
+eg: tauvis=999
+# The user must change the sed command in probe.sh to replace this value as desired
+eg: 
+sed -e s/'tauvis=999'/'tauvis='${TAU[ $i ]}/g r$i/callphys.def > r$i/callphys.def.tmp ; \mv r$i/callphys.def.tmp r$i/callphys.def
+
+with:
+taus="0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0"
+TAU=($taus)
+
+## Preparation
+
+# The cleaning and creation of directories where the 1D will be run is done by the following command:
+
+./probe.sh prepare
+# (make sure your probe.sh is executable, or type in chmod a+x probe.sh)
+
+## Running the comparisons
+
+# runs are launched with the following command:
+
+./probe.sh run
+
+## Analyse the results
+
+# results are analysed with the following command:
+
+./probe.sh analyse
+# png or eps can be specified as a second argument, eg "./probe.sh analyse eps"
+

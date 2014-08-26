@@ -1,0 +1,54 @@
+############################
+## ic.py
+## --------
+## A tool to convert MRAMS mesoscale files to netcdf format
+## and make them compatible with API and planetoplot.py
+## --------
+## Author : A. Colaitis
+############################
+
+************
+# IMPORTANT: the CDO version installed by default at LMD does not handle
+# import_binary operation ! You must install the correct CDO version. See for
+# exemple in $YOUR_SVN/trunk/UTIL/PYTHON/Intercomparison/CDO/ the Install_pgi.sh script that will do it for
+# you. Don't forget to add the corresponding path to you $PATH.
+***********
+
+## SETUP
+# ----------
+
+# The folder containing ic.py must also contain a symbolic link to the binary files you will convert, named "vis", eg:
+
+ln -sf /planeto/acolmd/SwRI_files/mrams/vis vis
+
+# IMPORTANT IMPORTANT IMPORTANT
+# The very first time you run this script, you must create the correct folders. This can be done easily with ic.py --deepclean
+
+
+## USAGE
+# ---------
+
+ic.py -c # clean generated mramsout_XXXX-XX-XX_XX:XX:XX files
+ic.py --deepclean # clean files mentioned above + the figures folder + the
+                  # very long to generate cdo outputs of the binary to netcdf conversion
+ic.py -g # generate everything. If cdo outputs are already present, skip them.
+         # If reformatted mramsout_XXXX-XX-XX_XX:XX:XX files are present, skip them.
+
+# constants to enter manually in ic.py:
+# file names in __main__()
+ outfileatm='holden_ls150-atm-S-'+grid+'.nc' # CDO output filename for atmosphere
+ outfilesfc='holden_ls150-sfc-S-'+grid+'.nc' # CDO output filename for surface
+ infileatm='holden_ls150-atm-S-'+grid+'.ctl' # CDO input filename for atmosphere
+ infilesfc='holden_ls150-sfc-S-'+grid+'.ctl' # CDO input filename for surface
+
+# Simulation and extraction properties in merge_atm_sfc()
+    ls_simu_start=147.  #ls of start simu
+#   NOTE: WE ASSUME THE LT_START IN .CTL FOR MRAMS IS LOCAL TIME OF START AT
+#   LONGITUDE 0 (which seems to be the case for holden)
+    dx=[240000.,80000.,26667,8889] # horizontal resolution of nests
+    dy=dx
+    days=[16,17,18] # Sols the user wants to generate (corresponding to the
+                    # names in the LMD_MMM convention)
+                    # Converted files are by default put in the ./converted_files folder 
+                    # (as well as cdo outputs) original files are by default seeked 
+                    # out in the ./vis folder

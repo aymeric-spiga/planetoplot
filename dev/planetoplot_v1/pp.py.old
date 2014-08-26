@@ -1,0 +1,197 @@
+#!/usr/bin/env python
+
+### A. Spiga + T. Navarro + A. Colaitis
+
+###########################################################################################
+###########################################################################################
+### What is below relate to running the file as a command line executable (very convenient)
+if __name__ == "__main__":
+    import sys
+    import myplot
+    import os
+    import numpy as np
+    import netCDF4
+    import glob
+
+    from optparse import OptionParser    ### to be replaced by argparse
+    from api_wrapper import api_onelevel
+    from gcm_transformations import call_zrecast
+    from planetoplot import planetoplot
+    from myscript import getparseroptions
+
+
+    #############################
+    ### Get options and variables
+    parser = OptionParser() ; getparseroptions(parser) ; (opt,args) = parser.parse_args()
+    if opt.file is None:                                myplot.errormess("I want to eat one file at least ! Use pp.py -f name_of_my_file. Or type pp.py -h")
+    if opt.var is None and opt.anomaly is True: 	myplot.errormess("Cannot ask to compute anomaly if no variable is set")
+    if opt.fref is not None and opt.operat is None: 	myplot.errormess("you must specify an operation when using a reference file")
+    if opt.operat in ["+","-"] and opt.fref is None: 	myplot.errormess("you must specifiy a reference file when using inter-file operations")
+    if opt.fref is not None and opt.operat is not None and opt.itp is not None: interpref=True
+    else:   interpref=False
+    if opt.rate is not None:      opt.save = "avi"
+    elif opt.save == "avi":       opt.rate = 8   ## this is a default value for -S avi
+    if opt.save == "html":        opt.rate = -1  ## this is convenient because everything is done in planetoplot with mrate
+
+    #############################
+    ### Get infos about slices
+    zeslat  = myplot.readslices(opt.slat) ; zeslon  = myplot.readslices(opt.slon) ; zesvert = myplot.readslices(opt.svert) ; zestime = myplot.readslices(opt.stime)
+
+    reffile = opt.fref
+    zexaxis = [opt.xmin,opt.xmax] ; zeyaxis=[opt.ymin,opt.ymax]
+
+    #############################
+    ### Catch multiple files
+    if "*" in opt.file[0] or "?" in opt.file[0]: 
+        yeah = glob.glob(opt.file[0]) ; yeah.sort()
+        opt.file[0] = yeah[0] 
+        for file in yeah[1:]: opt.file[0] = opt.file[0] + "," + file
+
+    #############################
+    ### 1. LOOP ON FILE LISTS TO BE PUT IN DIFFERENT FIGURES
+    for i in range(len(opt.file)):
+
+      zefiles = myplot.separatenames(opt.file[i])
+
+      typefile = myplot.whatkindfile(netCDF4.Dataset(zefiles[0])) ; stralt = None
+      if typefile in ["meso"]:          
+          [lschar,zehour,zehourin] = myplot.getlschar ( zefiles[0] )
+          if opt.var is None:  opt.var = ["HGT"] ; opt.nocolorb = True
+      elif typefile in ["geo"]:
+          lschar=""
+          if opt.var is None:  opt.var = ["HGT_M"] ; opt.nocolorb = True
+      else:                                      
+          lschar="" 
+          if opt.var is None:  
+             opt.var = ["phisinit"] ; opt.clb = "nobar"
+             ### temporaire... en attendant mieux.
+             if opt.back == "titan": opt.var = ["phis"] ; opt.nocolorb = True
+
+      if opt.vmin is not None : zevmin  = opt.vmin[min(i,len(opt.vmin)-1)]
+      else:                     zevmin = None
+      if opt.vmax is not None : zevmax  = opt.vmax[min(i,len(opt.vmax)-1)]
+      else:                     zevmax = None
+      #print "vmin, zevmin", opt.vmin, zevmin ; print "vmax, zevmax", opt.vmax, zevmax
+
+      #############################
+      ### 2. LOOP ON VAR LISTS TO BE PUT IN DIFFERENT FIGURES
+      for j in range(len(opt.var)):
+
+        zevars = myplot.separatenames(opt.var[j])
+
+        inputnvert = myplot.separatenames(opt.lvl)
+        if np.array(inputnvert).size == 1:
+            zelevel = float(inputnvert[0])
+            ze_interp_levels = [-9999.]
+        elif np.array(inputnvert).size > 2:
+            zelevel = -99.
+            start = float(inputnvert[0])
+            stop = float(inputnvert[1])
+            if np.array(inputnvert).size == 2:  numsample = 20
+            else:                               numsample = float(inputnvert[2])
+            if stop > start:   
+               ## altitude coordinates
+               ze_interp_levels = np.linspace(start,stop,numsample)
+            else:
+               ## pressure coordinates
+               ze_interp_levels = np.logspace(np.log10(start),np.log10(stop),numsample)
+
+        ######################################################### 
+        if opt.itp is not None:
+         if opt.itp > 0:
+          #####
+          ##### MESOSCALE : written by AS
+          #####
+          if typefile in ["meso"]:
+            if zelevel == 0. and opt.itp == 4:  zelevel = 0.010
+            if np.array(inputnvert).size == 1:  zesvert = myplot.readslices([str(zelevel)])
+            ### winds or no winds
+            if opt.winds            :  zefields = 'uvmet'
+            elif opt.var[j] in ['deltat','DELTAT'] : zefields = 'tk,TSURF'
+            elif opt.var[j] in ['uv','UV','hodograph','hodograph_2'] : zefields = 'U,V'
+            else                    :  zefields = ''
+            ### var or no var
+            if zefields == ''       :  zefields = opt.var[j] 
+            else                    :  zefields = zefields + "," + opt.var[j]
+            if opt.var2 is not None :  zefields = zefields + "," + opt.var2  
+            ### call fortran routines
+            for fff in range(len(zefiles)):
+                newname = api_onelevel (  path_to_input   = '', \
+                                               input_name      = zefiles[fff], \
+                                               fields          = zefields, \
+                                               interp_method   = opt.itp, \
+                                               interp_level    = ze_interp_levels, \
+                                               onelevel        = zelevel, \
+                                               nocall          = opt.nocall )
+                if fff == 0: zetab = newname 
+                else:        zetab = np.append(zetab,newname)
+            if interpref:
+                reffile = api_onelevel (  path_to_input   = '', \
+                                               input_name      = opt.fref, \
+                                               fields          = zefields, \
+                                               interp_method   = opt.itp, \
+                                               interp_level    = ze_interp_levels, \
+                                               onelevel        = zelevel, \
+                                               nocall          = opt.nocall )
+            zefiles = zetab #; print zefiles
+            zelevel = 0 ## so that zelevel could play again the role of nvert
+          #####
+          ##### GCM : written by AC
+          #####
+          elif typefile == "gcm":
+            inputvar = zevars
+            if opt.var2 is not None : inputvar = np.append(inputvar,opt.var2)
+            interpolated_files=""
+            interpolated_files=call_zrecast(interp_mode=opt.itp,\
+                    input_name=zefiles,\
+                    fields=inputvar,\
+                    limites = ze_interp_levels,\
+                    predefined=opt.intas)
+
+            zefiles=interpolated_files
+            if interpref:
+               interpolated_ref=""
+               interpolated_ref=call_zrecast(interp_mode=opt.itp,\
+                    input_name=[opt.fref],\
+                    fields=zevars,\
+                    predefined=opt.intas)
+
+               reffile=interpolated_ref[0]
+          else:
+            print "type not supported"
+            exit()
+
+        #############
+        ### Main call
+        name = planetoplot (zefiles,level=int(zelevel),vertmode=opt.itp,\
+                proj=opt.proj,back=opt.back,target=opt.tgt,stride=opt.ste,var=zevars,\
+                clb=myplot.separatenames(opt.clb),winds=opt.winds,\
+                addchar=lschar,vmin=zevmin,vmax=zevmax,\
+                tile=opt.tile,zoom=opt.zoom,display=opt.display,\
+                hole=opt.hole,save=opt.save,\
+                anomaly=opt.anomaly,var2=opt.var2,ndiv=opt.ndiv,\
+                mult=opt.mult,add=opt.add,zetitle=myplot.separatenames(opt.zetitle),\
+                slon=zeslon,slat=zeslat,svert=zesvert,stime=zestime,\
+                outputname=opt.out,resolution=opt.res,\
+                ope=opt.operat,fileref=reffile,minop=opt.vminope,maxop=opt.vmaxope,titleref=opt.titref,\
+                invert_y=opt.inverty,xaxis=zexaxis,yaxis=zeyaxis,ylog=opt.logy,xlog=opt.logx,yintegral=opt.column,\
+                blat=opt.blat,blon=opt.blon,tsat=opt.tsat,flagnolow=opt.nolow,\
+                mrate=opt.rate,mquality=opt.quality,trans=opt.trans,zarea=opt.area,axtime=opt.axtime,\
+                redope=opt.redope,seevar=opt.seevar,xlab=opt.xlab,ylab=opt.ylab,lbls=myplot.separatenames(opt.labels),\
+                lstyle=myplot.separatenames(opt.linestyle),cross=myplot.readslices(opt.mark),markdevil=opt.mdevil,facwind=opt.facwind,\
+                trycol=opt.trycol,streamflag=opt.stream,nocolorb=opt.nocolorb,analysis=opt.analysis,monster=opt.monster)
+        print 'DONE: '+name
+        os.system("rm -f to_be_erased")
+  
+    #########################################################
+    ### Generate a .sh file with the used command saved in it
+    command = ""  
+    for arg in sys.argv: command = command + arg + ' '
+    #if typefile not in ["meso","mesoapi"]: name = 'pycommand'
+    if opt.save == "gui":    name = 'pycommand'
+    elif opt.save == "html": os.system("cat $PYTHONPATH/header.html > anim.html ; cat zepics >> anim.html ; cat $PYTHONPATH/body.html >> anim.html ; rm -rf zepics "+name+" ; mkdir "+name+" ; mv anim.html image*png "+name) 
+    f = open(name+'.sh', 'w')
+    f.write(command)
+
+    #print "********** OPTIONS: ", opt
+    print "********************************************************** END"

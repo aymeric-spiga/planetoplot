@@ -1,0 +1,26 @@
+############################
+## bam.sh
+## --------
+## A tool to compare LMD_MMM and MRAMS files
+## --------
+## Author : A. Colaitis
+############################
+
+# Figures are generated using the master script Driver_bam.sh or using
+# directly bam.sh
+# Constants to set in bam.sh before plotting:
+mramsfiles=/home/local_home/colaitis/intercomp_test/converted_files # directory of the converted mrams files using ic.py
+lmdfiles=/planeto/acolmd/SwRI_files/lmd/HOLDEN_nests_mrams # directory of the lmd_mmm files
+lat=-26. # landing site latitude (real one for exomars is different)
+lon=-34.   # landing site longitude (real one for exomars is different)
+filemrams='_2024-06-17_07:30:00' # main sol analyzed for MRAMS
+filemramsa='_2024-06-16_07:30:00' # sol before, for variability analysis, MRAMS
+filemramsb='_2024-06-18_07:30:00' # sol after, for variability analysis, MRAMS
+filelmd='_2024-06-17_06:00:00' # main sol analyzed for LMD
+filelmda='_2024-06-16_06:00:00' # sol before, for variability analysis, LMD_MMM
+filelmdb='_2024-06-18_06:00:00' # sol after, for variability analysis, LMD_MMM
+
+## USAGE
+
+# see Driver_bam.sh to see the different parts composing the bam.sh script. You can call the whole script or parts of it only.
+vi Driver_bam.sh
