@@ -1,3 +1,22 @@
+
+******************************************************************************
+
+You might want to access planetoplot modules and programs from anywhere
+This is done through the PYTHONPATH environment variable
+We also recommend to add PYTHONPATH to your PATH to use scripts anywhere
+
+In a nutshell:
+Add to environment file (e.g. .bashrc) those lines
+
+PYTHONPATH=$PYTHONPATH:you_got_to_adapt_this_to_your_own/planetoplot
+export PYTHONPATH
+PATH=$PYTHONPATH:$PATH
+export PATH
+
+Don't forget to source the environment file. Then enjoy!
+
+******************************************************************************
+
 ----------------------------
 PLANETOPLOT v2
 ----------------------------
