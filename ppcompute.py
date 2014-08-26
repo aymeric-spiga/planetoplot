@@ -11,7 +11,7 @@ import scipy.signal as sp_signal
 ###############################################
 
 ## first a useful function to find settings in a folder in PYTHONPATH
-def findset(whereset,string="planetoplot_v2"):
+def findset(whereset,string="planetoplot"):
     # ... set a default whereset if it was set to None
     # ... default is in the planetoplot_v2 folder
     if whereset is None:
