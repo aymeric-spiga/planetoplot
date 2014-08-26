@@ -7,12 +7,21 @@ import numpy as np
 fi = '/planeto/islmd/north_pole_mesoscale/2014/5th_nest/4th_try_several_days/wrfout_d05_2024-03-46_06:00:00_zabg'
 fi = 'testisaac/wrfout_d04_2024-03-46_06:00:00_zabg'
 fi = 'testisaac/wrfout_d03_2024-03-46_06:00:00_zabg'
+fi = 'wrfout_d05_2024-03-46_06:00:00_zabg'
+fi = 'wrfout_d05_2024-03-57_06:00:00_zabg'
 ti = 1
 ti = 10
+ti = 7
 zi = 25. # in meters
+zi = 130. #ok vert velo
+
 deltaT = 3.
+deltaT = 4.
 grav = 3.72
 tpottest = 195. #test potential temperature for finding height of katabatic layer
+#tpottest = 188.
+tpottest = 200.
+#tpottest = 205.
 
 ### LOAD
 tpot = pp(file=fi,var='tpot',t=ti,z=zi,verbose=True).getf()
@@ -45,7 +54,9 @@ p2d.x = xx
 p2d.y = yy
 p2d.title = "Topography"
 p2d.colorbar = "gist_rainbow"
-p2d.makeshow()
+p2d.xlabel = "longitude"
+p2d.ylabel = "latitude"
+p2d.makesave(filename="topo")
 
 p2d = plot2d()
 p2d.f = froude
@@ -54,11 +65,13 @@ p2d.x = xx
 p2d.y = yy
 p2d.title = "Froude number"
 p2d.vmin = 0.
-p2d.vmax = 4.
-p2d.div = 40
-p2d.colorbar = "gist_stern"
+p2d.vmax = 2. #4.
+p2d.div = 20 #40
+p2d.colorbar = "RdBu_r" #"gist_stern"
 p2d.fmt = "%.1f"
-p2d.makeshow()
+p2d.xlabel = "longitude"
+p2d.ylabel = "latitude"
+p2d.makesave(filename="froude")
 
 p2d = plot2d()
 p2d.f = potheight
@@ -71,7 +84,9 @@ p2d.vmax = 800.
 p2d.div = 40
 p2d.colorbar = "spectral"
 p2d.fmt = "%.0f"
-p2d.makeshow()
+p2d.xlabel = "longitude"
+p2d.ylabel = "latitude"
+p2d.makesave(filename="height")
 
 p2d = plot2d()
 p2d.f = vel
@@ -84,7 +99,9 @@ p2d.vmax = 20.
 p2d.div = 40 
 p2d.colorbar = "jet"
 p2d.fmt = "%.0f"
-p2d.makeshow()
+p2d.xlabel = "longitude"
+p2d.ylabel = "latitude"
+p2d.makesave(filename="hwind")
 
 p2d = plot2d()
 p2d.f = W
@@ -97,5 +114,7 @@ p2d.vmax = 1.
 p2d.div = 20
 p2d.colorbar = "RdBu_r"
 p2d.fmt = "%.1f"
-p2d.makeshow()
+p2d.xlabel = "longitude"
+p2d.ylabel = "latitude"
+p2d.makesave(filename="vwind")
 

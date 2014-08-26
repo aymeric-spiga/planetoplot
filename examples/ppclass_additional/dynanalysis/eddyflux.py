@@ -6,7 +6,9 @@ import numpy as np
 
 #############################
 ff = "diagfi.nc"
+ff = "diagfi739139.nc"
 tt = 240.
+tt = 100000.
 #############################
 
 # perturbation fields
@@ -15,7 +17,7 @@ vp = pp(var="v",file=ff,t=tt,compute="pert_x").getf()
 tp = pp(var="temp",file=ff,t=tt,compute="pert_x").getf()
 
 # coordinates
-press = pp(var="p",file="diagfi.nc",t=tt,x=0,y=0).getf()
+press = pp(var="p",file=ff,t=tt,x=0,y=0).getf()
 lat = np.linspace(-90.,90.,up.shape[1])
 
 # compute <u'v'> etc...
@@ -28,10 +30,11 @@ p.f = upvpm
 p.c = vptpm
 p.x = lat
 p.y = press/100.
-p.title = r"$\overline{u^\prime v^\prime}$"
+#p.title = r'$\overline{u^\prime v^\prime}$'
+p.title = "" 
 p.xlabel = "Latitude"
 p.ylabel = "Pressure (mb)"
-p.units = r"$m^{2}s^{-2}$"
+p.units = r'$m^{2}s^{-2}$'
 p.invert = True
 p.logy = True
 p.colorbar = "RdBu_r"
@@ -39,4 +42,4 @@ p.fmt = "%.1f"
 p.vmin = -7
 p.vmax = 7
 p.div = 28
-p.makesave(mode="jpg",filename="eddyflux")
+p.makesave(mode="png",filename="eddyflux")
