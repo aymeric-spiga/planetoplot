@@ -328,7 +328,7 @@ def save(mode=None,filename=None,folder="./",includedate=False,res=150,custom=Fa
           else:
               # ... mapping mode, adapted space for labels etc...
               # TBD: not impacted by pad_inches_value. why?
-              mpl.savefig(name,dpi=res)
+              mpl.savefig(name,dpi=res) #,bbox_inches='tight')
       else:
           print "!! ERROR !! File format not supported. Supported: ",possiblesave
 
@@ -904,6 +904,7 @@ class plot2d(plot):
                 if self.mapmode: 
                    try:
                      [vecx,vecy] = m.rotate_vector(self.vx,self.vy,self.x,self.y) # for metwinds only ?
+                     #vecx,vecy = self.vx,self.vy
                    except:
                      print "!! ERROR !! Problem with field shapes for vector?" 
                      print self.vx.shape,self.vy.shape,self.x.shape,self.y.shape
@@ -927,7 +928,7 @@ class plot2d(plot):
                                     scale=self.wscale*reducevec,width=widthvec )
                 # make vector key.
                 #keyh = 1.025 ; keyv = 1.05 # upper right corner over colorbar
-                keyh = 0.97 ; keyv = 1.05
+                keyh = 0.97 ; keyv = 1.06
                 #keyh = -0.03 ; keyv = 1.08 # upper left corner
                 p = mpl.quiverkey(q,keyh,keyv,\
                                   self.wscale,str(int(self.wscale)),\

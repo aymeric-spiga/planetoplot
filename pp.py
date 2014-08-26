@@ -103,7 +103,7 @@ parser.add_option('--svy',action='store',dest='svy',type="int",default=None,help
 parser.add_option('--cbticks',action='append',dest='cbticks',type="float",default=None,help="ticks for colorbar")
 ###########################
 (opt,args) = parser.parse_args()
-# remains F G R  
+# remains G R  
 
 ######################################
 # get arguments (one or several files)

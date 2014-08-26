@@ -7,6 +7,7 @@ thermalnight ; http://www.lmd.jussieu.fr/~aslmd/maps/thermalnight.jpg
 tesalbedo ; http://www.lmd.jussieu.fr/~aslmd/maps/tesalbedo.jpg
 vis ; http://www.lmd.jussieu.fr/~aslmd/maps/mar0kuu2.jpg
 vishires ; http://www.lmd.jussieu.fr/~aslmd/maps/MarsMap_2500x1250.jpg
+vishiresloc ; /home/aymeric/Dropbox/Public/MarsMap_2500x1250.jpg
 geolocal ; http://www.lmd.jussieu.fr/~aslmd/maps/geolocal.jpg
 mola ; http://www.lmd.jussieu.fr/~aslmd/maps/mars-mola-2k.jpg
 molabw ; http://www.lmd.jussieu.fr/~aslmd/maps/MarsElevation_2500x1250.jpg
