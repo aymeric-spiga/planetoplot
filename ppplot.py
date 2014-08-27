@@ -10,7 +10,6 @@ import time as timelib
 import numpy as np
 import matplotlib.pyplot as mpl
 from matplotlib.cm import get_cmap
-from mpl_toolkits.basemap import Basemap
 from matplotlib.ticker import FormatStrFormatter,MaxNLocator
 # personal librairies
 import ppcompute
@@ -832,6 +831,12 @@ class plot2d(plot):
                 print "!! ERROR !! unsupported projection. supported: "+\
                       "cyl, npstere, spstere, ortho, moll, robin, lcc, laea, merc"
             # finally define projection
+	    try:
+	      from mpl_toolkits.basemap import Basemap
+	    except:
+              print "!! ERROR !! basemap is not available."
+	      print "... either install it or use another plot type."
+	      exit()
             m = Basemap(projection=self.proj,\
                         lat_0=lat_0,lon_0=lon_0,\
                         boundinglat=self.blat,\

@@ -177,9 +177,9 @@ def blur_image(im, n, ny=None) :
     	g = gauss_kern(n, sizey=ny)
 	try:
           import scipy.signal as sp_signal
-    	  improc = sp_signal.convolve(im, g, mode='same')
+	  improc = sp_signal.convolve(im, g, mode='same')
 	except:
-          improc = None
+	  print "blur_image needs scipy. please add scipy lib." ; exit()
     	return improc
 
 ## FROM COOKBOOK http://www.scipy.org/Cookbook/SignalSmooth
