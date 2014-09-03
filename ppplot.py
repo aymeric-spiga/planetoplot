@@ -795,7 +795,7 @@ class plot2d(plot):
             # ... cyl is good for global and regional
             if self.proj == "cyl":
                 format = '%.0f'
-                partab = np.r_[-90.,-60.,-30.,0.,30.,60.,90.]
+                partab = np.r_[-90.:90.+15.:15.]
             # ... global projections
             elif self.proj in ["ortho","moll","robin"]:
                 wlat[0] = None ; wlat[1] = None ; wlon[0] = None ; wlon[1] = None
