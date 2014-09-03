@@ -7,4 +7,7 @@ source $HOME/.bashrc
 conda install numpy
 conda install matplotlib
 conda install netCDF4
-conda install basemap
+
+##the following lib are not mandatory
+#conda install basemap
+#conda install scipy
