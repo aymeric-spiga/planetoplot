@@ -769,6 +769,11 @@ class plot2d(plot):
             if self.area is not None:
              if self.area in area.keys():
                 wlon, wlat = area[self.area]
+            # -- user-defined limits
+            if self.xmin is not None: wlon[0] = self.xmin
+            if self.xmax is not None: wlon[1] = self.xmax
+            if self.ymin is not None: wlat[0] = self.ymin
+            if self.ymax is not None: wlat[1] = self.ymax
             # -- settings for meridians and parallels
             steplon = int(abs(wlon[1]-wlon[0])/6.)
             steplat = int(abs(wlat[1]-wlat[0])/3.)
