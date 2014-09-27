@@ -10,7 +10,6 @@ import time as timelib
 import numpy as np
 import matplotlib.pyplot as mpl
 from matplotlib.cm import get_cmap
-from mpl_toolkits.basemap import Basemap
 from matplotlib.ticker import FormatStrFormatter,MaxNLocator
 # personal librairies
 import ppcompute
@@ -770,6 +769,11 @@ class plot2d(plot):
             if self.area is not None:
              if self.area in area.keys():
                 wlon, wlat = area[self.area]
+            # -- user-defined limits
+            if self.xmin is not None: wlon[0] = self.xmin
+            if self.xmax is not None: wlon[1] = self.xmax
+            if self.ymin is not None: wlat[0] = self.ymin
+            if self.ymax is not None: wlat[1] = self.ymax
             # -- settings for meridians and parallels
             steplon = int(abs(wlon[1]-wlon[0])/6.)
             steplat = int(abs(wlat[1]-wlat[0])/3.)
@@ -791,7 +795,7 @@ class plot2d(plot):
             # ... cyl is good for global and regional
             if self.proj == "cyl":
                 format = '%.0f'
-                partab = np.r_[-90.,-60.,-30.,0.,30.,60.,90.]
+                partab = np.r_[-90.:90.+15.:15.]
             # ... global projections
             elif self.proj in ["ortho","moll","robin"]:
                 wlat[0] = None ; wlat[1] = None ; wlon[0] = None ; wlon[1] = None
@@ -832,6 +836,12 @@ class plot2d(plot):
                 print "!! ERROR !! unsupported projection. supported: "+\
                       "cyl, npstere, spstere, ortho, moll, robin, lcc, laea, merc"
             # finally define projection
+	    try:
+	      from mpl_toolkits.basemap import Basemap
+	    except:
+              print "!! ERROR !! basemap is not available."
+	      print "... either install it or use another plot type."
+	      exit()
             m = Basemap(projection=self.proj,\
                         lat_0=lat_0,lon_0=lon_0,\
                         boundinglat=self.blat,\

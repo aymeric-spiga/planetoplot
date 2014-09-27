@@ -7,7 +7,6 @@ import os
 # added librairies
 import numpy as np
 import math  as m
-import scipy.signal as sp_signal
 ###############################################
 
 ## first a useful function to find settings in a folder in PYTHONPATH
@@ -176,7 +175,11 @@ def blur_image(im, n, ny=None) :
 	# blurs the image by convolving with a gaussian kernel of typical size n. 
 	# The optional keyword argument ny allows for a different size in the y direction.
     	g = gauss_kern(n, sizey=ny)
-    	improc = sp_signal.convolve(im, g, mode='same')
+	try:
+          import scipy.signal as sp_signal
+	  improc = sp_signal.convolve(im, g, mode='same')
+	except:
+	  print "blur_image needs scipy. please add scipy lib." ; exit()
     	return improc
 
 ## FROM COOKBOOK http://www.scipy.org/Cookbook/SignalSmooth

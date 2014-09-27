@@ -54,10 +54,15 @@ https://dl.dropbox.com/u/11078310/demo_data.tar.gz
 Requirements
 ------------
 ------------
-python + numpy + matplotlib + netCDF4
+required:
+- python
+- numpy 
+- matplotlib 
+- netCDF4
+recommended:
 - for mapping --> Basemap
 - for scientific computations --> scipy
-[recommended: Enthought Python Distribution (free for academics)]
+[cf. e.g. Anaconda distribution or use miniconda]
 
 Installation
 ------------
