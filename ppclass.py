@@ -1925,6 +1925,12 @@ class onerequest():
         elif "_t" in self.compute: zeaxis = 0
         if   "pert" in self.compute: 
            self.field = ppcompute.perturbation(self.field,axis=zeaxis)
+           if (self.field.all() == 0):
+              print "!! ERROR !! perturbation is 0 everywhere."
+              print " --> either it is really the case so no need to carry on!"
+              print " --> either you probably took a perturbation on an already reduced axis"
+              print "      (we recommend eddyflux2.py as a template for a solution)"
+              exit()
         elif "diff" in self.compute:
            dadiff = np.diff(self.field,axis=zeaxis)
            # (diff ouput has one value less in impacted dimension. fix this.)
