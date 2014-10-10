@@ -1013,14 +1013,15 @@ class pp():
             self.fig = ppplot.figuref(x=self.xp,y=self.yp)
             self.subv,self.subh = ppplot.definesubplot(self.howmanyplots,self.fig) 
             self.n = 0
-            ## adapted space for labels etc
-            ## ... except for ortho because there is no label anyway
-            self.customplot = self.p[0].f.ndim == 2 \
-                        and self.p[0].mapmode == True \
-                        and self.p[0].proj not in ["ortho","robin"]
-            if self.customplot:
-                margin = 0.07
-                self.fig.subplots_adjust(left=margin,right=1-margin,bottom=margin,top=1-margin)
+#            ## adapted space for labels etc
+#            ## ... except for ortho because there is no label anyway
+#            self.customplot = self.p[0].f.ndim == 2 \
+#                        and self.p[0].mapmode == True \
+#                        and self.p[0].proj not in ["ortho","robin"]
+#            if self.customplot:
+#                margin = 0.07
+#                #self.fig.subplots_adjust(left=margin,right=1-margin,bottom=margin,top=1-margin)
+#                self.fig.subplots_adjust(left=1.2*margin,right=1+0.4*margin,bottom=1.5*margin,top=1-margin)
         else:
             # start from an existing figure.
             # extraplot must have been set in the call to the previous figure.
