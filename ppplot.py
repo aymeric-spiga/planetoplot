@@ -34,7 +34,7 @@ mpl.rcParams['ytick.major.pad'] = 10
 # global variables
 # -------------------------------
 # - where settings files are located
-#   (None means planetoplot_v2 in PYTHONPATH)
+#   (None means planetoplot in PYTHONPATH)
 whereset = None
 # - some good default settings.
 # (bounds)
@@ -805,7 +805,7 @@ class plot2d(plot):
                 if self.proj in ["robin"]: steplon = 90.
                 mertab = np.r_[-360.:360.:steplon]
                 #partab = np.r_[-90.:90.+steplat:steplat]
-                partab = np.r_[-90.,-30.,0.,30.,90.]
+                partab = np.r_[-60.,-30.,0.,30.,60.]
                 if self.proj == "ortho": 
                     merlab = [0,0,0,0] ; parlab = [0,0,0,0]
                     # in ortho projection, blon and blat can be used to set map center
