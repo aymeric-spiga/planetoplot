@@ -205,7 +205,7 @@ def smooth1d(x,window=11,window_type='hanning'):
     scipy.signal.lfilter
     TODO: the window parameter could be the window itself if an array instead of a string   
     """
-    if True in np.isnan(field):
+    if True in np.isnan(x):
         print "!! ERROR !! Smooth is a disaster with missing values. This will be fixed."
         exit()    
     x = np.array(x)

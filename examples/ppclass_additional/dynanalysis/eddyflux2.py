@@ -6,13 +6,23 @@ import numpy as np
 
 #############################
 ff = "diagfi.nc"
-tt = 100000.
+it = 44
 #############################
 
-# perturbation fields
-up = pp(var="u",file=ff,t=tt,compute="pert_x").getf()
-vp = pp(var="v",file=ff,t=tt,compute="pert_x").getf()
-tp = pp(var="temp",file=ff,t=tt,compute="pert_x").getf()
+# perturbation fields wrt to time
+# -- contrary to eddyflux.py this is 4D
+# -- it is not possible to reduce time dimension here
+#    because averaging / perturbing is over time
+up = pp(var="u",file=ff,t=it,compute="pert_t").getf()
+vp = pp(var="v",file=ff,compute="pert_t").getf()
+tp = pp(var="temp",file=ff,compute="pert_t").getf()
+
+# OK. now: once perturbation is taken over time axis
+# reduce dimension over this axis by choosing index it
+# reminder: axis are reversed: t / z / y / x
+up = up[it,:,:,:]
+vp = vp[it,:,:,:]
+tp = tp[it,:,:,:]
 
 # coordinates
 press = pp(var="p",file=ff,t=tt,x=0,y=0).getf()
