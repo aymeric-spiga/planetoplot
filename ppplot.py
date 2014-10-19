@@ -615,6 +615,7 @@ class plot2d(plot):
                  svx=3,\
                  svy=3,\
                  leftcorrect=False,\
+                 clev=None,\
                  colorvec="black"):
         ## get initialization from parent class
         plot.__init__(self)
@@ -636,6 +637,7 @@ class plot2d(plot):
         self.svx = svx
         self.svy = svy
         self.leftcorrect = leftcorrect
+        self.clev = clev
 
     # define_from_var
     # ... this uses settings in set_var.txt
@@ -684,6 +686,8 @@ class plot2d(plot):
          if len(self.x) == shape[0] and len(self.y) == shape[1]:
             print "!! WARNING !! Transposing axes"
             self.f = np.transpose(self.f)
+            if self.c is not None: 
+              self.c = np.transpose(self.c)
         # bound field
         zevmin, zevmax = calculate_bounds(self.f,vmin=self.vmin,vmax=self.vmax)
         what_I_plot = bounds(self.f,zevmin,zevmax)
@@ -696,10 +700,15 @@ class plot2d(plot):
             # if masked array, set masked values to filled values (e.g. np.nan) for plotting purposes
             if type(self.c).__name__ in 'MaskedArray':
                self.c[self.c.mask] = self.c.fill_value
-            zevminc, zevmaxc = calculate_bounds(self.c)
-            what_I_contour = bounds(self.c,zevminc,zevmaxc)
-            ticks = self.div + 1
-            zelevelsc = np.linspace(zevminc,zevmaxc,ticks)
+            # set levels for contour lines
+            if self.clev is None:
+              zevminc, zevmaxc = calculate_bounds(self.c)
+              what_I_contour = bounds(self.c,zevminc,zevmaxc)
+              ticks = self.div + 1
+              self.clev = np.linspace(zevminc,zevmaxc,ticks)
+            else:
+              what_I_contour = self.c
+              
         ############################################################################################
         ### MAIN PLOT
         ### NB: contour lines are done before contour shades otherwise colorar error
@@ -715,7 +724,7 @@ class plot2d(plot):
             # make shaded and line contours
             if self.c is not None: 
                 objC = mpl.contour(x, y, what_I_contour, \
-                            zelevelsc, colors = ccol, linewidths = cline)
+                            self.clev, colors = ccol, linewidths = cline)
                 #mpl.clabel(objC, inline=1, fontsize="small",\
                 #             inline_spacing=1,fmt="%.0f")
             mpl.contourf(x, y, \
