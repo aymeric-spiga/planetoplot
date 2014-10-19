@@ -968,8 +968,9 @@ class plot2d(plot):
 
     # makeshow = make + show
     # -------------------------------
-    def makeshow(self):
+    def makeshow(self,grid="off"):
         self.make()
+        if grid != "off": mpl.grid(color=grid)
         mpl.show()
 
     # makesave = make + save
