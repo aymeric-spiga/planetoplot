@@ -1990,7 +1990,7 @@ class onerequest():
         else:
             if self.verbose: print "!! WARNING !! Not account for areas. Only averaging over z and/or t axis."
         # normalize by total area
-        print "**** OK. I can now normalize field by areas."
+        if self.verbose: print "**** OK. I can now normalize field by areas."
         aire.field = aire.field / totarea
         # tile area array over self t and z axis so that area field could be multiplied with self.field
         aire.field = np.tile(aire.field,(self.index_t.size,self.index_z.size,1,1))
