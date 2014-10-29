@@ -887,7 +887,7 @@ class plot2d(plot):
             if self.c is not None: 
                 #zelevelsc = np.arange(900.,1100.,5.)
                 objC2 = m.contour(x, y, what_I_contour, \
-                            zelevelsc, colors = ccol, linewidths = cline)
+                            self.clev, colors = ccol, linewidths = cline)
                 #mpl.clabel(objC2, inline=1, fontsize=10,manual=True,fmt='-%2.0f$^{\circ}$C',colors='r')
                 #mpl.clabel(objC2, inline=0, fontsize=8, fmt='%.0f',colors='r', inline_spacing=0)
             m.contourf(x, y, what_I_plot, zelevels, cmap = palette, alpha = self.trans, antialiased=True)
