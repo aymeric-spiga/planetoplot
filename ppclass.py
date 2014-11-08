@@ -1569,7 +1569,7 @@ class onerequest():
                               + self.f.variables['controle'][3]%669 \
                               + self.f.variables['controle'][26]
             ### options added by A. Spiga
-            elif self.changetime == "correctls":
+            elif "correctls" in self.changetime:
              if self.tabtime is None:
               print "!! WARNING !! Encountered a problem with correctls. Check your time dimension. Skipping this part."
              else: 
@@ -1577,14 +1577,17 @@ class onerequest():
               if self.dim_t == 1:
                 self.field_t = np.array([dafirst])
               else:
-                daint = self.tabtime[1] - dafirst
-                dalast = dafirst + (self.dim_t-1)*daint
-                year = 0.
-                add = np.linspace(dafirst,dalast,num=self.dim_t) ; add[0] = 0.
-                for iii in range(1,self.dim_t):
-                  if self.tabtime[iii] - self.tabtime[iii-1] < 0: year = year+1.
-                  add[iii] = year*360.
-                self.field_t = add + self.tabtime
+                if "noadd" in self.changetime:
+                  self.field_t = self.tabtime[:]
+                else:
+                  daint = self.tabtime[1] - dafirst
+                  dalast = dafirst + (self.dim_t-1)*daint
+                  year = 0.
+                  add = np.linspace(dafirst,dalast,num=self.dim_t) ; add[0] = 0.
+                  for iii in range(1,self.dim_t):
+                    if self.tabtime[iii] - self.tabtime[iii-1] < 0: year = year+1.
+                    add[iii] = year*360.
+                  self.field_t = add + self.tabtime
             elif "mars_meso" in self.changetime:
                 if 'Times' not in self.f.variables.keys():
                     if self.verbose: print "!! WARNING !! Variable Times not in file. Cannot proceed to change of time axis."
