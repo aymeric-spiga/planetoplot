@@ -1579,6 +1579,7 @@ class onerequest():
               else:
                 if "noadd" in self.changetime:
                   self.field_t = self.tabtime[:]
+                  if self.verbose: print "!! WARNING !! Ls axis is kept as is.",self.field_t[0],self.field_t[self.dim_t-1]
                 else:
                   daint = self.tabtime[1] - dafirst
                   dalast = dafirst + (self.dim_t-1)*daint
