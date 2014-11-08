@@ -40,7 +40,6 @@ whereset = None
 # (bounds)
 how_many_sigma = 3.0 
 # (contours)
-ccol = 'black'
 cline = 0.55
 #cline = 0.8
 # (vectors)
@@ -616,6 +615,7 @@ class plot2d(plot):
                  svy=3,\
                  leftcorrect=False,\
                  clev=None,\
+                 ccol="black",\
                  colorvec="black"):
         ## get initialization from parent class
         plot.__init__(self)
@@ -638,6 +638,7 @@ class plot2d(plot):
         self.svy = svy
         self.leftcorrect = leftcorrect
         self.clev = clev
+        self.ccol = ccol
 
     # define_from_var
     # ... this uses settings in set_var.txt
@@ -724,7 +725,7 @@ class plot2d(plot):
             # make shaded and line contours
             if self.c is not None: 
                 objC = mpl.contour(x, y, what_I_contour, \
-                            self.clev, colors = ccol, linewidths = cline)
+                            self.clev, colors = self.ccol, linewidths = cline)
                 #mpl.clabel(objC, inline=1, fontsize="small",\
                 #             inline_spacing=1,fmt="%.0f")
             mpl.contourf(x, y, \
@@ -887,9 +888,9 @@ class plot2d(plot):
             if self.c is not None: 
                 #zelevelsc = np.arange(900.,1100.,5.)
                 objC2 = m.contour(x, y, what_I_contour, \
-                            self.clev, colors = ccol, linewidths = cline)
+                            self.clev, colors = self.ccol, linewidths = cline)
                 #mpl.clabel(objC2, inline=1, fontsize=10,manual=True,fmt='-%2.0f$^{\circ}$C',colors='r')
-                #mpl.clabel(objC2, inline=0, fontsize=8, fmt='%.0f',colors='r', inline_spacing=0)
+                #mpl.clabel(objC2, inline=0, fontsize=8, fmt='%.0f',colors='r', inline_spacing=0) 
             m.contourf(x, y, what_I_plot, zelevels, cmap = palette, alpha = self.trans, antialiased=True)
         ############################################################################################
         ### COLORBAR
