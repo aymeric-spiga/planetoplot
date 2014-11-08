@@ -50,26 +50,9 @@ zeorientation="vertical"
 zefrac = 0.05
 # (save figures)
 pad_inches_value=0.25
-# (negative mode)
-def_negative = False
-# (xkcd mode)
-def_xkcd = False
 ###############################################
 
-### settings for 'negative-like' mode
-if def_negative:
-    mpl.rc('figure', facecolor='k', edgecolor='k')
-    mpl.rcParams['text.color'] = 'w'
-    mpl.rc('axes',labelcolor='w',facecolor='k',edgecolor='w')
-    mpl.rcParams['xtick.color'] = 'w'
-    mpl.rcParams['ytick.color'] = 'w'
-    mpl.rcParams['grid.color'] = 'w'
-    mpl.rc('savefig',facecolor='k',edgecolor='k')
 
-### settings for xkcd mode (only with matplotlib 1.3)
-### ... you must have Humori-Sans Font installed
-if def_xkcd:
-    mpl.xkcd()
 
 ##########################
 # executed when imported #
@@ -330,7 +313,21 @@ def save(mode=None,filename=None,folder="./",includedate=False,res=150,custom=Fa
       else:
           print "!! ERROR !! File format not supported. Supported: ",possiblesave
 
+## make it negative (black background / white axes)
+def negative(howblack="black"):
+    mpl.rc('figure', facecolor=howblack, edgecolor=howblack)
+    mpl.rcParams['text.color'] = 'w'
+    mpl.rcParams['lines.color'] = 'w'
+    mpl.rc('axes',labelcolor='w',facecolor=howblack,edgecolor='w')
+    mpl.rcParams['xtick.color'] = 'w'
+    mpl.rcParams['ytick.color'] = 'w'
+    mpl.rcParams['grid.color'] = 'w'
+    mpl.rc('savefig',facecolor=howblack,edgecolor=howblack)
 
+### settings for xkcd mode (only with matplotlib 1.3)
+### ... you must have Humori-Sans Font installed
+def xkcd():
+    mpl.xkcd()
 
 ##################################
 # a generic class to make a plot #
