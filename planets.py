@@ -81,7 +81,7 @@ class Planet:
         # --> NB: dTdz could be an array
         if T0 is None: T0=self.T0
         if dTdz is None: dTdz=0.
-        return self.g / T0 * ( self.g/self.cp + dTdz )
+        return (self.g / T0) * ( self.g/self.cp + dTdz )
 
     def H(self,T0=None):
         # calculate scale height
