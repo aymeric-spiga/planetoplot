@@ -641,24 +641,28 @@ class pp():
               # get methods
               obj.method_x = mx ; obj.method_y = my
               obj.method_z = mz ; obj.method_t = mt
+              # get strides
+              obj.sx = self.sx ; obj.sy = self.sy
+              obj.sz = self.sz ; obj.st = self.st
               # indicate the computation method
               obj.compute = self.compute
               # indicate the kind of 3D fields
               obj.kind3d = self.kind3d
               # open the files (the same file might be opened several times but this is cheap)
               obj.openfile()
-              ### get x,y,z,t dimensions from file
-              obj.getdim()
-              ### possible time axis change
+              ### get dimensions from file
+              obj.getdimsize()
+              ### treat x,y dimensions with index
+              obj.getdimhor()
+              obj.getindexhori(dalistx=sx,dalisty=sy,indx=x,indy=y)
+              ### treat z dimension with index
+              obj.getdimz()
+              obj.getindexvert(dalist=sz,ind=z)
+              ### treat t dimension with index
+              obj.getdimt()
               obj.changetime = self.changetime
               obj.performtimechange()
-              # get strides
-              obj.sx = self.sx ; obj.sy = self.sy
-              obj.sz = self.sz ; obj.st = self.st
-              ### get index
               obj.getindextime(dalist=st,ind=t)
-              obj.getindexvert(dalist=sz,ind=z)
-              obj.getindexhori(dalistx=sx,dalisty=sy,indx=x,indy=y)
               # missing value
               obj.missing = self.missing
         # change status
@@ -1400,6 +1404,12 @@ class onerequest():
     # TBD: staggered variables could request specific dimensions
     # -------------------------------
     def getdim(self):
+        self.getdimsize()
+        self.getdimhor()
+        self.getdimz()
+        self.getdimt()
+    ##
+    def getdimsize(self):
           # GET SIZES OF EACH DIMENSION
           if self.verbose: print "**** OK. Found variable "+self.var
           shape = self.f.variables[self.var].shape
@@ -1424,6 +1434,8 @@ class onerequest():
           elif self.dim == 4:
               if self.verbose: print "**** OK. 4D field."
               self.dim_x = shape[3] ; self.dim_y = shape[2] ; self.dim_z = shape[1] ; self.dim_t = shape[0]
+    ##
+    def getdimhor(self):
           # LONGITUDE. Try preset fields. If not present set grid points axis.
           self.name_x = "nothing"
           for c in glob_listx:
@@ -1471,6 +1483,8 @@ class onerequest():
                if self.verbose: print "**** OK. x axis %4.0f values [%5.1f,%5.1f]" % (self.dim_x,self.field_x.min(),self.field_x.max())
           if self.dim_y > 1: 
                if self.verbose: print "**** OK. y axis %4.0f values [%5.1f,%5.1f]" % (self.dim_y,self.field_y.min(),self.field_y.max())
+    ##
+    def getdimz(self):
           # ALTITUDE. Try preset fields. If not present set grid points axis.
           # WARNING: how do we do if several are available? the last one is chosen.
           self.name_z = "nothing"
@@ -1485,8 +1499,10 @@ class onerequest():
             # (consider the case where tabtime is not dim 1) TBD: 2D and 3D cases
             if tabalt.ndim == 4: 
                 try:
-                    self.field_z = tabalt[1,:,0,0] # 4D case. alt is usually third dimension.
-                                                   # 1 for time to avoid initial 0s
+                    self.field_z = tabalt[1,:,self.index_y[0],self.index_x[0]] 
+                    # 4D case. alt is usually third dimension.
+                    # 1 for time to avoid initial 0s
+                    # -- and try to use horizontal indices
                 except:
                     self.field_z = tabalt[0,:,0,0]
                 if self.verbose: print "!! WARNING !! "+self.name_z+" is 4D var. We made it 1D."
@@ -1499,7 +1515,8 @@ class onerequest():
                 self.name_z = "z grid points"
           if self.dim_z > 1: 
                if self.verbose: print "**** OK. z axis %4.0f values [%5.1f,%5.1f]" % (self.dim_z,self.field_z.min(),self.field_z.max())
-
+    ##
+    def getdimt(self):
           # TIME. Try preset fields.
           self.name_t = "nothing"
           for c in glob_listt:
