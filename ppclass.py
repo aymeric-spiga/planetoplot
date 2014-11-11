@@ -198,6 +198,7 @@ class pp():
                       fmt=None,\
                       xp=16,yp=8,\
                       missing=1.e25,\
+                      nopickle=False,\
                       trans=None,back=None,\
                       showcb=None,\
                       logy=None,\
@@ -246,6 +247,7 @@ class pp():
         self.savtxt = savtxt
         self.modx = modx
         self.missing = missing
+        self.nopickle = nopickle
         ## here are user-defined plot settings 
         ## -- if not None, valid on all plots in the pp() objects
         self.xlabel = xlabel ; self.xcoeff = xcoeff
@@ -331,6 +333,7 @@ class pp():
             self.modx = other.modx
             self.xp = other.xp ; self.yp = other.yp
             self.missing = other.missing
+            self.nopickle = other.nopickle
             self.nxticks = other.nxticks ; self.nyticks = other.nyticks
             self.fmt = other.fmt
             self.trans = other.trans ; self.back = other.back
@@ -1096,7 +1099,8 @@ class pp():
             ppplot.save(mode=self.out,filename=self.filename,folder=self.folder,custom=self.customplot,includedate=self.includedate,res=self.res)
             mpl.close()
         # SAVE A PICKLE FILE WITH THE self.p ARRAY OF OBJECTS
-        if self.filename is not None:
+        if not self.nopickle:
+         if self.filename is not None:
           if self.verbose: print "**** Saving session in "+self.filename + ".ppobj"
           savfile = self.folder + "/" + self.filename + ".ppobj"
           try: 

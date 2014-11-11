@@ -14,6 +14,7 @@ opac.title = ""
 opac.proj = "ortho"
 opac.out = "png"
 opac.res = 75
+opac.nopickle = True
 
 count = 0
 for ttt in range(0,135,3):
