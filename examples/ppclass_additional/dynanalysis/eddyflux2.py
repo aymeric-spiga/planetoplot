@@ -50,4 +50,4 @@ p.fmt = "%.1f"
 p.vmin = -7
 p.vmax = 7
 p.div = 28
-p.makesave(mode="png",filename="eddyflux")
+p.makesave(mode="png",filename="eddyflux2")
