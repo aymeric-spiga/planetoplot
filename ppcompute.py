@@ -12,12 +12,12 @@ import math  as m
 ## first a useful function to find settings in a folder in PYTHONPATH
 def findset(whereset,string="planetoplot"):
     # ... set a default whereset if it was set to None
-    # ... default is in the planetoplot_v2 folder
+    # ... default is in the planetoplot folder
     if whereset is None:
         for path in os.environ['PYTHONPATH'].split(os.pathsep):
             if string in path: whereset = path
-        if whereset is None: 
-            print "!! ERROR !! "+ string + "not in $PYTHONPATH"
+        if whereset is None:
+            print "!! ERROR !! "+ string + " not in $PYTHONPATH"
             print "--> either put it in $PYTHONPATH or change whereset"
             exit()
     # ... if the last / is missing put it
