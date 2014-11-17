@@ -81,6 +81,7 @@ parser.add_option('--nxticks',action='append',dest='nxticks',type="float",defaul
 parser.add_option('--nyticks',action='append',dest='nyticks',type="float",default=None,help="ticks for y axis [not for 2D map]")
 parser.add_option('--xp',action='store',dest='xp',type="int",default=None,help="x size of figure (integer)")
 parser.add_option('--yp',action='store',dest='yp',type="int",default=None,help="y size of figure (integer)")
+parser.add_option('--res',action='store',dest='res',type="float",default=150.,help="change resolution of figure")
 # -- 1D plot
 parser.add_option('-L','--linestyle',action='append',dest='linestyle',type="string",default=None,help="[1D] linestyle: '-' '--' '.' '..'")
 parser.add_option('-Q','--color',action='append',dest='color',type="string",default=None,help="[1D] color: 'b' 'g' 'r' etc")
@@ -158,6 +159,7 @@ user.filename = opt.filename
 user.folder = opt.folder
 user.out = opt.out
 user.proj = opt.proj
+user.res = opt.res
 # define plot
 user.defineplot()
 # user-defined plot settings
