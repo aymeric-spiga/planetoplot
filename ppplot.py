@@ -682,7 +682,7 @@ class plot2d(plot):
         shape = self.f.shape
         if shape[0] != shape[1]:
          if len(self.x) == shape[0] and len(self.y) == shape[1]:
-            print "!! WARNING !! Transposing axes"
+            #print "!! WARNING !! Transposing axes"
             self.f = np.transpose(self.f)
             if self.c is not None: 
               self.c = np.transpose(self.c)
