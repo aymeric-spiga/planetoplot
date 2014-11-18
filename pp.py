@@ -37,7 +37,6 @@ PLANETOPLOT
 # set options for the pp.py command line
 ########################################
 parser.add_option('--verbose',action='store_true',dest='verbose',default=False,help='make the program verbose')
-parser.add_option('--quiet',action='store_true',dest='quiet',default=False,help='make the program quiet')
 # field --> lower case
 parser.add_option('-v','--var',action='append',dest='var',type="string",default=None,help="'variable' or ['var1','var2',etc]")
 parser.add_option('-x','--lon',action='append',dest='x',type="string",default=None,help="x axis value. one value; or val1,val2 (computations)")
@@ -105,8 +104,8 @@ parser.add_option('--cbticks',action='append',dest='cbticks',type="float",defaul
 ###########################
 (opt,args) = parser.parse_args()
 # remains G R  
-if not opt.quiet:
-  parser.print_version()
+if (len(args) == 0):
+    parser.print_version()
 
 ######################################
 # get arguments (one or several files)
@@ -140,7 +139,7 @@ user.var = var ; user.vargoal = vargoal
 user.x = opt.x ; user.y = opt.y 
 user.z = opt.z ; user.t = opt.t
 user.verbose = opt.verbose
-user.quiet = opt.quiet
+if not user.verbose: user.quiet = True
 user.compute = opt.compute
 user.changetime = opt.changetime
 user.sx = opt.sx ; user.sy = opt.sy
