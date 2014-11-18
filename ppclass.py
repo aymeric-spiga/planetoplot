@@ -196,7 +196,7 @@ class pp():
                       savtxt=False,\
                       modx=None,\
                       fmt=None,\
-                      xp=16,yp=8,\
+                      xp=10,yp=6,\
                       missing=1.e25,\
                       nopickle=False,\
                       trans=None,back=None,\
