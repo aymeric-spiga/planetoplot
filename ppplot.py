@@ -188,9 +188,9 @@ def rainbow(cb="jet",num=8):
 # a function to define subplot
 # ... user can change settings in set_multiplot.txt read above
 # -------------------------------
-def definesubplot(numplot, fig):
+def definesubplot(numplot, fig, factor=1.):
     try: 
-        mpl.rcParams['font.size'] = font_t[numplot]
+        mpl.rcParams['font.size'] = font_t[numplot]/factor
     except: 
         mpl.rcParams['font.size'] = 18
     try: 
