@@ -659,9 +659,9 @@ class plot2d(plot):
         ############################################################################################
         ### PRE-SETTINGS
         ############################################################################################
-        # if no projection is set, set mapmode to False
-        if self.proj is None:
-            self.mapmode = False
+        # if projection is set, set mapmode to True
+        if self.proj is not None:
+            self.mapmode = True
         # set dummy xy axis if not defined
         if self.x is None: 
             self.x = np.array(range(self.f.shape[0]))
