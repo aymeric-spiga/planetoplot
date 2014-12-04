@@ -1011,7 +1011,7 @@ class pp():
         if self.plotin is None:  
             # start from scratch
             self.fig = ppplot.figuref(x=self.xp,y=self.yp)
-            self.subv,self.subh = ppplot.definesubplot(self.howmanyplots,self.fig) 
+            self.subv,self.subh = ppplot.definesubplot(self.howmanyplots,self.fig,sup=self.superpose) 
             self.n = 0
             ## adapted space for labels etc
             ## ... except for ortho because there is no label anyway

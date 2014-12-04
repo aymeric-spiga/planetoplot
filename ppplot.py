@@ -206,15 +206,19 @@ def rainbow(cb="jet",num=8):
 # a function to define subplot
 # ... user can change settings in set_multiplot.txt read above
 # -------------------------------
-def definesubplot(numplot, fig):
-    try: 
+def definesubplot(numplot, fig, sup=False):
+    if sup:
+       mpl.rcParams['font.size'] = 18
+       subv = 1 ; subh = 1
+    else:
+      try: 
         mpl.rcParams['font.size'] = font_t[numplot]
-    except: 
+      except: 
         mpl.rcParams['font.size'] = 18
-    try: 
+      try: 
         fig.subplots_adjust(wspace = wspace_t[numplot], hspace = hspace_t[numplot])
         subv, subh = subv_t[numplot],subh_t[numplot]
-    except: 
+      except: 
         print "!! WARNING !! (ignore if superpose mode) no preset found from set_multiplot.txt, or this setting file was not found."
         subv = 1 ; subh = numplot
     return subv,subh
