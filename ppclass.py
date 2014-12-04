@@ -196,8 +196,9 @@ class pp():
                       savtxt=False,\
                       modx=None,\
                       fmt=None,\
-                      xp=16,yp=8,\
+                      xp=10,yp=6,\
                       missing=1.e25,\
+                      nopickle=False,\
                       trans=None,back=None,\
                       showcb=None,\
                       logy=None,\
@@ -246,6 +247,7 @@ class pp():
         self.savtxt = savtxt
         self.modx = modx
         self.missing = missing
+        self.nopickle = nopickle
         ## here are user-defined plot settings 
         ## -- if not None, valid on all plots in the pp() objects
         self.xlabel = xlabel ; self.xcoeff = xcoeff
@@ -331,6 +333,7 @@ class pp():
             self.modx = other.modx
             self.xp = other.xp ; self.yp = other.yp
             self.missing = other.missing
+            self.nopickle = other.nopickle
             self.nxticks = other.nxticks ; self.nyticks = other.nyticks
             self.fmt = other.fmt
             self.trans = other.trans ; self.back = other.back
@@ -641,24 +644,28 @@ class pp():
               # get methods
               obj.method_x = mx ; obj.method_y = my
               obj.method_z = mz ; obj.method_t = mt
+              # get strides
+              obj.sx = self.sx ; obj.sy = self.sy
+              obj.sz = self.sz ; obj.st = self.st
               # indicate the computation method
               obj.compute = self.compute
               # indicate the kind of 3D fields
               obj.kind3d = self.kind3d
               # open the files (the same file might be opened several times but this is cheap)
               obj.openfile()
-              ### get x,y,z,t dimensions from file
-              obj.getdim()
-              ### possible time axis change
+              ### get dimensions from file
+              obj.getdimsize()
+              ### treat x,y dimensions with index
+              obj.getdimhor()
+              obj.getindexhori(dalistx=sx,dalisty=sy,indx=x,indy=y)
+              ### treat z dimension with index
+              obj.getdimz()
+              obj.getindexvert(dalist=sz,ind=z)
+              ### treat t dimension with index
+              obj.getdimt()
               obj.changetime = self.changetime
               obj.performtimechange()
-              # get strides
-              obj.sx = self.sx ; obj.sy = self.sy
-              obj.sz = self.sz ; obj.st = self.st
-              ### get index
               obj.getindextime(dalist=st,ind=t)
-              obj.getindexvert(dalist=sz,ind=z)
-              obj.getindexhori(dalistx=sx,dalisty=sy,indx=x,indy=y)
               # missing value
               obj.missing = self.missing
         # change status
@@ -1011,16 +1018,17 @@ class pp():
         if self.plotin is None:  
             # start from scratch
             self.fig = ppplot.figuref(x=self.xp,y=self.yp)
-            self.subv,self.subh = ppplot.definesubplot(self.howmanyplots,self.fig,sup=self.superpose) 
+            self.subv,self.subh = ppplot.definesubplot(self.howmanyplots,self.fig,factor=16./self.xp,sup=self.superpose) 
             self.n = 0
-            ## adapted space for labels etc
-            ## ... except for ortho because there is no label anyway
-            self.customplot = self.p[0].f.ndim == 2 \
-                        and self.p[0].mapmode == True \
-                        and self.p[0].proj not in ["ortho","robin"]
-            if self.customplot:
-                margin = 0.07
-                self.fig.subplots_adjust(left=margin,right=1-margin,bottom=margin,top=1-margin)
+#            ## adapted space for labels etc
+#            ## ... except for ortho because there is no label anyway
+#            self.customplot = self.p[0].f.ndim == 2 \
+#                        and self.p[0].mapmode == True \
+#                        and self.p[0].proj not in ["ortho","robin"]
+#            if self.customplot:
+#                margin = 0.07
+#                #self.fig.subplots_adjust(left=margin,right=1-margin,bottom=margin,top=1-margin)
+#                self.fig.subplots_adjust(left=1.2*margin,right=1+0.4*margin,bottom=1.5*margin,top=1-margin)
         else:
             # start from an existing figure.
             # extraplot must have been set in the call to the previous figure.
@@ -1091,7 +1099,8 @@ class pp():
             ppplot.save(mode=self.out,filename=self.filename,folder=self.folder,custom=self.customplot,includedate=self.includedate,res=self.res)
             mpl.close()
         # SAVE A PICKLE FILE WITH THE self.p ARRAY OF OBJECTS
-        if self.filename is not None:
+        if not self.nopickle:
+         if self.filename is not None:
           if self.verbose: print "**** Saving session in "+self.filename + ".ppobj"
           savfile = self.folder + "/" + self.filename + ".ppobj"
           try: 
@@ -1399,6 +1408,12 @@ class onerequest():
     # TBD: staggered variables could request specific dimensions
     # -------------------------------
     def getdim(self):
+        self.getdimsize()
+        self.getdimhor()
+        self.getdimz()
+        self.getdimt()
+    ##
+    def getdimsize(self):
           # GET SIZES OF EACH DIMENSION
           if self.verbose: print "**** OK. Found variable "+self.var
           shape = self.f.variables[self.var].shape
@@ -1423,6 +1438,8 @@ class onerequest():
           elif self.dim == 4:
               if self.verbose: print "**** OK. 4D field."
               self.dim_x = shape[3] ; self.dim_y = shape[2] ; self.dim_z = shape[1] ; self.dim_t = shape[0]
+    ##
+    def getdimhor(self):
           # LONGITUDE. Try preset fields. If not present set grid points axis.
           self.name_x = "nothing"
           for c in glob_listx:
@@ -1470,6 +1487,8 @@ class onerequest():
                if self.verbose: print "**** OK. x axis %4.0f values [%5.1f,%5.1f]" % (self.dim_x,self.field_x.min(),self.field_x.max())
           if self.dim_y > 1: 
                if self.verbose: print "**** OK. y axis %4.0f values [%5.1f,%5.1f]" % (self.dim_y,self.field_y.min(),self.field_y.max())
+    ##
+    def getdimz(self):
           # ALTITUDE. Try preset fields. If not present set grid points axis.
           # WARNING: how do we do if several are available? the last one is chosen.
           self.name_z = "nothing"
@@ -1484,8 +1503,10 @@ class onerequest():
             # (consider the case where tabtime is not dim 1) TBD: 2D and 3D cases
             if tabalt.ndim == 4: 
                 try:
-                    self.field_z = tabalt[1,:,0,0] # 4D case. alt is usually third dimension.
-                                                   # 1 for time to avoid initial 0s
+                    self.field_z = tabalt[1,:,self.index_y[0],self.index_x[0]] 
+                    # 4D case. alt is usually third dimension.
+                    # 1 for time to avoid initial 0s
+                    # -- and try to use horizontal indices
                 except:
                     self.field_z = tabalt[0,:,0,0]
                 if self.verbose: print "!! WARNING !! "+self.name_z+" is 4D var. We made it 1D."
@@ -1498,7 +1519,8 @@ class onerequest():
                 self.name_z = "z grid points"
           if self.dim_z > 1: 
                if self.verbose: print "**** OK. z axis %4.0f values [%5.1f,%5.1f]" % (self.dim_z,self.field_z.min(),self.field_z.max())
-
+    ##
+    def getdimt(self):
           # TIME. Try preset fields.
           self.name_t = "nothing"
           for c in glob_listt:
@@ -1551,7 +1573,7 @@ class onerequest():
                               + self.f.variables['controle'][3]%669 \
                               + self.f.variables['controle'][26]
             ### options added by A. Spiga
-            elif self.changetime == "correctls":
+            elif "correctls" in self.changetime:
              if self.tabtime is None:
               print "!! WARNING !! Encountered a problem with correctls. Check your time dimension. Skipping this part."
              else: 
@@ -1559,14 +1581,18 @@ class onerequest():
               if self.dim_t == 1:
                 self.field_t = np.array([dafirst])
               else:
-                daint = self.tabtime[1] - dafirst
-                dalast = dafirst + (self.dim_t-1)*daint
-                year = 0.
-                add = np.linspace(dafirst,dalast,num=self.dim_t) ; add[0] = 0.
-                for iii in range(1,self.dim_t):
-                  if self.tabtime[iii] - self.tabtime[iii-1] < 0: year = year+1.
-                  add[iii] = year*360.
-                self.field_t = add + self.tabtime
+                if "noadd" in self.changetime:
+                  self.field_t = self.tabtime[:]
+                  if self.verbose: print "!! WARNING !! Ls axis is kept as is.",self.field_t[0],self.field_t[self.dim_t-1]
+                else:
+                  daint = self.tabtime[1] - dafirst
+                  dalast = dafirst + (self.dim_t-1)*daint
+                  year = 0.
+                  add = np.linspace(dafirst,dalast,num=self.dim_t) ; add[0] = 0.
+                  for iii in range(1,self.dim_t):
+                    if self.tabtime[iii] - self.tabtime[iii-1] < 0: year = year+1.
+                    add[iii] = year*360.
+                  self.field_t = add + self.tabtime
             elif "mars_meso" in self.changetime:
                 if 'Times' not in self.f.variables.keys():
                     if self.verbose: print "!! WARNING !! Variable Times not in file. Cannot proceed to change of time axis."
@@ -1989,7 +2015,7 @@ class onerequest():
         else:
             if self.verbose: print "!! WARNING !! Not account for areas. Only averaging over z and/or t axis."
         # normalize by total area
-        print "**** OK. I can now normalize field by areas."
+        if self.verbose: print "**** OK. I can now normalize field by areas."
         aire.field = aire.field / totarea
         # tile area array over self t and z axis so that area field could be multiplied with self.field
         aire.field = np.tile(aire.field,(self.index_t.size,self.index_z.size,1,1))

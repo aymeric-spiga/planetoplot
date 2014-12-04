@@ -34,13 +34,12 @@ mpl.rcParams['ytick.major.pad'] = 10
 # global variables
 # -------------------------------
 # - where settings files are located
-#   (None means planetoplot_v2 in PYTHONPATH)
+#   (None means planetoplot in PYTHONPATH)
 whereset = None
 # - some good default settings.
 # (bounds)
 how_many_sigma = 3.0 
 # (contours)
-ccol = 'black'
 cline = 0.55
 #cline = 0.8
 # (vectors)
@@ -51,26 +50,9 @@ zeorientation="vertical"
 zefrac = 0.05
 # (save figures)
 pad_inches_value=0.25
-# (negative mode)
-def_negative = False
-# (xkcd mode)
-def_xkcd = False
 ###############################################
 
-### settings for 'negative-like' mode
-if def_negative:
-    mpl.rc('figure', facecolor='k', edgecolor='k')
-    mpl.rcParams['text.color'] = 'w'
-    mpl.rc('axes',labelcolor='w',facecolor='k',edgecolor='w')
-    mpl.rcParams['xtick.color'] = 'w'
-    mpl.rcParams['ytick.color'] = 'w'
-    mpl.rcParams['grid.color'] = 'w'
-    mpl.rc('savefig',facecolor='k',edgecolor='k')
 
-### settings for xkcd mode (only with matplotlib 1.3)
-### ... you must have Humori-Sans Font installed
-if def_xkcd:
-    mpl.xkcd()
 
 ##########################
 # executed when imported #
@@ -206,21 +188,22 @@ def rainbow(cb="jet",num=8):
 # a function to define subplot
 # ... user can change settings in set_multiplot.txt read above
 # -------------------------------
-def definesubplot(numplot, fig, sup=False):
-    if sup:
-       mpl.rcParams['font.size'] = 18
-       subv = 1 ; subh = 1
-    else:
-      try: 
-        mpl.rcParams['font.size'] = font_t[numplot]
-      except: 
-        mpl.rcParams['font.size'] = 18
-      try: 
-        fig.subplots_adjust(wspace = wspace_t[numplot], hspace = hspace_t[numplot])
-        subv, subh = subv_t[numplot],subh_t[numplot]
-      except: 
-        print "!! WARNING !! (ignore if superpose mode) no preset found from set_multiplot.txt, or this setting file was not found."
-        subv = 1 ; subh = numplot
+def definesubplot(numplot, fig, factor=1., sup=False):
+    # default
+    fontsize = 18 ; subv = 1 ; subh = 1
+    # multiplot mode
+    if not sup:
+     try:
+       fontsize = font_t[numplot]
+       fig.subplots_adjust(wspace = wspace_t[numplot], hspace = hspace_t[numplot])
+       subv, subh = subv_t[numplot],subh_t[numplot]
+     except:
+       print "!! WARNING !! no preset found from set_multiplot.txt, or this setting file was not found."
+       subv = 1 ; subh = numplot
+    # commensurate font
+    if factor != 0.: fontsize = fontsize / factor
+    # change parameter
+    mpl.rcParams['font.size'] = fontsize
     return subv,subh
 
 # a function to calculate automatically bounds (or simply prescribe those)
@@ -335,7 +318,21 @@ def save(mode=None,filename=None,folder="./",includedate=False,res=150,custom=Fa
       else:
           print "!! ERROR !! File format not supported. Supported: ",possiblesave
 
+## make it negative (black background / white axes)
+def negative(howblack="black"):
+    mpl.rc('figure', facecolor=howblack, edgecolor=howblack)
+    mpl.rcParams['text.color'] = 'w'
+    mpl.rcParams['lines.color'] = 'w'
+    mpl.rc('axes',labelcolor='w',facecolor=howblack,edgecolor='w')
+    mpl.rcParams['xtick.color'] = 'w'
+    mpl.rcParams['ytick.color'] = 'w'
+    mpl.rcParams['grid.color'] = 'w'
+    mpl.rc('savefig',facecolor=howblack,edgecolor=howblack)
 
+### settings for xkcd mode (only with matplotlib 1.3)
+### ... you must have Humori-Sans Font installed
+def xkcd():
+    mpl.xkcd()
 
 ##################################
 # a generic class to make a plot #
@@ -619,6 +616,8 @@ class plot2d(plot):
                  svx=3,\
                  svy=3,\
                  leftcorrect=False,\
+                 clev=None,\
+                 ccol="black",\
                  colorvec="black"):
         ## get initialization from parent class
         plot.__init__(self)
@@ -640,6 +639,8 @@ class plot2d(plot):
         self.svx = svx
         self.svy = svy
         self.leftcorrect = leftcorrect
+        self.clev = clev
+        self.ccol = ccol
 
     # define_from_var
     # ... this uses settings in set_var.txt
@@ -663,9 +664,9 @@ class plot2d(plot):
         ############################################################################################
         ### PRE-SETTINGS
         ############################################################################################
-        # if no projection is set, set mapmode to False
-        if self.proj is None:
-            self.mapmode = False
+        # if projection is set, set mapmode to True
+        if self.proj is not None:
+            self.mapmode = True
         # set dummy xy axis if not defined
         if self.x is None: 
             self.x = np.array(range(self.f.shape[0]))
@@ -686,8 +687,10 @@ class plot2d(plot):
         shape = self.f.shape
         if shape[0] != shape[1]:
          if len(self.x) == shape[0] and len(self.y) == shape[1]:
-            print "!! WARNING !! Transposing axes"
+            #print "!! WARNING !! Transposing axes"
             self.f = np.transpose(self.f)
+            if self.c is not None: 
+              self.c = np.transpose(self.c)
         # bound field
         zevmin, zevmax = calculate_bounds(self.f,vmin=self.vmin,vmax=self.vmax)
         what_I_plot = bounds(self.f,zevmin,zevmax)
@@ -700,10 +703,15 @@ class plot2d(plot):
             # if masked array, set masked values to filled values (e.g. np.nan) for plotting purposes
             if type(self.c).__name__ in 'MaskedArray':
                self.c[self.c.mask] = self.c.fill_value
-            zevminc, zevmaxc = calculate_bounds(self.c)
-            what_I_contour = bounds(self.c,zevminc,zevmaxc)
-            ticks = self.div + 1
-            zelevelsc = np.linspace(zevminc,zevmaxc,ticks)
+            # set levels for contour lines
+            if self.clev is None:
+              zevminc, zevmaxc = calculate_bounds(self.c)
+              what_I_contour = bounds(self.c,zevminc,zevmaxc)
+              ticks = self.div + 1
+              self.clev = np.linspace(zevminc,zevmaxc,ticks)
+            else:
+              what_I_contour = self.c
+              
         ############################################################################################
         ### MAIN PLOT
         ### NB: contour lines are done before contour shades otherwise colorar error
@@ -719,7 +727,7 @@ class plot2d(plot):
             # make shaded and line contours
             if self.c is not None: 
                 objC = mpl.contour(x, y, what_I_contour, \
-                            zelevelsc, colors = ccol, linewidths = cline)
+                            self.clev, colors = self.ccol, linewidths = cline)
                 #mpl.clabel(objC, inline=1, fontsize="small",\
                 #             inline_spacing=1,fmt="%.0f")
             mpl.contourf(x, y, \
@@ -809,7 +817,7 @@ class plot2d(plot):
                 if self.proj in ["robin"]: steplon = 90.
                 mertab = np.r_[-360.:360.:steplon]
                 #partab = np.r_[-90.:90.+steplat:steplat]
-                partab = np.r_[-90.,-30.,0.,30.,90.]
+                partab = np.r_[-60.,-30.,0.,30.,60.]
                 if self.proj == "ortho": 
                     merlab = [0,0,0,0] ; parlab = [0,0,0,0]
                     # in ortho projection, blon and blat can be used to set map center
@@ -882,9 +890,9 @@ class plot2d(plot):
             if self.c is not None: 
                 #zelevelsc = np.arange(900.,1100.,5.)
                 objC2 = m.contour(x, y, what_I_contour, \
-                            zelevelsc, colors = ccol, linewidths = cline)
+                            self.clev, colors = self.ccol, linewidths = cline)
                 #mpl.clabel(objC2, inline=1, fontsize=10,manual=True,fmt='-%2.0f$^{\circ}$C',colors='r')
-                #mpl.clabel(objC2, inline=0, fontsize=8, fmt='%.0f',colors='r', inline_spacing=0)
+                #mpl.clabel(objC2, inline=0, fontsize=8, fmt='%.0f',colors='r', inline_spacing=0) 
             m.contourf(x, y, what_I_plot, zelevels, cmap = palette, alpha = self.trans, antialiased=True)
         ############################################################################################
         ### COLORBAR
@@ -972,8 +980,9 @@ class plot2d(plot):
 
     # makeshow = make + show
     # -------------------------------
-    def makeshow(self):
+    def makeshow(self,grid="off"):
         self.make()
+        if grid != "off": mpl.grid(color=grid)
         mpl.show()
 
     # makesave = make + save

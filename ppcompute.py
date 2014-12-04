@@ -12,12 +12,12 @@ import math  as m
 ## first a useful function to find settings in a folder in PYTHONPATH
 def findset(whereset,string="planetoplot"):
     # ... set a default whereset if it was set to None
-    # ... default is in the planetoplot_v2 folder
+    # ... default is in the planetoplot folder
     if whereset is None:
         for path in os.environ['PYTHONPATH'].split(os.pathsep):
             if string in path: whereset = path
-        if whereset is None: 
-            print "!! ERROR !! "+ string + "not in $PYTHONPATH"
+        if whereset is None:
+            print "!! ERROR !! "+ string + " not in $PYTHONPATH"
             print "--> either put it in $PYTHONPATH or change whereset"
             exit()
     # ... if the last / is missing put it
@@ -205,7 +205,7 @@ def smooth1d(x,window=11,window_type='hanning'):
     scipy.signal.lfilter
     TODO: the window parameter could be the window itself if an array instead of a string   
     """
-    if True in np.isnan(field):
+    if True in np.isnan(x):
         print "!! ERROR !! Smooth is a disaster with missing values. This will be fixed."
         exit()    
     x = np.array(x)
@@ -325,6 +325,59 @@ def timecorrect(time):
 #### FLOW DIAGNOSTIC ####
 #########################
 
+def deriv1d(field,coord=None): 
+  ## dfdx = deriv(f,x)
+  df = np.gradient(field)
+  if coord is not None:
+    dx = np.gradient(coord)
+    return df/dx
+  else:
+    return df
+
+def dxdy(lon,lat,coeff=None,lonlat=False):
+  ####################
+  # fill 2D array w/ derivatives of two coordinates
+  ####################
+  # lon: coord1
+  # lat: coord2
+  # coeff: e.g. pi/180 for deg --> rad
+  # lonlat: True if lon is longitude and lat is latitude
+  ####################
+  if coeff is not None:
+    # convert factor (e.g. deg to rad)
+    la = lon*coeff
+    ph = lat*coeff
+  else:
+    la = lon
+    ph = lat
+  # ensure 2D arrays for lon,lat
+  if lon.ndim == 1 and lat.ndim == 1:
+    [lar,phr] = np.meshgrid(la,ph)
+  elif lon.ndim == 2 and lat.ndim == 2:
+    lar,phr = la,ph
+  else:
+    print "ppcompute. there is a problem with coordinates rank. stop."
+    exit()
+  # compute normalized gradients for lat/lon grid
+  # -- cartesian differential coordinates
+  dump,dx = np.gradient(lar)
+  dy,dump = np.gradient(phr)
+  # treat the particular case of lon/lat
+  if lonlat:
+    dx = dx*np.cos(phr)
+  return dx,dy
+ 
+def deriv2d(u,lon,lat,coeff=None,lonlat=False,fac=1.):
+  # compute gradients -- with normalized coordinates
+  du_y,du_x = np.gradient(u)
+  # compute cartesian increments
+  dx,dy = dxdy(lon,lat,coeff=coeff,lonlat=lonlat)
+  # eventually compute cartesian derivatives
+  du_dx = du_x/(fac*dx)
+  du_dy = du_y/(fac*dy)
+  # output
+  return du_dx, du_dy 
+
 def divort(u,v,lon,lat,rad):
   ####################
   # compute divergence and vorticity
@@ -336,42 +389,8 @@ def divort(u,v,lon,lat,rad):
   # lat: latitude
   # rad: radius of the planet
   ####################
-
-  # compute gradients -- with normalized coordinates
-  du_y,du_x = np.gradient(u)
-  dv_y,dv_x = np.gradient(v)
-
-  # convert to radian
-  la = lon*np.pi/180.
-  ph = lat*np.pi/180.
-
-  # ensure 2D arrays for lon,lat
-  if lon.ndim == 1 and lat.ndim == 1:
-    [lar,phr] = np.meshgrid(la,ph)
-  elif lon.ndim == 2 and lat.ndim == 2:
-    lar,phr = la,ph
-  else:
-    print "ppcompute. there is a problem with lat/lon rank. stop."
-    exit()
-
-  # compute normalized gradients for lat/lon grid
-  dump,dla_x = np.gradient(lar)
-  dph_y,dump = np.gradient(phr)
-   
-  # compute cartesian differential coordinates
-  dx = dla_x*rad*np.cos(phr)
-  dy = dph_y*rad
-   
-  # eventually compute cartesian derivatives
-  du_dx = du_x / dx
-  du_dy = du_y / dy
-  dv_dx = dv_x / dx
-  dv_dy = dv_y / dy
-   
-  # vorticity
+  du_dx,du_dy = deriv2d(u,lon,lat,coeff=np.pi/180.,lonlat=True,fac=rad)
+  dv_dx,dv_dy = deriv2d(v,lon,lat,coeff=np.pi/180.,lonlat=True,fac=rad)
   vorti = dv_dx - du_dy
   div = du_dx + dv_dy 
-
   return div,vorti
-
-

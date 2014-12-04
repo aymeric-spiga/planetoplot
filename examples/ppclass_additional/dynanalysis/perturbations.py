@@ -7,6 +7,7 @@ xx = 0.
 xm = "-175.,180."
 ff = "diagfi.nc"
 tt = 240.
+tt = 1.e5 # always the last
 #############################
 
 # field
