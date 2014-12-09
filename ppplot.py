@@ -362,8 +362,8 @@ class plot():
                  swap=False,\
                  swaplab=True,\
                  invert=False,\
-                 xcoeff=1.,\
-                 ycoeff=1.,\
+                 xcoeff=None,\
+                 ycoeff=None,\
                  fmt=None,\
                  colorbar="jet",\
                  units="",\
@@ -500,7 +500,8 @@ class plot1d(plot):
         if self.swap:  x = self.f ; y = self.x
         else:          x = self.x ; y = self.f
         # coefficients on axis
-        x=x*self.xcoeff ; y=y*self.ycoeff
+        if self.xcoeff is not None: x=x*self.xcoeff
+        if self.ycoeff is not None: y=y*self.ycoeff
         # check axis
         if x.size != y.size:
             print "!! ERROR !! x and y sizes don't match on 1D plot.", x.size, y.size
@@ -723,7 +724,8 @@ class plot2d(plot):
             if self.swap:  x = self.y ; y = self.x
             else:          x = self.x ; y = self.y
             # coefficients on axis
-            x=x*self.xcoeff ; y=y*self.ycoeff
+            if self.xcoeff is not None: x=x*self.xcoeff
+            if self.ycoeff is not None: y=y*self.ycoeff
             # make shaded and line contours
             if self.c is not None: 
                 objC = mpl.contour(x, y, what_I_contour, \
