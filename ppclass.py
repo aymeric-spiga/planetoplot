@@ -1622,6 +1622,18 @@ class onerequest():
                         self.name_t = "local time (center of domain)"
                         if self.method_t == "fixed": 
                             self.field_t = self.field_t % 24 # so that the user is not mistaken!
+            elif "earth_seconds_to_date" in self.changetime:
+              import datetime as dt
+              orig = self.f.variables['time_counter'].time_origin.lower().title()
+              date = dt.datetime.strptime(orig,' %Y-%b-%d %H:%M:%S')
+              try:    self.field_t = self.f.variables['time_counter'][:]
+              except: print "!! ERROR !! could not find time_counter"
+              listdate = []
+              for yeah in self.field_t:
+                newdate = date + dt.timedelta(0,yeah)
+                char = newdate.strftime("%Y-%b-%d %H:%M:%S")
+                listdate.append(char)
+              self.field_t = listdate
             else:
                 if self.verbose: print "!! WARNING !! This time change is not implemented. Nothing is done."
             if self.verbose: print "**** OK. new t axis values [%5.1f,%5.1f]" % (self.field_t.min(),self.field_t.max())
@@ -1847,7 +1859,10 @@ class onerequest():
           if self.method_y == "free" and self.sy != 1: 
               self.field_y = self.field_y[self.index_y]
         self.field_z = self.field_z[self.index_z]
-        self.field_t = self.field_t[self.index_t]
+        try: 
+          self.field_t = self.field_t[self.index_t]
+        except:
+          print "!!!! Time indices are not numbers. I assume you know what you are doing !!!!"
         # extract relevant horizontal points
         # TBD: is compfree OK with computing on irregular grid?
         test = self.method_x + self.method_y
