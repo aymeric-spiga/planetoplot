@@ -882,6 +882,8 @@ class pp():
                     plobj.x = obj.absc     # abscissa (or longitude)
                     plobj.y = obj.ordi     # ordinate (or latitude)
                                            # -- useless in 1D but not used anyway
+                    # specific case where axis is made of dates
+                    if "earth_calendar" in self.changetime: plobj.xdate = True
                     # specific 1D plot stuff
                     if dp == 1:
                         # -- a default legend
@@ -1622,18 +1624,17 @@ class onerequest():
                         self.name_t = "local time (center of domain)"
                         if self.method_t == "fixed": 
                             self.field_t = self.field_t % 24 # so that the user is not mistaken!
-            elif "earth_seconds_to_date" in self.changetime:
-              import datetime as dt
-              orig = self.f.variables['time_counter'].time_origin.lower().title()
-              date = dt.datetime.strptime(orig,' %Y-%b-%d %H:%M:%S')
-              try:    self.field_t = self.f.variables['time_counter'][:]
-              except: print "!! ERROR !! could not find time_counter"
-              listdate = []
-              for yeah in self.field_t:
-                newdate = date + dt.timedelta(0,yeah)
-                char = newdate.strftime("%Y-%b-%d %H:%M:%S")
-                listdate.append(char)
-              self.field_t = listdate
+            elif "earth_calendar" in self.changetime:
+                # -- Jean-Baptiste Madeleine helped with this part
+                import datetime as dt
+                from netCDF4 import num2date
+                # Load initial time
+                origdate = self.f.variables['time_counter'].time_origin.lower().title()
+                origdate = dt.datetime.strptime(origdate,' %Y-%b-%d %H:%M:%S')
+                chardate = "seconds since " + origdate.strftime('%Y-%m-%d %H:%M:%S')
+                # Load time axis
+                orig = self.f.variables['time_counter']
+                self.field_t = num2date(orig[:], units = chardate)
             else:
                 if self.verbose: print "!! WARNING !! This time change is not implemented. Nothing is done."
             if self.verbose: print "**** OK. new t axis values [%5.1f,%5.1f]" % (self.field_t.min(),self.field_t.max())

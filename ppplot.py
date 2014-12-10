@@ -375,6 +375,7 @@ class plot():
                  nxticks=10,\
                  nyticks=10,\
                  cbticks=None,\
+                 xdate=False,\
                  title=""):
         ## what could be defined by the user
         self.var = var
@@ -402,6 +403,7 @@ class plot():
         self.nxticks = nxticks
         self.nyticks = nyticks
         self.cbticks = cbticks
+        self.xdate = xdate
         ## other useful arguments
         ## ... not used here in ppplot but need to be attached to plot object
         self.axisbg = "white"
@@ -537,14 +539,21 @@ class plot1d(plot):
         else: ax.yaxis.set_major_formatter(FormatStrFormatter(self.fmt))
         # plot limits: ensure that no curve would be outside the window
         # x-axis
-        x1, x2 = ax.get_xbound()
-        xmin = ppcompute.min(x)
-        xmax = ppcompute.max(x)
-        if xmin < x1: x1 = xmin
-        if xmax > x2: x2 = xmax
-        if self.xmin is not None: x1 = self.xmin
-        if self.xmax is not None: x2 = self.xmax
-        ax.set_xbound(lower=x1,upper=x2)
+        if self.xdate:
+          import matplotlib.dates as mdates
+          ax.xaxis.set_major_formatter(mdates.DateFormatter('%m/%d/%y'))
+          #ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%b-%d %H:%M:%S'))
+          ax.xaxis.set_major_locator(mdates.DayLocator())
+          mpl.setp(mpl.xticks()[1], rotation=30, ha='right') # rotate the x labels
+        else:
+          x1, x2 = ax.get_xbound()
+          xmin = ppcompute.min(x)
+          xmax = ppcompute.max(x)
+          if xmin < x1: x1 = xmin
+          if xmax > x2: x2 = xmax
+          if self.xmin is not None: x1 = self.xmin
+          if self.xmax is not None: x2 = self.xmax
+          ax.set_xbound(lower=x1,upper=x2)
         # y-axis
         y1, y2 = ax.get_ybound()
         ymin = ppcompute.min(y)
