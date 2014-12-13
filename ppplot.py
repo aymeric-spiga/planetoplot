@@ -334,6 +334,56 @@ def negative(howblack="black"):
 def xkcd():
     mpl.xkcd()
 
+## for command-line use: set up parser options for plot, plot1D and plot2D
+## -- must take as an input a parser object
+## -- return a modified parser object
+def opt(parser):
+  parser.add_option('-T','--title',action='append',dest='title',type="string",default=None,help="change 'title'")
+  parser.add_option('-X','--xlabel',action='append',dest='xlabel',type="string",default=None,help="change 'xlabel'")
+  parser.add_option('-Y','--ylabel',action='append',dest='ylabel',type="string",default=None,help="change 'ylabel'")
+  parser.add_option('-D','--div',action='store',dest='div',type="int",default=20,help="integer for number of divisions")
+  parser.add_option('-H','--trans',action='store',dest='trans',type="float",default=1.0,help="float for transparency (0=transp,1=opaque)")
+  parser.add_option('-Z','--logy',action='store_true',dest='logy',default=False,help="set log for vertical axis")
+  parser.add_option('-O','--save',action='store',dest='out',type="string",default=None,help="save mode: 'gui' 'png' 'pdf' 'eps' 'svg' 'ps'")
+  parser.add_option('-V','--void',action='store_true',dest='void',default=False,help="no colorbar, no title, no labels")
+  parser.add_option('-U','--units',action='append',dest='units',type="string",default=None,help="units for the field")
+  parser.add_option('-F','--fmt',action='append',dest='fmt',type="string",default=None,help="values formatting. ex: '%.0f' '%3.1e'")
+  parser.add_option('--xcoeff',action='append',dest='xcoeff',type="float",default=None,help="multiply x axis [not for 2D map]")
+  parser.add_option('--ycoeff',action='append',dest='ycoeff',type="float",default=None,help="multiply y axis [not for 2D map]")
+  parser.add_option('--xmin',action='append',dest='xmin',type="float",default=None,help="min bound x axis [not for 2D map]")
+  parser.add_option('--ymin',action='append',dest='ymin',type="float",default=None,help="min bound y axis [not for 2D map]")
+  parser.add_option('--xmax',action='append',dest='xmax',type="float",default=None,help="max bound x axis [not for 2D map]")
+  parser.add_option('--ymax',action='append',dest='ymax',type="float",default=None,help="max bound y axis [not for 2D map]")
+  parser.add_option('--nxticks',action='append',dest='nxticks',type="float",default=None,help="ticks for x axis [not for 2D map]")
+  parser.add_option('--nyticks',action='append',dest='nyticks',type="float",default=None,help="ticks for y axis [not for 2D map]")
+  parser.add_option('--xp',action='store',dest='xp',type="int",default=None,help="x size of figure (integer)")
+  parser.add_option('--yp',action='store',dest='yp',type="int",default=None,help="y size of figure (integer)")
+  parser.add_option('--res',action='store',dest='res',type="float",default=150.,help="change resolution of figure")
+  parser.add_option('--swap',action='store_true',dest='swap',default=False,help='swap axis')
+  return parser
+def opt1d(parser):
+  parser.add_option('-L','--linestyle',action='append',dest='linestyle',type="string",default=None,help="[1D] linestyle: '-' '--' '.' '..'")
+  parser.add_option('-Q','--color',action='append',dest='color',type="string",default=None,help="[1D] color: 'b' 'g' 'r' etc")
+  parser.add_option('-K','--marker',action='append',dest='marker',type="string",default=None,help="[1D] marker: '' 'x' 'o' etc")
+  parser.add_option('-S','--superpose',action='store_true',dest='superpose',default=False,help="[1D] use same axis for all plots")
+  parser.add_option('-E','--legend',action='append',dest='legend',type="string",default=None,help="[1D] legend for line")
+  parser.add_option('--modx',action='append',dest='modx',type="float",default=None,help="[1D] change xticks with a modulo")
+  return parser
+def opt2d(parser):
+  parser.add_option('-C','--colorbar',action='append',dest='colorbar',type="string",default=None,help="[2D] colormap: http://micropore.files.wordpress.com/2010/06/colormaps.png")
+  parser.add_option('-P','--proj',action='store',dest='proj',type="string",default=None,help="[2D] map projection: 'cyl' 'npstere' 'spstere' 'ortho' 'moll' 'robin' 'lcc' 'laea' 'merc'")
+  parser.add_option('-B','--back',action='append',dest='back',type="string",default=None,help='[2D] predefined map background (cf. set_back.txt)')
+  parser.add_option('-A','--area',action='append',dest='area',type="string",default=None,help='[2D] predefined region of mapping (cf. set_area.txt)')
+  parser.add_option('-I','--blon',action='append',dest='blon',type="float",default=None,help='[2D] float: bounding longitude for stere (or center longitude for ortho)')
+  parser.add_option('-J','--blat',action='append',dest='blat',type="float",default=None,help='[2D] float: bounding latitude for stere (or center latitude for ortho) ')
+  parser.add_option('-N','--vmin',action='append',dest='vmin',type="float",default=None,help='[2D] float: minimum value for displayed field')
+  parser.add_option('-M','--vmax',action='append',dest='vmax',type="float",default=None,help='[2D] float: maximum value for displayed field')
+  parser.add_option('-W','--wscale',action='append',dest='wscale',type="float",default=None,help='[2D] float: set size of reference wind vector')
+  parser.add_option('--svx',action='store',dest='svx',type="int",default=None,help="Define an abscissa stride on vectors only -- not on field")
+  parser.add_option('--svy',action='store',dest='svy',type="int",default=None,help="Define an ordinate stride on vectors only -- not on field")
+  parser.add_option('--cbticks',action='append',dest='cbticks',type="float",default=None,help="ticks for colorbar")
+  return parser
+
 ##################################
 # a generic class to make a plot #
 ##################################
