@@ -481,8 +481,6 @@ class plot():
             vv = v
           # 3. set attibutes in destination
           setattr(self,k,vv)
-          print k,vv
-
 
     # check
     # -------------------------------
