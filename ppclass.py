@@ -882,6 +882,8 @@ class pp():
                     plobj.x = obj.absc     # abscissa (or longitude)
                     plobj.y = obj.ordi     # ordinate (or latitude)
                                            # -- useless in 1D but not used anyway
+                    # specific case where axis is made of dates
+                    if "earth_calendar" in self.changetime: plobj.xdate = True
                     # specific 1D plot stuff
                     if dp == 1:
                         # -- a default legend
@@ -1622,6 +1624,17 @@ class onerequest():
                         self.name_t = "local time (center of domain)"
                         if self.method_t == "fixed": 
                             self.field_t = self.field_t % 24 # so that the user is not mistaken!
+            elif "earth_calendar" in self.changetime:
+                # -- Jean-Baptiste Madeleine helped with this part
+                import datetime as dt
+                from netCDF4 import num2date
+                # Load initial time
+                origdate = self.f.variables['time_counter'].time_origin.lower().title()
+                origdate = dt.datetime.strptime(origdate,' %Y-%b-%d %H:%M:%S')
+                chardate = "seconds since " + origdate.strftime('%Y-%m-%d %H:%M:%S')
+                # Load time axis
+                orig = self.f.variables['time_counter']
+                self.field_t = num2date(orig[:], units = chardate)
             else:
                 if self.verbose: print "!! WARNING !! This time change is not implemented. Nothing is done."
             if self.verbose: print "**** OK. new t axis values [%5.1f,%5.1f]" % (self.field_t.min(),self.field_t.max())
@@ -1847,7 +1860,10 @@ class onerequest():
           if self.method_y == "free" and self.sy != 1: 
               self.field_y = self.field_y[self.index_y]
         self.field_z = self.field_z[self.index_z]
-        self.field_t = self.field_t[self.index_t]
+        try: 
+          self.field_t = self.field_t[self.index_t]
+        except:
+          print "!!!! Time indices are not numbers. I assume you know what you are doing !!!!"
         # extract relevant horizontal points
         # TBD: is compfree OK with computing on irregular grid?
         test = self.method_x + self.method_y
