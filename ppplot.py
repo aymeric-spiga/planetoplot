@@ -407,6 +407,31 @@ class plot():
         self.axisbg = "white"
         self.superpose = False
 
+    def transopt(self,objfrom,num=None):
+      # method to transfer not-None attributes
+      # from a destination object to a plot object
+      # e.g. useful in command line scripts with options 
+      # ------------------------------------------------
+      # for all common attributes ...
+      commonattr = [(k,v) for k,v in vars(objfrom).items() for kt,vt in vars(self).items() if k == kt]
+      for k,v in commonattr:
+        # ... if value is not None ...
+        if v is not None:
+          # proceed
+          # 1. detect if array attributes (obtained with append)
+          try: l = len(v)
+          except: l = 0
+          # 2. intermediate transfer
+          if l>0:
+            if num is not None: vv = v[num]
+            else: vv = v
+          else:
+            vv = v
+          # 3. set attibutes in destination
+          setattr(self,k,vv)
+          print k,vv
+
+
     # check
     # -------------------------------
     def check(self):
