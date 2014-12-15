@@ -883,7 +883,8 @@ class pp():
                     plobj.y = obj.ordi     # ordinate (or latitude)
                                            # -- useless in 1D but not used anyway
                     # specific case where axis is made of dates
-                    if "earth_calendar" in self.changetime: plobj.xdate = True
+                    if self.changetime is not None:
+                      if "earth_calendar" in self.changetime: plobj.xdate = True
                     # specific 1D plot stuff
                     if dp == 1:
                         # -- a default legend
