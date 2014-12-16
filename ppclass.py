@@ -165,6 +165,7 @@ class pp():
                       svy=None,\
                       compute="mean",\
                       kind3d="tyx",\
+                      useindex=False,\
                       verbose=False,\
                       quiet=False,\
                       superpose=False,\
@@ -233,6 +234,7 @@ class pp():
         self.svy = svy
         self.compute = compute
         self.kind3d = kind3d
+        self.useindex = useindex
         self.verbose = verbose
         self.quiet = quiet
         self.plotin = plotin
@@ -303,6 +305,7 @@ class pp():
             self.sz = other.sz ; self.st = other.st
             self.compute = other.compute
             self.kind3d = other.kind3d
+            self.useindex = other.useindex
             self.verbose = other.verbose
             self.quiet = other.quiet
             self.plotin = other.plotin
@@ -651,6 +654,8 @@ class pp():
               obj.compute = self.compute
               # indicate the kind of 3D fields
               obj.kind3d = self.kind3d
+              # use inde or not
+              obj.useindex = self.useindex 
               # open the files (the same file might be opened several times but this is cheap)
               obj.openfile()
               ### get dimensions from file
@@ -1382,6 +1387,7 @@ class onerequest():
         self.sx = 1 ; self.sy = 1 ; self.sz = 1 ; self.st = 1
         self.missing = '!! missing value: I am not set, damned !!'
         self.kind3d = '!! kind3d: I am not set, damned !!'
+        self.useindex = None
 
     # open a file. for now it is netcdf. TBD for other formats.
     # check that self.var is inside.
@@ -1445,7 +1451,8 @@ class onerequest():
     def getdimhor(self):
           # LONGITUDE. Try preset fields. If not present set grid points axis.
           self.name_x = "nothing"
-          for c in glob_listx:
+          if not self.useindex:
+           for c in glob_listx:
             if c in self.f.variables.keys():
              self.name_x = c
           if self.name_x == "nothing":
@@ -1455,7 +1462,8 @@ class onerequest():
             self.field_x = self.f.variables[self.name_x]
           # LATITUDE. Try preset fields. If not present set grid points axis.
           self.name_y = "nothing"
-          for c in glob_listy:
+          if not self.useindex:
+           for c in glob_listy:
             if c in self.f.variables.keys():
              self.name_y = c
           if self.name_y == "nothing":
@@ -1495,7 +1503,8 @@ class onerequest():
           # ALTITUDE. Try preset fields. If not present set grid points axis.
           # WARNING: how do we do if several are available? the last one is chosen.
           self.name_z = "nothing"
-          for c in glob_listz:
+          if not self.useindex:
+           for c in glob_listz:
             if c in self.f.variables.keys():
              self.name_z = c
           if self.name_z == "nothing":
@@ -1526,7 +1535,8 @@ class onerequest():
     def getdimt(self):
           # TIME. Try preset fields.
           self.name_t = "nothing"
-          for c in glob_listt:
+          if not self.useindex:
+           for c in glob_listt:
             if c in self.f.variables.keys():
              self.name_t = c
              if self.verbose: print "**** OK. Found time variable: ",c

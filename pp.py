@@ -59,6 +59,7 @@ parser.add_option('--sx',action='store',dest='sx',type="int",default=1,help="Loa
 parser.add_option('--sy',action='store',dest='sy',type="int",default=1,help="Load data every sy grid points over y dimension")
 parser.add_option('--sz',action='store',dest='sz',type="int",default=1,help="Load data every sz grid points over z dimension")
 parser.add_option('--st',action='store',dest='st',type="int",default=1,help="Load data every st grid points over t dimension")
+parser.add_option('--useindex',action='store_true',dest="useindex",default=False,help="Use index for arrays and not values of dimensions")
 # plot options --> upper case. see ppplot.
 parser = ppplot.opt(parser)
 parser = ppplot.opt1d(parser)
@@ -104,6 +105,7 @@ user.verbose = opt.verbose
 if not user.verbose: user.quiet = True
 user.compute = opt.compute
 user.changetime = opt.changetime
+user.useindex = opt.useindex
 user.sx = opt.sx ; user.sy = opt.sy
 user.sz = opt.sz ; user.st = opt.st
 user.svx = opt.svx ; user.svy = opt.svy
