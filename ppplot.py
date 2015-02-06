@@ -534,9 +534,10 @@ class plot1d(plot):
                  linestyle=None,\
                  color=None,\
                  marker='x',\
-                 legend=None):
+                 legend=None,\
+                 *args, **kwargs):
         ## get initialization from parent class
-        plot.__init__(self)
+        plot.__init__(self,*args, **kwargs)
         ## what could be defined by the user
         self.linestyle = linestyle
         self.color = color
@@ -701,9 +702,10 @@ class plot2d(plot):
                  leftcorrect=False,\
                  clev=None,\
                  ccol="black",\
-                 colorvec="black"):
+                 colorvec="black",\
+                 *args, **kwargs):
         ## get initialization from parent class
-        plot.__init__(self)
+        plot.__init__(self,*args, **kwargs)
         ## what could be defined by the user
         self.y = y
         self.mapmode = mapmode
