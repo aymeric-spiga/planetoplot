@@ -61,3 +61,11 @@ ASR ; %.0f ; gist_heat ; Absorbed Solar Radiation ; W m$^{-2}$
 ISR ; %.0f ; gist_heat ; Incoming Solar Radiation ; W m$^{-2}$
 SWDOWNZ ; %.0f ; gist_heat ; $\Phi^{SW}\downarrow$ ; W m$^{-2}$
 ZMAX_TH ; %.1f ; spectral ; PBL depth ; km
+PRECIP ; %.5f ; RdBu_r ; Total precipitation ; kg m$^{-2}$ s$^{-1}$
+SWdnSFC ; %.1f ; spectral ; Downward surface SW flux ; W m$^{-2}$
+T2M ; %.1f ; spectral ; 2m temperature ; K
+RNEB ; %.2f ; spectral ; Cloud fraction ; 
+LWP ; %.2f ; spectral ; Liquid water path ; kg m$^{-2}$
+PRW ; %.2f ; spectral ; Precipitable water ; kg m$^{-2}$
+TOPL ; %.0f ; binary ; IR flux at TOA ; W m$^{-2}$
+TOPS ; %.0f ; gray ; VIS flux at TOA ; W m$^{-2}$
