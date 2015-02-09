@@ -10,4 +10,5 @@ conda install netCDF4
 
 ##the following lib are not mandatory
 #conda install basemap
+#conda install pip
 #conda install scipy
