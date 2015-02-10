@@ -60,4 +60,6 @@ conda install pip
 conda install scipy
 ~~~
 
-### Possibility 3: install directly librairies to the built-in `python` in your OS (if you know what you are doing and have the adminsitration rights to do so)
+### Possibility 3: install directly librairies to the built-in `python` in your OS 
+
+If you know what you are doing and have the adminsitration rights to do so.
