@@ -19,11 +19,11 @@
  - `asciiplot.py`: a simple script to easily plot data in a text file
 
 * `settings`
- - `set_area.txt` --> setting file: predefined areas for plotting (can be omitted)
- - `set_back.txt` --> setting file: predefined backgrounds for plotting (can be omitted)
- - `set_multiplot.txt` --> setting file: predefined coefficients for multiplots (can be omitted)
- - `set_ppclass.txt` --> setting file: predefined variables for x,y,z,t (can be omitted)
- - `set_var.txt` --> setting file: predefined colorbars, format, labels, etc... for variables (can be omitted)
+ - `set_area.txt`: setting file: predefined areas for plotting
+ - `set_back.txt`: setting file: predefined backgrounds for plotting
+ - `set_multiplot.txt`: setting file: predefined coefficients for multiplots
+ - `set_ppclass.txt`: setting file: predefined variables for x,y,z,t
+ - `set_var.txt`: setting file: predefined colorbars, format, labels, etc... for variables
 
 * `example`
  - example scripts using `ppclass`
