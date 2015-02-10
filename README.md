@@ -22,3 +22,5 @@ svn co https://github.com/aymeric-spiga/planetoplot/trunk planetoplot
 cd tutorial
 ipython notebook planetoplot_tutorial.ipynb
 ~~~
+
+* To share experience and examples, write in the [**wiki**]!
