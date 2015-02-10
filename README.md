@@ -23,4 +23,4 @@ cd tutorial
 ipython notebook planetoplot_tutorial.ipynb
 ~~~
 
-* To share experience and examples, write in the [**wiki**]!
+* To share experience and examples, write in the [**wiki**](https://github.com/aymeric-spiga/planetoplot/wiki)!
