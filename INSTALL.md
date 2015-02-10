@@ -1,11 +1,9 @@
 # How to install PLANETOPLOT?
 -----------------------------
 
-## A note about OS
-
 This install guide is mostly for Linux/UNIX OS users. The following install steps should also work on Mac OSX provided you could access its underlying UNIX system and install `python` librairies. The tool has never been tested on Windows (but should be functional provided `python` requirements are met).
 
-## A note about getting the environment variables right
+## Important! Getting the environment variables right
 
 Add the `planetoplot` folder to `PYTHONPATH` in your environment file (e.g. `.bashrc`)
 
@@ -31,7 +29,7 @@ Do not forget to source the environment file.
 
 ## Quick guide to install the necessary `python` librairies
 
-A suite of pre-packaged `python` librairies such as `anaconda` is probably the best way to get started with a complete python environment.
+A suite of pre-packaged `python` librairies such as [Anaconda](https://store.continuum.io/cshop/anaconda) is probably the best way to get started with a complete python environment.
 
 ### Possibility 1: full `anaconda` suite
 
