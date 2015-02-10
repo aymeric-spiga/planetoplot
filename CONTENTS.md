@@ -6,6 +6,7 @@
 # `bin`
 - pp.py --> command line utility to use ppclass [HELP with 'pp.py -h']
 - pp_reload.py --> command line utility to load saved plot objects *.ppobj
+- asciiplot.py --> a simple script to easily plot data in a text file
 
 # `example`
 - example scripts using ppclass
