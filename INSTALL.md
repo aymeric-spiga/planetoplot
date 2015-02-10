@@ -5,9 +5,9 @@ This install guide is mostly for Linux/UNIX OS users. The following install step
 
 ## Important! Getting the environment variables right
 
-Add the `planetoplot` folder to `PYTHONPATH` in your environment file (e.g. `.bashrc`)
+Add the `planetoplot/modules` folder to `PYTHONPATH` in your environment file (e.g. `.bashrc`)
 
-	export PYTHONPATH=$PYTHONPATH:adapt_to_your_own/planetoplot
+	export PYTHONPATH=$PYTHONPATH:adapt_to_your_own/planetoplot/modules
 
 If you plan to use the command line tools, add the `planetoplot/bin` folder to your `PATH`
 
