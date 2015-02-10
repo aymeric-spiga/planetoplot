@@ -26,8 +26,8 @@ Do not forget to source the environment file.
 
 ## Recommended librairies
 
-- for mapping --> `basemap`
-- for scientific computations --> `scipy`
+- `basemap` (for mapping)
+- `scipy` (for scientific computations)
 
 ## Quick guide to install the necessary `python` librairies
 
