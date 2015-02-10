@@ -53,9 +53,11 @@ conda install numpy
 conda install matplotlib
 conda install netCDF4
 ~~~
- 5. Install the optional packages
+(If needed, install the optional packages)
 ~~~
 conda install basemap
 conda install pip
 conda install scipy
 ~~~
+
+### Possibility 3: install directly librairies to the built-in `python` in your OS (if you know what you are doing and have the adminsitration rights to do so)
