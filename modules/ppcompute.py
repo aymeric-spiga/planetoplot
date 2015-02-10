@@ -15,7 +15,7 @@ def findset(whereset,string="planetoplot"):
     # ... default is in the planetoplot folder
     if whereset is None:
         for path in os.environ['PYTHONPATH'].split(os.pathsep):
-            if string in path: whereset = path + "/settings/"
+            if string in path: whereset = path + "/../settings/"
         if whereset is None:
             print "!! ERROR !! "+ string + " not in $PYTHONPATH"
             print "--> either put it in $PYTHONPATH or change whereset"
