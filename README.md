@@ -2,12 +2,12 @@
 
 A cool python-based tool to plot stuff and explore data
 
-* To get sources with git type
+* To get sources through git
 ~~~
 git clone https://github.com/aymeric-spiga/planetoplot
 ~~~
 
-* To get sources with SVN type
+* To get sources through SVN
 ~~~
 svn co https://github.com/aymeric-spiga/planetoplot/trunk planetoplot
 ~~~
