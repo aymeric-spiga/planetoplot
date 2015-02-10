@@ -16,7 +16,7 @@ svn co https://github.com/aymeric-spiga/planetoplot/trunk planetoplot
 * To install, see [installation notes](https://github.com/aymeric-spiga/planetoplot/blob/master/INSTALL.md)
 
 
-* To learn how to use, see [tutorial](http://nbviewer.ipython.org/github/aymeric-spiga/planetoplot/blob/master/planetoplot_tutorial.ipynb)
+* To learn how to use, see [tutorial](http://nbviewer.ipython.org/github/aymeric-spiga/planetoplot/blob/master/tutorial/planetoplot_tutorial.ipynb)
 or if you are familiar with `ipython notebook` type
 ~~~
 cd tutorial
