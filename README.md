@@ -1,5 +1,4 @@
-### PLANETOPLOT
-**A cool python-based tool to plot stuff and explore data**
+**PLANETOPLOT: a cool python-based tool to plot stuff and explore data**
 * To get sources through git `git clone https://github.com/aymeric-spiga/planetoplot`
 * To get sources through SVN `svn co https://github.com/aymeric-spiga/planetoplot/trunk planetoplot`
 * To get a static ZIP file of the current version of the code, [click here](https://github.com/aymeric-spiga/planetoplot/archive/master.zip)
