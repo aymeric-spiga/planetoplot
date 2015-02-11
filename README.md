@@ -2,9 +2,9 @@
 * To get sources through git `git clone https://github.com/aymeric-spiga/planetoplot`
 * To get sources through SVN `svn co https://github.com/aymeric-spiga/planetoplot/trunk planetoplot`
 * To get a static ZIP file of the current version of the code, [click here](https://github.com/aymeric-spiga/planetoplot/archive/master.zip)
-* To install, see [**installation notes**](https://github.com/aymeric-spiga/planetoplot/blob/master/INSTALL.md)
-* To look at examples and learn how to use, see [**PLANETOPLOT tutorial**](http://nbviewer.ipython.org/github/aymeric-spiga/planetoplot/blob/master/tutorial/planetoplot_tutorial.ipynb).
-* To share experience and examples, write in the [**wiki**](https://github.com/aymeric-spiga/planetoplot/wiki). A complete [list of tutorials](https://github.com/aymeric-spiga/planetoplot/wiki/Tutorials) can also be found in the wiki.
+* To install, see [**INSTALL** notes](https://github.com/aymeric-spiga/planetoplot/blob/master/INSTALL.md)
+* To look at examples and learn how to use, see the [main **TUTORIAL**](http://nbviewer.ipython.org/github/aymeric-spiga/planetoplot/blob/master/tutorial/planetoplot_tutorial.ipynb).
+* To share experience and examples, write in the [**WIKI**](https://github.com/aymeric-spiga/planetoplot/wiki). A complete [list of tutorials](https://github.com/aymeric-spiga/planetoplot/wiki/Tutorials) can also be found in the wiki.
 
 ---------------------------------------------------------
 
