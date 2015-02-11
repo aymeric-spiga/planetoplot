@@ -684,7 +684,7 @@ class plot2d(plot):
     def __init__(self,\
                  y=None,\
                  mapmode=False,\
-                 proj="cyl",\
+                 proj=None,\
                  back=None,\
                  trans=1.0,\
                  vx=None,\
