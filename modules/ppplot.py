@@ -37,8 +37,6 @@ mpl.rcParams['ytick.major.pad'] = 10
 #   (None means planetoplot in PYTHONPATH)
 whereset = None
 # - some good default settings.
-# (bounds)
-how_many_sigma = 3.0 
 # (contours)
 cline = 0.55
 #cline = 0.8
@@ -208,37 +206,38 @@ def definesubplot(numplot, fig, factor=1., sup=False):
 
 # a function to calculate automatically bounds (or simply prescribe those)
 # -------------------------------
-def calculate_bounds(field,vmin=None,vmax=None):
+def calculate_bounds(field,vmin=None,vmax=None,sigma=None):
     # prescribed cases first
     zevmin = vmin
     zevmax = vmax
-    # computed cases
-    if zevmin is None or zevmax is None:
-       # select values
-       ind = np.where(field < 9e+35)
-       fieldcalc = field[ ind ] # field must be a numpy array
-       # calculate stdev and mean
-       dev = np.std(fieldcalc)*how_many_sigma
-       damean = ppcompute.mean(fieldcalc)
-       # fill min/max if needed
-       if vmin is None: zevmin = damean - dev
-       if vmax is None: zevmax = damean + dev
-       # special case: negative values with stddev while field is positive
-       if zevmin < 0. and ppcompute.min(fieldcalc) >= 0.: zevmin = 0.
-    # check that bounds are not too tight given the field
+    # calculate min and max
+    ind = np.where(np.abs(field) < 9e+35) # select values
+    fieldcalc = field[ ind ] # field must be a numpy array
     amin = ppcompute.min(field)
     amax = ppcompute.max(field)
-    if np.abs(amin) < 1.e-15: 
-        cmin = 0.
-    else:
-        cmin = 100.*np.abs((amin - zevmin)/amin)
-    cmax = 100.*np.abs((amax - zevmax)/amax)
-    if cmin > 150. or cmax > 150.:
-        print "!! WARNING !! Bounds are a bit too tight. Might need to reconsider those."
-        print "!! WARNING !! --> actual",amin,amax,"adopted",zevmin,zevmax
+    # computed cases
+    if zevmin is None or zevmax is None:
+       # default case: sigma is None, take min and max
+       if sigma is None:
+          zevmin = amin
+          zevmax = amax
+       # if sigma not None: calculate stdev and mean
+       else:
+          dev = np.std(fieldcalc)*sigma
+          damean = ppcompute.mean(fieldcalc)
+          # fill min/max if needed
+          if vmin is None: zevmin = damean - dev
+          if vmax is None: zevmax = damean + dev
+          # special case: negative values with stddev while field is positive
+          if zevmin < 0. and ppcompute.min(fieldcalc) >= 0.: zevmin = 0.
+          # check that bounds are not too tight given the field
+          if np.abs(amin) < 1.e-15: cmin = 0.
+          else: cmin = 100.*np.abs((amin - zevmin)/amin)
+          cmax = 100.*np.abs((amax - zevmax)/amax)
+          if cmin > 150. or cmax > 150.:
+            print "!! WARNING !! Bounds are a bit too tight. Might need to reconsider those."
+            print "!! WARNING !! --> actual",amin,amax,"adopted",zevmin,zevmax
     return zevmin, zevmax    
-    #### treat vmin = vmax for continuity 
-    #if vmin == vmax:  zevmin = damean - dev ; zevmax = damean + dev
 
 # a function to solve the problem with blank bounds !
 # -------------------------------
@@ -693,6 +692,7 @@ class plot2d(plot):
                  blon=None,\
                  blat=None,\
                  area=None,\
+                 sigma=None,\
                  vmin=None,\
                  vmax=None,\
                  showcb=True,\
@@ -719,6 +719,7 @@ class plot2d(plot):
         self.blon = blon ; self.blat = blat
         self.area = area
         self.vmin = vmin ; self.vmax = vmax
+        self.sigma = sigma
         self.showcb = showcb
         self.wscale = wscale
         self.svx = svx
@@ -777,7 +778,7 @@ class plot2d(plot):
             if self.c is not None: 
               self.c = np.transpose(self.c)
         # bound field
-        zevmin, zevmax = calculate_bounds(self.f,vmin=self.vmin,vmax=self.vmax)
+        zevmin, zevmax = calculate_bounds(self.f,vmin=self.vmin,vmax=self.vmax,sigma=self.sigma)
         what_I_plot = bounds(self.f,zevmin,zevmax)
         # define contour field levels. define color palette
         ticks = self.div + 1
