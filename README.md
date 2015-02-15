@@ -28,8 +28,5 @@
  - `set_var.txt`: setting file: predefined colorbars, format, labels, etc... for variables
 
 * `example`
- - example scripts using `ppclass`
 
 * `tutorial`
- - tutorial (based on `ipython notebook`)
-
