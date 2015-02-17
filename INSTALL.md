@@ -38,7 +38,7 @@ The full `anaconda` suite is free of charge and easy to install
  1. Go to [this website](https://store.continuum.io/cshop/anaconda/)
  2. Install `anaconda` on your system
  3. Add the `anaconda` `bin` directory to your `PATH` environment variable
- 4. Add `basemap` and `netCDF4` with the shell command `conda install basemap netCDF4`
+ 4. Add `basemap` and `netCDF4` with the shell command `conda install basemap pil netCDF4`
 
 ### Possibility 2: add librairies one-by-one with `miniconda`
 
