@@ -56,7 +56,7 @@ conda install netCDF4
 (If needed, install the optional packages)
 ~~~
 conda install basemap
-conda install pip
+conda install pil
 conda install scipy
 ~~~
 
