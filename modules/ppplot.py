@@ -167,6 +167,12 @@ if files_not_present != "":
 # useful functions #
 ####################
 
+# a function to quickly obtain a plot
+def quickplot(field):
+    ddd = field.ndim
+    if ddd == 1: plot1d(f=field).makeshow()
+    elif ddd == 2: plot2d(f=field).makeshow()
+
 # continuity with matplotlib
 def close():
     mpl.close()
