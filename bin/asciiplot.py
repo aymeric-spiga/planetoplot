@@ -16,6 +16,7 @@ asciiplot.py [options] text file(s)
 parser.add_option('-x','--colx',action='store',dest='colx',type="int",default=1,help='column for x axis')
 parser.add_option('-y','--coly',action='store',dest='coly',type="int",default=2,help='column for y axis')
 parser.add_option('-s','--skip',action='store',dest='skiprows',type="int",default=0,help='skip first rows in file(s)')
+parser.add_option('-u','--unique',action='store_true',dest='unique',default=False,help='case with one column only')
 parser = ppplot.opt(parser) # common options for plots
 parser = ppplot.opt1d(parser) # common options for plots
 (opt,args) = parser.parse_args()
@@ -37,6 +38,9 @@ for fff in args:
   if len(var.shape) == 1:
     pl.f = var
     pl.x = None # important for chained plots
+  elif opt.unique:
+    pl.f = var[opt.coly-1]
+    pl.x = None
   else:
     pl.f = var[opt.coly-1]
     pl.x = var[opt.colx-1]
