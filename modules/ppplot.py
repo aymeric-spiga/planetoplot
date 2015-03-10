@@ -216,13 +216,13 @@ def calculate_bounds(field,vmin=None,vmax=None,sigma=None):
     # prescribed cases first
     zevmin = vmin
     zevmax = vmax
-    # calculate min and max
-    ind = np.where(np.abs(field) < 9e+35) # select values
-    fieldcalc = field[ ind ] # field must be a numpy array
-    amin = ppcompute.min(field)
-    amax = ppcompute.max(field)
     # computed cases
     if zevmin is None or zevmax is None:
+       # calculate min and max
+       ind = np.where(np.abs(field) < 9e+35) # select values
+       fieldcalc = field[ ind ] # field must be a numpy array
+       amin = ppcompute.min(field)
+       amax = ppcompute.max(field)
        # default case: sigma is None, take min and max
        if sigma is None:
           zevmin = amin
