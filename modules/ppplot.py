@@ -831,6 +831,12 @@ class plot2d(plot):
             #             cmap=palette)
             # make log axes and/or invert ordinate
             ax = mpl.gca()
+            if self.xdate:
+              import matplotlib.dates as mdates
+              ax.xaxis.set_major_formatter(mdates.DateFormatter('%m/%d/%y %Hh'))
+              #ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%b-%d %H:%M:%S'))
+              ax.xaxis.set_major_locator(mdates.DayLocator())
+              mpl.setp(mpl.xticks()[1], rotation=30, ha='right') # rotate the x labels
             if self.logx: mpl.semilogx()
             if self.logy: mpl.semilogy()
             if self.invert: ax.set_ylim(ax.get_ylim()[::-1])
