@@ -1648,7 +1648,11 @@ class onerequest():
                 self.field_t = num2date(orig[:], units = chardate)
             else:
                 if self.verbose: print "!! WARNING !! This time change is not implemented. Nothing is done."
-            if self.verbose: print "**** OK. new t axis values [%5.1f,%5.1f]" % (self.field_t.min(),self.field_t.max())
+            if self.verbose: 
+             try:
+               print "**** OK. new t axis values [%5.1f,%5.1f]" % (self.field_t.min(),self.field_t.max())
+             except:
+               pass
 
     # get list of index to be retrieved for time axis
     ### TBD: il faudrait ne prendre que les indices qui correspondent a l interieur d un plot (dans all)
