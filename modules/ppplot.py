@@ -349,6 +349,7 @@ def opt(parser):
   parser.add_option('-D','--div',action='store',dest='div',type="int",default=20,help="integer for number of divisions")
   parser.add_option('-H','--trans',action='store',dest='trans',type="float",default=1.0,help="float for transparency (0=transp,1=opaque)")
   parser.add_option('-Z','--logy',action='store_true',dest='logy',default=False,help="set log for vertical axis")
+  parser.add_option('--logx',action='store_true',dest='logx',default=False,help="set log for horizontal axis")
   parser.add_option('-O','--save',action='store',dest='out',type="string",default=None,help="save mode: 'gui' 'png' 'pdf' 'eps' 'svg' 'ps'")
   parser.add_option('-V','--void',action='store_true',dest='void',default=False,help="no colorbar, no title, no labels")
   parser.add_option('-U','--units',action='append',dest='units',type="string",default=None,help="units for the field")
