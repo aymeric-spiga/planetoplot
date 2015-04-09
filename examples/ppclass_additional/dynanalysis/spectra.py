@@ -77,9 +77,6 @@ spec = np.abs(spec)**2
 #spec = np.log10(spec)
 
 ## PLOT
-if opt.sigma is not None:
-  ppplot.how_many_sigma = opt.sigma  # the 3sig max-min is not wide enough
-                                     # -- increase this to make max/min more contrasted
 ppplot.cline = 0.35
 ppplot.negative(howblack="0.05")
 
@@ -90,8 +87,8 @@ p.y = specy
 p.colorbar = opt.cb
 p.axisbg = 0.75
 p.div = 50
-p.xmin = limxmin
-p.xmax = limxmax
+p.xmin = np.max([limxmin,-32])
+p.xmax = np.min([limxmax,32])
 p.nxticks = 8
 #p.nyticks = 1./dy/2.
 p.ylabel = r"frequency $\sigma$ (year$^{-1}$)"
@@ -105,6 +102,9 @@ if (not opt.noreldis):
 else:
   foo = np.logspace(-3.,-1.,10)*25000.
   p.ymin = np.min(foo)
+if opt.sigma is not None:
+  p.sigma = opt.sigma  # the 3sig max-min is not wide enough
+                       # -- increase this to make max/min more contrasted
 p.make()
 
 ###################################
