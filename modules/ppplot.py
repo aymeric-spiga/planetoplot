@@ -216,8 +216,13 @@ def calculate_bounds(field,vmin=None,vmax=None,sigma=None):
     # prescribed cases first
     zevmin = vmin
     zevmax = vmax
-    # computed cases
-    if zevmin is None or zevmax is None:
+    # particular case: only nan in field
+    if False not in np.isnan(field):
+      zevmin = np.nan
+      zevmax = np.nan
+    # GENERAL cases to be computed
+    else:
+     if zevmin is None or zevmax is None:
        # calculate min and max
        ind = np.where(np.abs(field) < 9e+35) # select values
        fieldcalc = field[ ind ] # field must be a numpy array
@@ -248,11 +253,13 @@ def calculate_bounds(field,vmin=None,vmax=None,sigma=None):
 # a function to solve the problem with blank bounds !
 # -------------------------------
 def bounds(what_I_plot,zevmin,zevmax,miss=9e+35):
-    small_enough = 1.e-7
-    if zevmin < 0: what_I_plot[ what_I_plot < zevmin*(1.-small_enough) ] = zevmin*(1.-small_enough)
-    else:          what_I_plot[ what_I_plot < zevmin*(1.+small_enough) ] = zevmin*(1.+small_enough)
-    what_I_plot[ what_I_plot > miss  ] = -miss
-    what_I_plot[ what_I_plot > zevmax ] = zevmax*(1.-small_enough)
+    cond = (not np.isnan(zevmin)) or (not np.isnan(zevmax))
+    if cond:
+      small_enough = 1.e-7
+      if zevmin < 0: what_I_plot[ what_I_plot < zevmin*(1.-small_enough) ] = zevmin*(1.-small_enough)
+      else:          what_I_plot[ what_I_plot < zevmin*(1.+small_enough) ] = zevmin*(1.+small_enough)
+      what_I_plot[ what_I_plot > miss  ] = -miss
+      what_I_plot[ what_I_plot > zevmax ] = zevmax*(1.-small_enough)
     return what_I_plot
 
 # a function to change labels with modulo
