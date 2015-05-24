@@ -395,6 +395,8 @@ def opt2d(parser):
   parser.add_option('--svx',action='store',dest='svx',type="int",default=None,help="Define an abscissa stride on vectors only -- not on field")
   parser.add_option('--svy',action='store',dest='svy',type="int",default=None,help="Define an ordinate stride on vectors only -- not on field")
   parser.add_option('--cbticks',action='append',dest='cbticks',type="float",default=None,help="ticks for colorbar")
+  parser.add_option('--sigma',action='store',dest='sigma',type="float",default=None,help="[2D] enhance contrast between max/min (default: min/max limits)")
+  parser.add_option('--nocb',action='store_false',dest='showcb',default=True,help="[2D] do not show colorbar")
   return parser
 
 ##################################
@@ -856,6 +858,8 @@ class plot2d(plot):
             if self.xmax is not None: ax.set_xbound(upper=self.xmax)
             if self.ymin is not None: ax.set_ybound(lower=self.ymin)
             if self.ymax is not None: ax.set_ybound(upper=self.ymax)
+            # use back attributes to set a background
+            if self.back is not None: ax.set_axis_bgcolor(self.back)
             # set the number of ticks
             if not self.logx:
                 ax.xaxis.set_major_locator(MaxNLocator(self.nxticks))
@@ -879,8 +883,8 @@ class plot2d(plot):
             if self.proj is None: self.proj = "cyl"
             # get lon and lat in 2D version.
             # (but first ensure we do have 2D coordinates)
-            if self.x.ndim == 1: 	[self.x,self.y] = np.meshgrid(self.x,self.y)
-            elif self.x.ndim > 2:    print "!! ERROR !! lon and lat arrays must be 1D or 2D"
+            if self.x.ndim == 1:  [self.x,self.y] = np.meshgrid(self.x,self.y)
+            elif self.x.ndim > 2: print "!! ERROR !! lon and lat arrays must be 1D or 2D"
             # get lat lon intervals and associated settings
             wlon = [np.min(self.x),np.max(self.x)]
             wlat = [np.min(self.y),np.max(self.y)]
