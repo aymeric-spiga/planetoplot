@@ -7,8 +7,10 @@
 ################
 
 ## examples
-## ** mars' thermal tides
-## ./spectra.py -f ps100.nc -v ps -d 0.0833 -u sol -y 20 --sigma 10 --ymin 0.5 --ymax 8 --xmin -8 --xmax 8 -o mars_tides
+## ** mars' thermal tides in a file with outputs every 0.0833 sols
+##     ./spectra.py ps100.nc -v ps -d 0.0833 -u sol -y 20 --sigma 10 --ymin 0.5 --ymax 8 --xmin -8 --xmax 8 -o mars_tides
+## ** saturn waves in a file with outputs every 5 sols in a year of ~25000 sols
+##     ./spectra.py outremap.nc  --dt 0.0002 --unit year -y 45 --sigma 5 --logy
 
 ## modules
 import planets
@@ -25,11 +27,10 @@ import sys
 ## script options
 from optparse import OptionParser ### TBR by argparse
 parser = OptionParser()
-parser.add_option('-f','--file',action='store',dest='file',type="string",default="extract.nc",help="file")
-parser.add_option('-v','--var',action='store',dest='var',type="string",default="ps",help="var")
-parser.add_option('-y','--lat',action='store',dest='y',type="string",default="0.",help="y (lat)")
-parser.add_option('-z','--vert',action='store',dest='z',type="string",default="0.",help="z (vert)")
-parser.add_option('-u','--unit',action='store',dest='unit',type='string',default="year",help="time unit (spectra in UNIT^-1, default: year)")
+parser.add_option('-v','--var',action='store',dest='var',type="string",default="ps",help="var (default: ps)")
+parser.add_option('-y','--lat',action='store',dest='y',type="string",default="0.",help="y (lat, default: 0)")
+parser.add_option('-z','--vert',action='store',dest='z',type="string",default="0.",help="z (vert, default: 0)")
+parser.add_option('-u','--unit',action='store',dest='unit',type='string',default="time unit",help="time unit (spectra in UNIT^-1, default: time unit)")
 parser.add_option('-d','--dt',action='store',dest='dt',type="float",default=None,help="in FILE, one data point each time UNIT (default: 1)")
 parser.add_option('-o','--output',action='store',dest='output',type='string',default=None,help="name of png output (gui if None)")
 parser.add_option('--reldis',action='store_true',dest='reldis',default=False,help="add dispersion relationship")
@@ -39,6 +40,9 @@ parser.add_option('--log',action='store_true',dest='log',default=False,help="set
 parser = ppplot.opt(parser) # common options for plots
 parser = ppplot.opt2d(parser) # common options for plots
 (opt,args) = parser.parse_args()
+
+## input file
+infile = args[0]
 
 ## customize default behaviour for this script
 if opt.colorbar is None: opt.colorbar = "CMRmap"
@@ -70,7 +74,7 @@ if opt.ymin is None: opt.ymin = 0 # remove symmetric negative frequency
 ##############################
 
 ## FIELD
-tab = pp(file=opt.file,var=opt.var,y=opt.y,z=opt.z,verbose=True).getf()
+tab = pp(file=infile,var=opt.var,y=opt.y,z=opt.z,verbose=True).getf()
 
 ## MAKE X=LON Y=TIME
 tab = np.transpose(tab)
@@ -79,8 +83,10 @@ tab = np.transpose(tab)
 nx,nt = tab.shape
 
 ## SAMPLE SPACES
-dx = 1./nx   # data points each dx planet --> result in zonal wavenumber
-if opt.dt is None: dt = 1./250. # data points each opt.dt time units --> result in (time unit)^-1
+# data points each dx planet --> result in zonal wavenumber
+dx = 1./nx
+# data points each opt.dt time units --> result in (time unit)^-1
+if opt.dt is None: dt = 1.
 else: dt = opt.dt
 
 ## PERFORM 2D FFT
