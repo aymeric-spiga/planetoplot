@@ -900,7 +900,7 @@ class plot2d(plot):
             if self.ymin is not None: wlat[0] = self.ymin
             if self.ymax is not None: wlat[1] = self.ymax
             # -- settings for meridians and parallels
-            steplon = int(abs(wlon[1]-wlon[0])/6.)
+            steplon = int(abs(wlon[1]-wlon[0])/3.)
             steplat = int(abs(wlat[1]-wlat[0])/3.)
             #mertab = np.r_[wlon[0]:wlon[1]:steplon] ; merlab = [0,0,0,1]
             #partab = np.r_[wlat[0]:wlat[1]:steplat] ; parlab = [1,0,0,0]
@@ -1038,8 +1038,8 @@ class plot2d(plot):
                 # vectors on map projection or simple 2D mapping
                 if self.mapmode: 
                    try:
-                     [vecx,vecy] = m.rotate_vector(self.vx,self.vy,self.x,self.y) # for metwinds only ?
-                     #vecx,vecy = self.vx,self.vy
+                     #[vecx,vecy] = m.rotate_vector(self.vx,self.vy,self.x,self.y) # for metwinds only ?
+                     vecx,vecy = self.vx,self.vy
                    except:
                      print "!! ERROR !! Problem with field shapes for vector?" 
                      print self.vx.shape,self.vy.shape,self.x.shape,self.y.shape
@@ -1064,6 +1064,7 @@ class plot2d(plot):
                 # make vector key.
                 #keyh = 1.025 ; keyv = 1.05 # upper right corner over colorbar
                 keyh = 0.97 ; keyv = 1.06
+                keyh = 0.97 ; keyv = 1.11
                 #keyh = -0.03 ; keyv = 1.08 # upper left corner
                 p = mpl.quiverkey(q,keyh,keyv,\
                                   self.wscale,str(int(self.wscale)),\
