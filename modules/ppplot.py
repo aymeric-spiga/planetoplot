@@ -715,6 +715,7 @@ class plot2d(plot):
                  svy=3,\
                  leftcorrect=False,\
                  clev=None,\
+                 cfmt=None,\
                  ccol="black",\
                  colorvec="black",\
                  *args, **kwargs):
@@ -740,6 +741,7 @@ class plot2d(plot):
         self.svy = svy
         self.leftcorrect = leftcorrect
         self.clev = clev
+        self.cfmt = cfmt
         self.ccol = ccol
 
     # define_from_var
@@ -811,6 +813,9 @@ class plot2d(plot):
               self.clev = np.linspace(zevminc,zevmaxc,ticks)
             else:
               what_I_contour = self.c
+            # formatting
+            ft = int(mpl.rcParams['font.size']*0.55)
+            if self.cfmt is None: self.cfmt = "%.2g"
               
         ############################################################################################
         ### MAIN PLOT
@@ -829,8 +834,9 @@ class plot2d(plot):
             if self.c is not None: 
                 objC = mpl.contour(x, y, what_I_contour, \
                             self.clev, colors = self.ccol, linewidths = cline)
-                #mpl.clabel(objC, inline=1, fontsize="small",\
-                #             inline_spacing=1,fmt="%.0f")
+                ft = int(mpl.rcParams['font.size']*0.55)
+                mpl.clabel(objC, inline=1, fontsize=ft,\
+                             inline_spacing=1,fmt=self.cfmt)
             mpl.contourf(x, y, \
                          self.f, \
                          zelevels, cmap=palette)
