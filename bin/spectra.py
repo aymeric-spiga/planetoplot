@@ -85,7 +85,7 @@ if opt.ymin is None: opt.ymin = 0 # remove symmetric negative frequency
 ##############################
 
 ## FIELD
-tab = pp(file=infile,var=opt.var,y=opt.y,z=opt.z,verbose=True).getf()
+tab,x,y,z,t = pp(file=infile,var=opt.var,y=opt.y,z=opt.z,verbose=True).getfd()
 
 ## MAKE X=LON Y=TIME
 tab = np.transpose(tab)
@@ -126,8 +126,14 @@ if not opt.log:
 spec = fftpack.fftshift(spec)
 specx = fftpack.fftshift(specx)
 spect = fftpack.fftshift(spect)
-#right westward/eastward orientation
-specx = specx[::-1]
+
+## GET THE RIGHT W/E ORIENTATION
+if x[0] < x[-1]:
+  #right westward/eastward orientation
+  specx = specx[::-1]
+else:
+  #reverted axis (e.g. 180 --> -180, Venus): nothing to do
+  pass
 
 ## POWER SPECTRA
 spec = np.abs(spec)**2
