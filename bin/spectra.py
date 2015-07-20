@@ -93,6 +93,15 @@ tab = np.transpose(tab)
 ## FIELD SIZES
 nx,nt = tab.shape
 
+### TREAT PROBLEM of EVEN NUMBER OF LONGITUDES (which is a problem with fftshift) 
+### ... ADD A MIRROR POINT IN THE END
+if (nx % 2 == 0):
+  tab2 = np.zeros([nx+1,nt])
+  tab2[0:nx-1,:] = tab[0:nx-1,:]
+  tab2[nx,:] = tab[0,:]
+  tab = tab2
+  nx = nx + 1
+     
 ## SAMPLE SPACES
 # data points each dx planet --> result in zonal wavenumber
 dx = 1./nx
