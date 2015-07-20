@@ -45,13 +45,24 @@ parser = ppplot.opt2d(parser) # common options for plots
 infile = args[0]
 
 ## customize default behaviour for this script
-if opt.colorbar is None: opt.colorbar = "CMRmap"
-else: opt.colorbar = opt.colorbar[0]
-if opt.ylabel is None: opt.ylabel = r"frequency $\sigma$ ("+opt.unit+"$^{-1}$)"
-if opt.xlabel is None: opt.xlabel = r"$\leftarrow$ Westward | wavenumber $s$ | Eastward $\rightarrow$"
-if opt.title is None: opt.title = "2D Zonal-Time FFT for "+opt.var
-if (opt.reldis): opt.title = opt.title + " + RW / KW dispersion relations"
-else: opt.title = opt.title + " at latitude "+str(opt.y)
+if opt.colorbar is None: 
+  opt.colorbar = "CMRmap"
+else: 
+  opt.colorbar = opt.colorbar[0]
+#
+if opt.ylabel is None: 
+  opt.ylabel = r"frequency $\sigma$ (cycles per "+opt.unit+")"
+#
+if opt.xlabel is None: 
+  opt.xlabel = r"$\leftarrow$ Westward | wavenumber $s$ | Eastward $\rightarrow$"
+#
+if opt.title is None: 
+  opt.title = "2D Zonal-Time FFT for "+opt.var
+#
+if (opt.reldis): 
+  opt.title = opt.title + " + RW / KW dispersion relations"
+else: 
+  opt.title = opt.title + " at latitude "+str(opt.y)
 
 ## hardwired settings for this script
 opt.div = 50
