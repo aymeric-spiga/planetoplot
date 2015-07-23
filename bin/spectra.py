@@ -45,13 +45,24 @@ parser = ppplot.opt2d(parser) # common options for plots
 infile = args[0]
 
 ## customize default behaviour for this script
-if opt.colorbar is None: opt.colorbar = "CMRmap"
-else: opt.colorbar = opt.colorbar[0]
-if opt.ylabel is None: opt.ylabel = r"frequency $\sigma$ ("+opt.unit+"$^{-1}$)"
-if opt.xlabel is None: opt.xlabel = r"$\leftarrow$ Westward | wavenumber $s$ | Eastward $\rightarrow$"
-if opt.title is None: opt.title = "2D Zonal-Time FFT for "+opt.var
-if (opt.reldis): opt.title = opt.title + " + RW / KW dispersion relations"
-else: opt.title = opt.title + " at latitude "+str(opt.y)
+if opt.colorbar is None: 
+  opt.colorbar = "CMRmap"
+else: 
+  opt.colorbar = opt.colorbar[0]
+#
+if opt.ylabel is None: 
+  opt.ylabel = r"frequency $\sigma$ (cycles per "+opt.unit+")"
+#
+if opt.xlabel is None: 
+  opt.xlabel = r"$\leftarrow$ Westward | wavenumber $s$ | Eastward $\rightarrow$"
+#
+if opt.title is None: 
+  opt.title = "2D Zonal-Time FFT for "+opt.var
+#
+if (opt.reldis): 
+  opt.title = opt.title + " + RW / KW dispersion relations"
+else: 
+  opt.title = opt.title + " at latitude "+str(opt.y)
 
 ## hardwired settings for this script
 opt.div = 50
@@ -74,7 +85,7 @@ if opt.ymin is None: opt.ymin = 0 # remove symmetric negative frequency
 ##############################
 
 ## FIELD
-tab = pp(file=infile,var=opt.var,y=opt.y,z=opt.z,verbose=True).getf()
+tab,x,y,z,t = pp(file=infile,var=opt.var,y=opt.y,z=opt.z,verbose=True).getfd()
 
 ## MAKE X=LON Y=TIME
 tab = np.transpose(tab)
@@ -82,6 +93,15 @@ tab = np.transpose(tab)
 ## FIELD SIZES
 nx,nt = tab.shape
 
+### TREAT PROBLEM of EVEN NUMBER OF LONGITUDES (which is a problem with fftshift) 
+### ... ADD A MIRROR POINT IN THE END
+if (nx % 2 == 0):
+  tab2 = np.zeros([nx+1,nt])
+  tab2[0:nx-1,:] = tab[0:nx-1,:]
+  tab2[nx,:] = tab[0,:]
+  tab = tab2
+  nx = nx + 1
+     
 ## SAMPLE SPACES
 # data points each dx planet --> result in zonal wavenumber
 dx = 1./nx
@@ -106,8 +126,14 @@ if not opt.log:
 spec = fftpack.fftshift(spec)
 specx = fftpack.fftshift(specx)
 spect = fftpack.fftshift(spect)
-#right westward/eastward orientation
-specx = specx[::-1]
+
+## GET THE RIGHT W/E ORIENTATION
+if x[0] < x[-1]:
+  #right westward/eastward orientation
+  specx = specx[::-1]
+else:
+  #reverted axis (e.g. 180 --> -180, Venus): nothing to do
+  pass
 
 ## POWER SPECTRA
 spec = np.abs(spec)**2
