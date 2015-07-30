@@ -3,10 +3,10 @@
 ###
   # x-axis: possible names to search for. add in the line with a separating ;
   #
-longitude;longi;Longitude;lon;XLONG;XLONG_M
+longitude;longi;Longitude;lon;XLONG;XLONG_M;LON
   # y-axis: possible names to search for. add in the line with a separating ;
   #
-latitude;lati;Latitude;lat;XLAT;XLAT_M
+latitude;lati;Latitude;lat;XLAT;XLAT_M;LAT
   # z-axis: possible names to search for. add in the line with a separating ;
   #
 altitude;Alt;presnivs;bottom_top;altitude_abg;lev;PTOT;vert;p
