@@ -74,8 +74,6 @@ ppplot.cline = 0.35
 ## a few specific fixes
 if opt.ymin is not None: opt.ymin = opt.ymin[0]
 if opt.ymax is not None: opt.ymax = opt.ymax[0]
-if opt.xmin is not None: opt.xmin = opt.xmin[0]
-if opt.xmax is not None: opt.xmax = opt.xmax[0]
 if opt.logy and (opt.ymin is None): opt.ymin = 1e-6
 if opt.logy and (opt.ymax is None): opt.ymax = 1e6
 if opt.ymin is None: opt.ymin = 0 # remove symmetric negative frequency
@@ -144,6 +142,8 @@ if opt.log: spec = np.log10(spec)
 ## HORIZONTAL WAVENUMBER LIMITS
 limxmax = (nx-1)/4
 limxmin = -limxmax
+if opt.xmin is None: opt.xmin = limxmin
+if opt.xmax is None: opt.xmax = limxmax
 
 ## PLOT
 p = ppplot.plot2d()
