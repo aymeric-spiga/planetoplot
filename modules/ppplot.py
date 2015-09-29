@@ -490,8 +490,13 @@ class plot():
           except: l = 0
           # 2. intermediate transfer
           if l>0:
-            if num is not None: vv = v[num]
-            else: vv = v
+            if num is not None: 
+              if num >= l: 
+                vv = v[l-1]
+              else: 
+                vv = v[num]
+            else: 
+              vv = v
           else:
             vv = v
           # 3. set attibutes in destination
