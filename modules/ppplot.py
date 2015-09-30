@@ -377,7 +377,7 @@ def opt(parser):
 def opt1d(parser):
   parser.add_option('-L','--linestyle',action='append',dest='linestyle',type="string",default=None,help="[1D] linestyle: '-' '--' '.' '..'")
   parser.add_option('-Q','--color',action='append',dest='color',type="string",default=None,help="[1D] color: 'b' 'g' 'r' etc")
-  parser.add_option('-K','--marker',action='append',dest='marker',type="string",default=None,help="[1D] marker: '' 'x' 'o' etc")
+  parser.add_option('-K','--marker',action='append',dest='marker',type="string",default=None,help="[1D] marker: None '' 'x' 'o' etc")
   parser.add_option('-S','--superpose',action='store_true',dest='superpose',default=False,help="[1D] use same axis for all plots")
   parser.add_option('-E','--legend',action='append',dest='legend',type="string",default=None,help="[1D] legend for line")
   parser.add_option('--modx',action='append',dest='modx',type="float",default=None,help="[1D] change xticks with a modulo")
