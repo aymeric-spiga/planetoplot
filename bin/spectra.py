@@ -13,7 +13,6 @@
 ##     ./spectra.py outremap.nc  --dt 0.0002 --unit year -y 45 --sigma 5 --logy
 
 ## modules
-import planets
 from ppclass import pp
 import numpy as np
 import ppplot
@@ -74,8 +73,6 @@ ppplot.cline = 0.35
 ## a few specific fixes
 if opt.ymin is not None: opt.ymin = opt.ymin[0]
 if opt.ymax is not None: opt.ymax = opt.ymax[0]
-if opt.xmin is not None: opt.xmin = opt.xmin[0]
-if opt.xmax is not None: opt.xmax = opt.xmax[0]
 if opt.logy and (opt.ymin is None): opt.ymin = 1e-6
 if opt.logy and (opt.ymax is None): opt.ymax = 1e6
 if opt.ymin is None: opt.ymin = 0 # remove symmetric negative frequency
@@ -144,6 +141,8 @@ if opt.log: spec = np.log10(spec)
 ## HORIZONTAL WAVENUMBER LIMITS
 limxmax = (nx-1)/4
 limxmin = -limxmax
+if opt.xmin is None: opt.xmin = limxmin
+if opt.xmax is None: opt.xmax = limxmax
 
 ## PLOT
 p = ppplot.plot2d()
@@ -153,18 +152,6 @@ p.x = specx
 p.y = spect
 p.make()
 
-##################################################################################################
-##################################################################################################
-##################################################################################################
-
-##aymeric@aymeric-laptop:~/TMPDIR/fft$ testsat.py -v v -f yorgl.nc -y 20. -z 490
-##aymeric@aymeric-laptop:~/TMPDIR/fft$ testsat.py -v v -f yorgl.nc -y 3.75 -z 118
-## testsat.py -f ~/Remote/saturn_128x96x64_guided.nc -y 0. -z 5e4 -v temp
-## testsat.py -f ~/Remote/saturn_128x96x64_guided.nc -y 0. -z 5e4 -v u
-## testsat.py -f ~/Remote/saturn_128x96x64_guided.nc -y 0. -z 5e4 -v v
-## testsat.py -y 0. -z 5e4 -v temp -f ~/Remote/saturn_0.5deg_dtnamico.nc -d 0.0008 -s 15 --reldis --logy
-## spectra.py -f /home/aymeric/Big_Data/DATAPLOT/diagfired.nc -v ps -d 0.00015 
-
 ###################################
 ##
 ## 2. DISPERSION RELATIONSHIP
@@ -173,25 +160,36 @@ p.make()
 
 if (opt.reldis):
 
+  ## planet
+  try: 
+    import planets
+  except: 
+    print "please install the module planets"
+  mypl = planets.Saturn
+  #mypl = planets.Jupiter
+
+  ## take limit from previous plot
+  if p.ymax is None: p.ymax = np.max(spect)
+
   ####################################
   lz = 60000. # vue dans la simu
   ####################################
   nutab = [+1,+2,+3]
   nutab = [+1,+2,+3,+4,+5]
-  nutab = [-2,-1,+1,+2]
+  nutab = [-3,-2,-1,+1,+2,+3]
   ####################################
   #T0=pp(file=opt.file,var="temp",y=opt.y,z=opt.z,x=0,t="0,10000").getf()
   ##--environ 120K, OK.
   ###################################
   n2tab = []
   #n2tab.append(0.3e-5) # SL nat2011
-  n2tab.append(1.0e-5) # LL grl2008
-  #n2tab.append(planets.Saturn.N2())
-  #n2tab.append(planets.Saturn.N2(dTdz=-0.7e-3)) # proche LL
+  #n2tab.append(1.0e-5) # LL grl2008
+  n2tab.append(mypl.N2())
+  #n2tab.append(mypl.N2(dTdz=-0.7e-3)) # proche LL
   ####################################
 
   specx = np.linspace(limxmin,limxmax,100)
-  spect = np.logspace(-3.,-1.,100)
+  spect = np.logspace(-6.,+6.,600)
   s,sigma = np.meshgrid(specx,spect)
 
   p.f = sigma*np.nan # trick to make it transparent
@@ -199,11 +197,12 @@ if (opt.reldis):
   p.ccol = "white"
   p.ccol = "red"
   p.x = specx
-  p.y = 25000.*spect
+  p.y = spect / opt.dt  # /25000. Saturne
   p.invert = True
+
   for nnn in nutab:
    for n2n2 in n2tab:
-     p.c = planets.Saturn.dispeqw(s,sigma,nu=nnn,lz=lz,N2=n2n2)
+     p.c = mypl.dispeqw(s,sigma,nu=nnn,lz=lz,N2=n2n2)
      p.make()
 
 if opt.output is None: ppplot.show()

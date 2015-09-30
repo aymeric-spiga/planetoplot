@@ -490,8 +490,13 @@ class plot():
           except: l = 0
           # 2. intermediate transfer
           if l>0:
-            if num is not None: vv = v[num]
-            else: vv = v
+            if num is not None: 
+              if num >= l: 
+                vv = v[l-1]
+              else: 
+                vv = v[num]
+            else: 
+              vv = v
           else:
             vv = v
           # 3. set attibutes in destination
@@ -624,8 +629,12 @@ class plot1d(plot):
             if self.legend != "":
                 mpl.legend(loc="best",fancybox=True)
         # format labels
-        if self.swap: ax.xaxis.set_major_formatter(FormatStrFormatter(self.fmt))
-        else: ax.yaxis.set_major_formatter(FormatStrFormatter(self.fmt))
+        if self.swap: 
+          if not self.logx:
+            ax.xaxis.set_major_formatter(FormatStrFormatter(self.fmt))
+        else: 
+          if not self.logy: 
+            ax.yaxis.set_major_formatter(FormatStrFormatter(self.fmt))
         # plot limits: ensure that no curve would be outside the window
         # x-axis
         if self.xdate:

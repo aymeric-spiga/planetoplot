@@ -12,7 +12,7 @@ latitude;lati;Latitude;lat;XLAT;XLAT_M;LAT
 altitude;Alt;presnivs;bottom_top;altitude_abg;lev;PTOT;vert;p
   # t-axis: possible names to search for. add in the line with a separating ;
   #
-Times;time;Time;Ls
+Times;time;Time;Ls;time_counter
   # area: possible names to search for. add in the line with a separating ;
   #
 area;aire
