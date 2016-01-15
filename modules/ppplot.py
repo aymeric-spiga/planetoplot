@@ -271,7 +271,9 @@ def labelmodulo(ax,mod):
         onetick = tick.get_text()
         if len(onetick) > 0:
           num = float(onetick)
-          strtab.append(num % mod)
+          strtab.append(str(num % mod))
+        elif len(onetick)==0:
+          strtab.append('')
     ax.get_xaxis().set_ticklabels(strtab)
     return ax
 
