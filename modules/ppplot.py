@@ -938,6 +938,7 @@ class plot2d(plot):
             if self.proj == "cyl":
                 format = '%.0f'
                 partab = np.r_[-90.:90.+15.:15.]
+                mertab = np.r_[-180.:180.:30.]
             # ... global projections
             elif self.proj in ["ortho","moll","robin"]:
                 wlat[0] = None ; wlat[1] = None ; wlon[0] = None ; wlon[1] = None
