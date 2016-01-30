@@ -782,6 +782,8 @@ class plot2d(plot):
         # if projection is set, set mapmode to True
         if self.proj is not None:
             self.mapmode = True
+        else:
+            self.mapmode = False
         # set dummy xy axis if not defined
         if self.x is None: 
             self.x = np.array(range(self.f.shape[0]))
