@@ -12,12 +12,17 @@ rad = myplanet.a
 ####################################################
 fff = "diagfi.nc"
 fff = "DRAG90days_DISSIP50000_lat10_913286052-951338051_red.nc"
+#fff = "DRAG900days_DISSIP15000.nc"
+#fff = "DRAG90days_DISSIP15000.nc"
+#fff = "DRAG90days_DISSIP50000_lat10.nc"
+fff = "DRAG90days_DISSIP15000_1902638052.nc"
 uuu = "u"
 vvv = "v"
 ttt = 1000
 ttt = 1
 zzz = 1e4
 zzz = 1e5
+zzz = 1.5e5
 #####################################################
 
 # get wind fields
@@ -26,7 +31,7 @@ v = pp(file=fff,var="v",t=ttt,z=zzz,compute="pert_x").getf()
 #s = pp(file=fff,var="phisinit",t=ttt).getf()
    
 # work out the pole problem 
-# -- spurious high values if extrem lati close to +/-90)
+# -- spurious high values if extrem lati close to +/-90
 ny,nx = u.shape
 u,v = u[1:ny-2,:],v[1:ny-2,:]
 lon,lat = lon[1:ny-2,:],lat[1:ny-2,:]
@@ -40,6 +45,7 @@ div, vorti = divort(u,v,lon,lat,rad)
 absmax = np.abs(vorti).max()
 exponent=int(round(np.log10(absmax)))
 norm = 10.**exponent
+fac = 1. #0.75
 
 ##########
 # figure #
@@ -53,9 +59,9 @@ pl.proj = "cyl"
 # -- field: vorticity
 pl.f = vorti/norm
 pl.units = '$10^{'+str(exponent)+'}$ s$^{-1}$'
-pl.colorbar = "RdBu_r"
-pl.vmin = -absmax/norm
-pl.vmax = absmax/norm
+pl.colorbar = "seismic" #"bwr"
+pl.vmin = -fac*absmax/norm
+pl.vmax = fac*absmax/norm
 pl.fmt = "%.1f"
 ## -- vectors: winds
 #pl.vx,pl.vy = u,v

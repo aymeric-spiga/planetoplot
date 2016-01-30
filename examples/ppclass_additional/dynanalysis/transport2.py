@@ -91,9 +91,9 @@ pl.f = eddy_trans / factor
 pl.c = meanu2D
 pl.x = lat
 pl.y = pniv
-pl.title = "Eddy horizontal transport"
+pl.title = "Eddy horizontal transport "+r'$\mu a \cos\phi \left[ \overline{v^\prime u^\prime} \right]$'
 pl.xmax = 60.
 pl.xmin = 0.
-pl.make()
-
-ppplot.show()
+#pl.make()
+#ppplot.show()
+pl.makesave(mode="png",filename="transport",includedate=False)
