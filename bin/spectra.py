@@ -30,7 +30,7 @@ parser.add_option('-v','--var',action='store',dest='var',type="string",default="
 parser.add_option('-y','--lat',action='store',dest='y',type="string",default="0.",help="y (lat, default: 0)")
 parser.add_option('-z','--vert',action='store',dest='z',type="string",default="0.",help="z (vert, default: 0)")
 parser.add_option('-u','--unit',action='store',dest='unit',type='string',default="time unit",help="time unit (spectra in UNIT^-1, default: time unit)")
-parser.add_option('-d','--dt',action='store',dest='dt',type="float",default=None,help="in FILE, one data point each time UNIT (default: 1)")
+parser.add_option('-d','--dt',action='store',dest='dt',type="float",default=1.,help="in FILE, one data point each time UNIT (default: 1)")
 parser.add_option('-o','--output',action='store',dest='output',type='string',default=None,help="name of png output (gui if None)")
 parser.add_option('--reldis',action='store_true',dest='reldis',default=False,help="add dispersion relationship")
 parser.add_option('--log',action='store_true',dest='log',default=False,help="set log field")
@@ -82,7 +82,8 @@ if opt.ymin is None: opt.ymin = 0 # remove symmetric negative frequency
 ##############################
 
 ## FIELD
-tab,x,y,z,t = pp(file=infile,var=opt.var,y=opt.y,z=opt.z,verbose=True).getfd()
+vb = False
+tab,x,y,z,t = pp(file=infile,var=opt.var,y=opt.y,z=opt.z,verbose=vb).getfd()
 
 ## MAKE X=LON Y=TIME
 tab = np.transpose(tab)
@@ -103,8 +104,6 @@ if (nx % 2 == 0):
 # data points each dx planet --> result in zonal wavenumber
 dx = 1./nx
 # data points each opt.dt time units --> result in (time unit)^-1
-if opt.dt is None: dt = 1.
-else: dt = opt.dt
 
 ## PERFORM 2D FFT
 ## http://docs.scipy.org/doc/scipy/reference/fftpack.html
@@ -112,7 +111,7 @@ spec = fftpack.fft2(tab)
 
 ## FREQUENCY COORDINATES
 specx = fftpack.fftfreq(nx,d=dx)
-spect = fftpack.fftfreq(nt,d=dt)
+spect = fftpack.fftfreq(nt,d=opt.dt)
 
 ## REMOVE DC COMPONENT 
 if not opt.log:
