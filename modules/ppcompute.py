@@ -367,11 +367,11 @@ def dxdy(lon,lat,coeff=None,lonlat=False):
     dx = dx*np.cos(phr)
   return dx,dy
  
-def deriv2d(u,lon,lat,coeff=None,lonlat=False,fac=1.):
+def deriv2d(u,coordx,coordy,coeff=None,lonlat=False,fac=1.):
   # compute gradients -- with normalized coordinates
   du_y,du_x = np.gradient(u)
   # compute cartesian increments
-  dx,dy = dxdy(lon,lat,coeff=coeff,lonlat=lonlat)
+  dx,dy = dxdy(coordx,coordy,coeff=coeff,lonlat=lonlat)
   # eventually compute cartesian derivatives
   du_dx = du_x/(fac*dx)
   du_dy = du_y/(fac*dy)
