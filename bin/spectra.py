@@ -17,6 +17,7 @@ from ppclass import pp
 import numpy as np
 import ppplot
 from scipy import fftpack
+from scipy.ndimage.measurements import maximum_position
 import sys
 
 ##############
@@ -34,6 +35,8 @@ parser.add_option('-d','--dt',action='store',dest='dt',type="float",default=1.,h
 parser.add_option('-o','--output',action='store',dest='output',type='string',default=None,help="name of png output (gui if None)")
 parser.add_option('--reldis',action='store_true',dest='reldis',default=False,help="add dispersion relationship")
 parser.add_option('--log',action='store_true',dest='log',default=False,help="set log field")
+parser.add_option('--period',action='store_true',dest='period',default=False,help="show period (in UNIT) instead of frequency")
+parser.add_option('--ndom',action='store',dest='ndom',type="int",default=3,help="print info for the NDOM dominant modes (default:3)")
 
 ## get planetoplot-like options
 parser = ppplot.opt(parser) # common options for plots
@@ -50,7 +53,10 @@ else:
   opt.colorbar = opt.colorbar[0]
 #
 if opt.ylabel is None: 
-  opt.ylabel = r"frequency $\sigma$ (cycles per "+opt.unit+")"
+ if not opt.period:
+  opt.ylabel = r"frequency $\sigma$ ($^{\circ}$ "+opt.unit+"$^{-1}$)"
+ else:
+  opt.ylabel = r"period ("+opt.unit+")"
 #
 if opt.xlabel is None: 
   opt.xlabel = r"$\leftarrow$ Westward | wavenumber $s$ | Eastward $\rightarrow$"
@@ -73,7 +79,11 @@ ppplot.cline = 0.35
 ## a few specific fixes
 if opt.logy and (opt.ymin is None): opt.ymin = 1e-6
 if opt.logy and (opt.ymax is None): opt.ymax = 1e6
-if opt.ymin is None: opt.ymin = 0 # remove symmetric negative frequency
+if opt.ymin is None: 
+ if not opt.period:
+  opt.ymin = 0 # remove symmetric negative frequency
+ else:
+  opt.ymin = 2.*opt.dt # minimum possible period
 
 ##############################
 ## SPECTRA FROM SIMULATIONS ##
@@ -140,6 +150,44 @@ limxmax = (nx-1)/4
 limxmin = -limxmax
 if opt.xmin is None: opt.xmin = limxmin
 if opt.xmax is None: opt.xmax = limxmax
+
+## RETAIN ONLY POSITIVE FREQUENCIES
+## -- (and remove period=sample_size)
+mm = min(spect[spect>0])
+w = spect > mm
+spect = spect[w]
+spec = spec[:,w]
+
+## SEARCH FOR DOMINANT MODES
+# -- initialize while loop
+search = np.empty_like(spec) ; search[:,:] = spec[:,:]
+zelab = search > 0 # (all elements)
+itit = 1 
+print "---------------------------------------"
+print "%2s %4s %8s %8s %8s" % ("n","WN","dg/"+opt.unit,opt.unit,"log(A)")
+print "---------------------------------------"
+# -- while loop
+while itit <= opt.ndom:
+  # -- find dominant mode
+  ij = maximum_position(search,labels=zelab)
+  dominant_wn = specx[ij[0]]
+  dominant_fq = spect[ij[1]]
+  spower = search[ij]
+  # -- print result
+  print "%2i %4.0f %8.1f %8.1f %8.1f" % (itit,dominant_wn,360.*dominant_fq,1./dominant_fq,np.log10(spower))
+  # -- iterate
+  zelab = search < spower # remove maximum found
+  search[ij[0],:] = -9999. # remove wavenumber found (otherwise loop could find other maxima for this wn)
+  itit += 1
+print "---------------------------------------"
+
+## COMPUTE FREQUENCY/PERIOD AXIS
+if not opt.period:
+  # frequency: longitude degree per UNIT
+  spect = 360.*spect
+else:
+  # period: UNIT
+  spect = 1./(spect)
 
 ## PLOT
 p = ppplot.plot2d()
