@@ -36,7 +36,8 @@ parser.add_option('-o','--output',action='store',dest='output',type='string',def
 parser.add_option('--reldis',action='store_true',dest='reldis',default=False,help="add dispersion relationship")
 parser.add_option('--log',action='store_true',dest='log',default=False,help="set log field")
 parser.add_option('--period',action='store_true',dest='period',default=False,help="show period (in UNIT) instead of frequency")
-parser.add_option('--ndom',action='store',dest='ndom',type="int",default=3,help="print info for the NDOM dominant modes (default:3)")
+parser.add_option('--ndom',action='store',dest='ndom',type="int",default=10,help="print info for the NDOM dominant modes (default:10)")
+parser.add_option('--noplot',action='store_true',dest='noplot',default=False,help="do not plot anything, just output dominant modes")
 
 ## get planetoplot-like options
 parser = ppplot.opt(parser) # common options for plots
@@ -159,13 +160,19 @@ spect = spect[w]
 spec = spec[:,w]
 
 ## SEARCH FOR DOMINANT MODES
+# -- initialize output
+if opt.output is not None:
+  txtfile = opt.output+".txt"
+else:
+  txtfile = "spectra.txt"
+fifi = open(txtfile, "w")
+fifi.write("---------------------------------------\n")
+fifi.write("%2s %4s %8s %8s %8s\n" % ("n","WN","dg/"+opt.unit,opt.unit,"log(A)"))
+fifi.write("---------------------------------------\n")
 # -- initialize while loop
 search = np.empty_like(spec) ; search[:,:] = spec[:,:]
 zelab = search > 0 # (all elements)
 itit = 1 
-print "---------------------------------------"
-print "%2s %4s %8s %8s %8s" % ("n","WN","dg/"+opt.unit,opt.unit,"log(A)")
-print "---------------------------------------"
 # -- while loop
 while itit <= opt.ndom:
   # -- find dominant mode
@@ -174,12 +181,14 @@ while itit <= opt.ndom:
   dominant_fq = spect[ij[1]]
   spower = search[ij]
   # -- print result
-  print "%2i %4.0f %8.1f %8.1f %8.1f" % (itit,dominant_wn,360.*dominant_fq,1./dominant_fq,np.log10(spower))
+  fifi.write("%2i %4.0f %8.1f %8.1f %8.1f\n" % (itit,dominant_wn,360.*dominant_fq,1./dominant_fq,np.log10(spower)))
   # -- iterate
   zelab = search < spower # remove maximum found
   search[ij[0],:] = -9999. # remove wavenumber found (otherwise loop could find other maxima for this wn)
   itit += 1
-print "---------------------------------------"
+# -- close output
+fifi.write("---------------------------------------\n")
+fifi.close()
 
 ## COMPUTE FREQUENCY/PERIOD AXIS
 if not opt.period:
@@ -190,12 +199,13 @@ else:
   spect = 1./(spect)
 
 ## PLOT
-p = ppplot.plot2d()
-p.transopt(opt) # transfer plot options
-p.f = spec
-p.x = specx
-p.y = spect
-p.make()
+if not opt.noplot:
+  p = ppplot.plot2d()
+  p.transopt(opt) # transfer plot options
+  p.f = spec
+  p.x = specx
+  p.y = spect
+  p.make()
 
 ###################################
 ##
@@ -250,8 +260,9 @@ if (opt.reldis):
      p.c = mypl.dispeqw(s,sigma,nu=nnn,lz=lz,N2=n2n2)
      p.make()
 
-if opt.output is None: ppplot.show()
-else: ppplot.save(mode="png",filename=opt.output)
+if not opt.noplot:
+  if opt.output is None: ppplot.show()
+  else: ppplot.save(mode="png",filename=opt.output)
 
 ####################################
 # save a .sh file with the command #
