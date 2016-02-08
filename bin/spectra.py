@@ -189,6 +189,8 @@ while itit <= opt.ndom:
 # -- close output
 fifi.write("---------------------------------------\n")
 fifi.close()
+# -- print results
+print(open(txtfile, "r").read())
 
 ## COMPUTE FREQUENCY/PERIOD AXIS
 if not opt.period:
