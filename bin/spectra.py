@@ -78,6 +78,8 @@ ppplot.cline = 0.35
 #ppplot.negative(howblack="0.05")
 
 ## a few specific fixes
+if opt.ymin is not None: opt.ymin = opt.ymin[0]
+if opt.ymax is not None: opt.ymax = opt.ymax[0]
 if opt.logy and (opt.ymin is None): opt.ymin = 1e-6
 if opt.logy and (opt.ymax is None): opt.ymax = 1e6
 if opt.ymin is None: 
