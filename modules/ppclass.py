@@ -1964,11 +1964,16 @@ class onerequest():
           if "comp" in rrr:
             # a. computing
             if self.verbose: print "**** OK. Computing over axis number ",nr
-            if self.compute == "meanarea": self.field = ppcompute.sum  (self.field,axis=nr)
-            elif "mean" in self.compute:   self.field = ppcompute.mean (self.field,axis=nr)
-            elif self.compute == "min":    self.field = ppcompute.min  (self.field,axis=nr)
-            elif self.compute == "max":    self.field = ppcompute.max  (self.field,axis=nr)
-            else:                          print "!! ERROR !! operation not supported." ; exit()
+            if (self.compute == "meanarea") and (nr>1): 
+              self.field = ppcompute.sum  (self.field,axis=nr)
+            elif "mean" in self.compute:   
+              self.field = ppcompute.mean (self.field,axis=nr)
+            elif self.compute == "min":    
+              self.field = ppcompute.min  (self.field,axis=nr)
+            elif self.compute == "max":    
+              self.field = ppcompute.max  (self.field,axis=nr)
+            else:                          
+              print "!! ERROR !! operation not supported." ; exit()
             # b. reshaping
             reshapedim[nr] = 1
             self.field = np.reshape(self.field,reshapedim) 
