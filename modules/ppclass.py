@@ -1966,6 +1966,7 @@ class onerequest():
             if self.verbose: print "**** OK. Computing over axis number ",nr
             if (self.compute == "meanarea") and (nr>1): 
               self.field = ppcompute.sum  (self.field,axis=nr)
+              if self.verbose: print "**** This is a meanarea computation."
             elif "mean" in self.compute:   
               self.field = ppcompute.mean (self.field,axis=nr)
             elif self.compute == "min":    
