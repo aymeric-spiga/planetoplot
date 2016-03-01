@@ -5,6 +5,7 @@ import ppplot
 import ppcompute
 import planets
 import numpy as np
+zzz = None # init
 
 ###############
 planet=planets.Saturn
@@ -20,33 +21,42 @@ fileAP="DRAG90days_DISSIP15000_1902638052_z5.nc"
 fileAP="DRAG90days_DISSIP15000_1902638052.nc"
 #fileAP="UHD_DRAG18days_DISSIP5000.nc"
 #fileAP="DRAG90days_DISSIP50000_lat10_z5.nc"
+#fileAP="DRAG90days_DISSIP2500_z5.nc"
+fileAP="DRAG90days_DISSIP10000_year7_743726340_512_z5.nc"
+fileAP="DRAG90days_DISSIP10000_year5-6_uv_z5_512_every400d.nc"
 ###############
-# -- 1: meridional eddy momentum flux --> mass:N metric:N
-# -- 2: meridional eddy angular momentum flux per unit mass --> mass:N metric:Y
-# -- 3: meridional eddy angular momentum flux --> mass:Y metric:Y
-typevar=3
+computemass = False
+#computemass = True
+###############
+#zzz = 15
+#zzz = 8
 ###############
 
 print "get full fields --> q"
 verb = False
-u4D,longit,latit,pniv,time=pp(file=fileAP,var="u",verbose=verb).getfd()
-v4D=pp(file=fileAP,var="v",verbose=verb).getf()
+u4D,longit,latit,pniv,time=pp(file=fileAP,var="u",verbose=verb,z=zzz).getfd()
+v4D=pp(file=fileAP,var="v",verbose=verb,z=zzz).getf()
 print "   -- got shape",u4D.shape
 lat=latit[:,0] # for further use
 
 print "get axis characteristics"
 timeaxis = (time.size > 1)
-vertaxis = (pniv.size > 1)
+if pniv.size == 1: 
+  vertaxis = False
+elif zzz is None:
+  vertaxis = False
+else:
+  vertaxis = True
 
 print "get zonal anomaly fields --> q*=q-[q]"
-staru4D=pp(file=fileAP,var="u",verbose=verb,compute="pert_x").getf()
-starv4D=pp(file=fileAP,var="v",verbose=verb,compute="pert_x").getf()
+staru4D=pp(file=fileAP,var="u",verbose=verb,compute="pert_x",z=zzz).getf()
+starv4D=pp(file=fileAP,var="v",verbose=verb,compute="pert_x",z=zzz).getf()
 print "   -- got shape",staru4D.shape
 
 print "get temporal anomaly fields --> q'=q-qbar"
 if timeaxis:
-  primu4D=pp(file=fileAP,var="u",verbose=verb,compute="pert_t").getf()
-  primv4D=pp(file=fileAP,var="v",verbose=verb,compute="pert_t").getf()
+  primu4D=pp(file=fileAP,var="u",verbose=verb,compute="pert_t",z=zzz).getf()
+  primv4D=pp(file=fileAP,var="v",verbose=verb,compute="pert_t",z=zzz).getf()
   print "   -- got shape",primu4D.shape
 else:
   primu4D=staru4D
@@ -54,31 +64,28 @@ else:
   print "   -- no time axis: ASSUMING q' ~ q*"
 
 print "get temporal+zonal mean fields --> [qbar]"
-meanu2D=pp(file=fileAP,var="u",verbose=verb,t="0,1e15",x="-180,180").getf()
-meanv2D=pp(file=fileAP,var="v",verbose=verb,t="0,1e15",x="-180,180").getf()
-meant2D=pp(file=fileAP,var="temp",verbose=verb,t="0,1e15",x="-180,180").getf()
-#meanmass2D=pp(file=fileAPM,var="dmass",verbose=verb,t="0,1e15",x="-180,180").getf()
+meanu2D=pp(file=fileAP,var="u",verbose=verb,t="0,1e15",x="-180,180",z=zzz).getf()
+meanv2D=pp(file=fileAP,var="v",verbose=verb,t="0,1e15",x="-180,180",z=zzz).getf()
+if computemass:
+  meant2D=pp(file=fileAP,var="temp",verbose=verb,t="0,1e15",x="-180,180",z=zzz).getf()
+  #meanmass2D=pp(file=fileAPM,var="dmass",verbose=verb,t="0,1e15",x="-180,180").getf()
 print "   -- got shape",meanu2D.shape
 
 ##########################################
-massmetric = 1.
-# -- 1: meridional eddy momentum flux --> mass:N metric:N
-# -- 2: meridional eddy angular momentum flux per unit mass --> mass:N metric:Y
-# -- 3: meridional eddy angular momentum flux --> mass:Y metric:Y
+# compute metric terms (distance to axis)
+# ... for angular momentum (m = u a cos_phi)
+if vertaxis:
+  acoslat2D=np.empty_like(meanv2D)
+  for i in range(len(pniv)):
+    # NB: thin shell approximation
+    acoslat2D[i,:]=planet.acosphi(lat)
+else:
+  acoslat2D=planet.acosphi(lat)
+massmetric = acoslat2D
 ##########################################
-if typevar > 1:
-  # compute metric terms (distance to axis)
+if computemass:
   if vertaxis:
-    acoslat2D=np.empty_like(meanv2D)
-    for i in range(len(pniv)):
-      # NB: thin shell approximation
-      acoslat2D[i,:]=planet.acosphi(lat)
-  else:
-    acoslat2D=planet.acosphi(lat)
-  massmetric = massmetric*acoslat2D
-##########################################
-if typevar > 2:
-  if vertaxis:
+    print "compute mass"
     ## compute mass for each considered grid mesh
     ## S dp = - rho g dz S = - g dm --> dm = - S dp / g
     meanmass2D = np.empty_like(meanv2D)
@@ -121,19 +128,22 @@ if timeaxis:
   stat_trans = ppcompute.mean(statu,axis=zeaxis)*ppcompute.mean(statv,axis=zeaxis)
 else:
   stat_trans = None
-# 3. add mass/metric term (computed above)
+# 3. multiply by mass/metric term (computed above)
 tot_trans = tot_trans*massmetric
 mmc_trans = mmc_trans*massmetric
 eddy_trans = eddy_trans*massmetric
 if stat_trans is not None:
   stat_trans = stat_trans*massmetric
 # 4. compute meridional divergence of eddy momentum flux
+what_is_derived = eddy_trans / planet.a # to get d/dy while performing d/dphi
+#what_is_derived = np.cos(lat*np.pi/180.) * what_is_derived # Hoskins as followed by Remke Kaspi
 if not vertaxis:
-  dETdy = ppcompute.deriv1d(eddy_trans,coord=lat*np.pi/180.)/planet.a  
+  dETdy = ppcompute.deriv1d(what_is_derived,coord=lat*np.pi/180.)
 else:
-  dETdy,dETdp = ppcompute.deriv2d(eddy_trans,lat*np.pi/180.,pniv,fac=planet.a)
-
-
+  dETdy,dETdp = ppcompute.deriv2d(what_is_derived,lat*np.pi/180.,pniv)
+# spherical coordinates (needed because this is in factor to du/dt)
+dETdy = dETdy / np.cos(lat*np.pi/180.)
+#dETdy = dETdy / np.cos(lat*np.pi/180.) # Hoskins as followed by Remke Kaspi
 
 ### PLOTS
 ### -- \langle q \rangle = \left[ \overline{q} \right]
@@ -146,37 +156,33 @@ if not vertaxis:
  #####################################################################
  ## PLOT : check d <u>/dt = -d <u'v'> /dy
  pl = ppplot.plot1d()
+ pl.xmin,pl.xmax,pl.xlabel = -90.,90.,"Latitude"
+ pl.fmt = "%.1f"
+ pl.marker = ''
  # get highest value and highest power
- absmax = np.abs(meanu2D*massmetric).mean()
+ absmax = np.abs(-dETdy).mean()
  exponent=int(round(np.log10(absmax)))
  norm = 10.**exponent
- ## curve 1 : zonal flow
- pl.f = meanu2D*massmetric/norm
- pl.x = lat
- pl.marker = ''
- pl.xmin = -90.
- pl.xmax = 90.
- pl.xlabel = "Latitude"
- pl.linestyle = '--'
- pl.fmt = "%.1f"
- if typevar == 1:
-   pl.legend = r'$\langle u \rangle$'
- elif typevar == 2:
-   pl.legend = r'$\langle m_u \rangle$'
- pl.make()
- ## curve 2 : convergence of eddy momentum flux
+ ## curve 1 : convergence of zonal mean eddy momentum flux
  smoothwindow = 1 # no smooth
  smoothwindow = 30
- duration = planet.day*1000.
- pl.f = ppcompute.smooth1d(-dETdy*duration,window=smoothwindow)/norm
+ pl.f = ppcompute.smooth1d(-dETdy,window=smoothwindow)/norm
  pl.x = ppcompute.smooth1d(lat,window=smoothwindow)
  pl.linestyle = '-'
- if typevar == 1:
-   pl.legend = r'$- \Delta t \, \frac{\partial}{\partial y} \langle v^\prime u^\prime \rangle$'
-   pl.ylabel = r'$10^{%i}$ m s$^{-1}$' % (exponent)
- elif typevar == 2:
-   pl.legend = r'$- \Delta t \, \frac{\partial}{\partial y} \langle v^\prime m_u^\prime \rangle$'
-   pl.ylabel = r'$10^{%i}$ m$^2$ s$^{-1}$' % (exponent)
+ pl.legend = r'$\frac{-1}{\cos\,\varphi} \, \left( \langle v^\prime \! u^\prime \! \rangle \, \cos\,\varphi \right)_{\varphi}$'
+ ylabel = r'$10^{%i}$ m$^2$ s$^{-1}$' % (exponent)
+ pl.make()
+ ## curve 2 : zonal mean zonal flow
+ pl.f = meanu2D
+ # get highest value and highest power
+ absmax = np.abs(pl.f).mean()
+ exponent=int(round(np.log10(absmax)))
+ norm = 10.**exponent
+ pl.f = pl.f/norm
+ pl.x = lat
+ pl.linestyle = '--'
+ pl.legend = r'$\langle u \rangle$'
+ pl.ylabel = ylabel + r' / $10^{%i}$ m s$^{-1}$' % (exponent)
  pl.makeshow()
  #####################################################################
  #####################################################################
@@ -191,25 +197,16 @@ if not vertaxis:
  norm = 10.**exponent
  ##
  pl.f = tot_trans/norm
- pl.x = lat
- pl.xmin = -90.
- pl.xmax = 90.
+ pl.x,pl.xmin,pl.xmax,pl.xlabel = lat,-90.,90.,"Latitude"
  pl.marker = ''
- pl.xlabel = "Latitude"
  pl.fmt = "%.1f"
- if typevar == 1:
-   pl.legend = r'total $\langle v \, u \rangle$'
-   pl.ylabel = r'$10^{%i}$ m$^2$ s$^{-2}$' % (exponent)
- elif typevar == 2:
-   pl.legend = r'total $\langle v \, m_u \rangle$'
-   pl.ylabel = r'$10^{%i}$ m$^3$ s$^{-2}$' % (exponent)
+ pl.legend = r'total $\langle v \, m_u \rangle$'
+ pl.ylabel = r'$10^{%i}$ m$^3$ s$^{-2}$' % (exponent)
+ pl.title = r'Meridional transport of zonal momentum $m_u = \, u \, a \, \cos\,\varphi$'
  pl.make()
  ##
  pl.f = mmc_trans/norm
- if typevar == 1:
-   pl.legend = r'MMC $\langle v \rangle \langle u \rangle$'
- elif typevar == 2:
-   pl.legend = r'MMC $\langle v \rangle \langle m_u \rangle$'
+ pl.legend = r'MMC $\langle v \rangle \langle m_u \rangle$'
  pl.make()
  ##
  #if stat_trans is not None:
@@ -218,10 +215,7 @@ if not vertaxis:
  # pl.make()
  ##
  pl.f = eddy_trans/norm
- if typevar == 1:
-   pl.legend = r'eddies $\langle v^{\prime} u^{\prime} \rangle$'
- elif typevar == 2:
-   pl.legend = r'eddies $\langle v^{\prime} m_u^{\prime} \rangle$'
+ pl.legend = r'eddies $\langle v^{\prime} m_u^{\prime} \rangle$'
  pl.makeshow()
  #####################################################################
  #####################################################################
@@ -231,14 +225,6 @@ else:
 
  print "make plot"
 
- what_I_plot = dETdy
- what_I_plot = eddy_trans
-
- # get highest value and highest power
- absmax = np.abs(what_I_plot).mean()
- exponent=int(round(np.log10(absmax)))
- norm = 10.**exponent
-
  fig = ppplot.figuref(x=20,y=6)
  subv,subh = ppplot.definesubplot(2, fig)
 
@@ -246,26 +232,36 @@ else:
  pl.invert = True
  pl.logy = True
  pl.fmt = "%.1e"
- pl.vmin = -2.
- pl.vmax = +2.
+ pl.vmin = -5.
+ pl.vmax = +5.
  pl.colorbar = "seismic" #"RdBu_r"
  pl.ylabel="Pressure (Pa)"
  pl.xlabel="Latitude"
  pl.fmt = "%.1f"
 
- if 1 == 1:
+ if 0 == 1:
   fig.add_subplot(subv,subh,1)
-  pl.f = mmc_trans / norm
+  pl.f = mmc_trans
+  # get highest value and highest power
+  absmax = np.abs(pl.f).mean()
+  exponent=int(round(np.log10(absmax)))
+  norm = 10.**exponent
+  pl.f = pl.f / norm
   pl.x = lat
   pl.y = pniv
   pl.units = '$10^{'+str(exponent)+'}$ s$^{-1}$'
   pl.title = "MMC transport"
   pl.make()
-    
   fig.add_subplot(subv,subh,2)
 
- pl.f = what_I_plot / norm
- pl.c = meanu2D
+ pl.f = eddy_trans
+ pl.f = -dETdy
+ # get highest value and highest power
+ absmax = np.abs(pl.f).mean()
+ exponent=int(round(np.log10(absmax)))
+ norm = 10.**exponent
+ pl.f = ppcompute.smooth2d(pl.f,window=10) / norm
+ pl.c = ppcompute.smooth2d(meanu2D,window=10)
  pl.x = lat
  pl.y = pniv
  pl.title = "Eddy transport"
