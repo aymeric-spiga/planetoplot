@@ -173,6 +173,10 @@ def quickplot(field):
     if ddd == 1: plot1d(f=field).makeshow()
     elif ddd == 2: plot2d(f=field).makeshow()
 
+# a function to change font
+def changefont(num):
+    mpl.rcParams['font.size'] = num
+
 # continuity with matplotlib
 def close():
     mpl.close()
