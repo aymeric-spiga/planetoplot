@@ -1487,9 +1487,10 @@ class onerequest():
                self.field_y = self.field_y[0,:,:]
           # if xy axis are apparently undefined, set 2D grid points axis.
           if "grid points" not in self.name_x:
-            if np.all(self.field_x == self.field_x[0,0]) \
+            if (self.dim_x > 1) \
+             and (np.all(self.field_x == self.field_x[0,0]) \
              or self.field_x.min() == self.field_x.max() \
-             or self.field_y.min() == self.field_y.max():
+             or self.field_y.min() == self.field_y.max()):
                if self.verbose: print "!! WARNING !! xy axis look undefined. creating non-dummy ones."
                self.field_x = np.array(range(self.dim_x)) ; self.name_x = "x grid points"
                self.field_y = np.array(range(self.dim_y)) ; self.name_y = "y grid points"
