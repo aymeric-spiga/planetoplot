@@ -741,6 +741,7 @@ class plot2d(plot):
                  leftcorrect=False,\
                  clev=None,\
                  cfmt=None,\
+                 clab=True,\
                  ccol="black",\
                  colorvec="black",\
                  *args, **kwargs):
@@ -766,6 +767,7 @@ class plot2d(plot):
         self.svy = svy
         self.leftcorrect = leftcorrect
         self.clev = clev
+        self.clab = clab
         self.cfmt = cfmt
         self.ccol = ccol
 
@@ -862,7 +864,8 @@ class plot2d(plot):
                 objC = mpl.contour(x, y, what_I_contour, \
                             self.clev, colors = self.ccol, linewidths = cline)
                 ft = int(mpl.rcParams['font.size']*0.55)
-                mpl.clabel(objC, inline=1, fontsize=ft,\
+                if self.clab:
+                  mpl.clabel(objC, inline=1, fontsize=ft,\
                              inline_spacing=1,fmt=self.cfmt)
             mpl.contourf(x, y, \
                          self.f, \
