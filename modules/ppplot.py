@@ -540,6 +540,14 @@ class plot():
         if type(self.f).__name__ in 'MaskedArray':
             self.f[self.f.mask] = self.f.fill_value
 
+    # normalize by the typical power
+    def normalize(self):
+        absmax = ppcompute.mean(np.abs(self.f))
+        exponent=int(round(np.log10(absmax)))
+        norm = 10.**exponent
+        self.f = self.f / norm
+        self.units = r'$10^{'+str(exponent)+'}$ s$^{-1}$ '+self.units
+
 ################################
 # a subclass to make a 1D plot #
 ################################
