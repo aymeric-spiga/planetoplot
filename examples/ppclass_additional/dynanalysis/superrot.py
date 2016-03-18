@@ -7,6 +7,7 @@ import ppplot
 fi = "DRAG90days_DISSIP10000_year7_912791376_512_z5"
 u,lon,lat,p,t = pp(file=fi+".nc",var="u",t=0,z=0,x="-180,180").getfd()
 
+# index = acosphi*((omega*acosphi)+u) / (omega*a*a)
 sindex = planets.Saturn.superrot(u=u,lat=lat)
 
 pl = ppplot.plot1d()

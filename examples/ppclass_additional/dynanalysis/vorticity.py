@@ -1,34 +1,23 @@
 #! /usr/bin/env python
 from ppclass import pp
-from ppplot import plot2d,figuref
+from ppplot import plot2d
 from ppcompute import divort
 import numpy as np
 import planets
 
 ####################################################
 myplanet = planets.Saturn
-#myplanet = planets.Mars
 rad = myplanet.a
 ####################################################
-fff = "diagfi.nc"
-fff = "DRAG90days_DISSIP50000_lat10_913286052-951338051_red.nc"
-#fff = "DRAG900days_DISSIP15000.nc"
-#fff = "DRAG90days_DISSIP15000.nc"
-#fff = "DRAG90days_DISSIP50000_lat10.nc"
-fff = "DRAG90days_DISSIP15000_1902638052.nc"
-uuu = "u"
-vvv = "v"
-ttt = 1000
+fff = "DRAG90days_DISSIP10000_year8_1842401736_512_z5"
+uuu,vvv = "u","v"
 ttt = 1
-zzz = 1e4
-zzz = 1e5
 zzz = 1.5e5
 #####################################################
 
 # get wind fields
-u,lon,lat,foo,foo = pp(file=fff,var="u",t=ttt,z=zzz,compute="pert_x").getfd()
-v = pp(file=fff,var="v",t=ttt,z=zzz,compute="pert_x").getf()
-#s = pp(file=fff,var="phisinit",t=ttt).getf()
+u,lon,lat,foo,foo = pp(file=fff+".nc",var="u",t=ttt,z=zzz,compute="pert_x").getfd()
+v = pp(file=fff+".nc",var="v",t=ttt,z=zzz,compute="pert_x").getf()
    
 # work out the pole problem 
 # -- spurious high values if extrem lati close to +/-90
@@ -41,12 +30,6 @@ lon,lat = lon[1:ny-2,:],lat[1:ny-2,:]
 div, vorti = divort(u,v,lon,lat,rad)
 #########################################
 
-# for plot: get highest value & highest power
-absmax = np.abs(vorti).max()
-exponent=int(round(np.log10(absmax)))
-norm = 10.**exponent
-fac = 1. #0.75
-
 ##########
 # figure #
 ##########
@@ -55,17 +38,17 @@ pl = plot2d()
 pl.x = lon
 pl.y = lat
 pl.proj = "cyl"
-#pl.mapmode = True
-# -- field: vorticity
-pl.f = vorti/norm
-pl.units = '$10^{'+str(exponent)+'}$ s$^{-1}$'
-pl.colorbar = "seismic" #"bwr"
-pl.vmin = -fac*absmax/norm
-pl.vmax = fac*absmax/norm
-pl.fmt = "%.1f"
-## -- vectors: winds
-#pl.vx,pl.vy = u,v
-#pl.svx,pl.svy = 2,2
-#pl.wscale = 50.
+## -- field: vorticity
+pl.f = vorti
+pl.colorbar = "seismic"
+pl.vmin = -5.
+pl.vmax = +5.
+pl.fmt = "%.2f"
+# -- vectors: winds
+pl.vx,pl.vy = u,v
+pl.svx,pl.svy = 10,10
+pl.wscale = 30.
+# -- normalize
+pl.normalize()
 # -- make the plot
-pl.makesave(mode="jpg",filename="vorticity",includedate=False)
+pl.makesave(mode="png",filename=fff+"_vorticity")
