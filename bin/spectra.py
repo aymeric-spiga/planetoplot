@@ -96,6 +96,12 @@ if opt.ymin is None:
 vb = False
 tab,x,y,z,t = pp(file=infile,var=opt.var,y=opt.y,z=opt.z,verbose=vb).getfd()
 
+## symm / anti-symm components, see Wheeler 1999
+#tabtropN = pp(file=infile,var=opt.var,y=+5.,z=opt.z,verbose=vb).getf()
+#tabtropS = pp(file=infile,var=opt.var,y=-5.,z=opt.z,verbose=vb).getf()
+#tab = 0.5*tabtropN + 0.5*tabtropS # symmetric
+##tab = 0.5*tabtropN - 0.5*tabtropS # antisymmetric
+
 ## MAKE X=LON Y=TIME
 tab = np.transpose(tab)
 
@@ -227,15 +233,16 @@ if (opt.reldis):
   mypl = planets.Saturn
   #mypl = planets.Jupiter
 
-  ## take limit from previous plot
-  if p.ymax is None: p.ymax = np.max(spect)
-
   ####################################
-  lz = 60000. # vue dans la simu
+  lz = 60000. # vue dans la simu?
+  lz = 2.*mypl.H() # a kind of generic choice
   ####################################
   nutab = [+1,+2,+3]
   nutab = [+1,+2,+3,+4,+5]
   nutab = [-3,-2,-1,+1,+2,+3]
+  #nutab = [-5,-4,-3,-2,-1,0,+1,+2,+3,+4,+5]
+  #nutab = [-2,-1,0,+1,+2]
+  #nutab = [-1,0,+1]
   ####################################
   #T0=pp(file=opt.file,var="temp",y=opt.y,z=opt.z,x=0,t="0,10000").getf()
   ##--environ 120K, OK.
@@ -247,23 +254,39 @@ if (opt.reldis):
   #n2tab.append(mypl.N2(dTdz=-0.7e-3)) # proche LL
   ####################################
 
-  specx = np.linspace(limxmin,limxmax,100)
-  spect = np.logspace(-6.,+6.,600)
+  # ensure number of points 
+  # -- is enough for smooth lines
+  # -- is not too high for efficiency
+  n = 100
+  specx = np.linspace(limxmin,limxmax,2*n)
+  spect = np.linspace(spect.min(),spect.max(),n)
+  spect = spect / 360. # convert back from deglon/unit to cycle/unit
   s,sigma = np.meshgrid(specx,spect)
 
+  # a few general settings for plots
   p.f = sigma*np.nan # trick to make it transparent
   p.clev = [0.]
-  p.ccol = "white"
-  p.ccol = "red"
+  p.clab = False
   p.x = specx
-  p.y = spect / opt.dt  # /25000. Saturne
-  p.invert = True
 
+  ## COMPUTE FREQUENCY/PERIOD AXIS
+  if not opt.period:
+    # frequency: longitude degree per UNIT
+    p.y = 360.*spect
+  else:
+    # period: UNIT
+    p.y = 1./(spect)
+
+  ## COMPUTE dispersion relationship for all modes
   for nnn in nutab:
    for n2n2 in n2tab:
+     if nnn == 0: p.ccol = "cyan"
+     elif nnn > 0: p.ccol = "magenta"
+     else: p.ccol = "red"
      p.c = mypl.dispeqw(s,sigma,nu=nnn,lz=lz,N2=n2n2)
      p.make()
 
+### SHOW or SAVE PLOT
 if not opt.noplot:
   if opt.output is None: ppplot.show()
   else: ppplot.save(mode="png",filename=opt.output)
@@ -279,6 +302,3 @@ if opt.output is not None:
     f.write(command)
   except IOError:
     print "!! WARNING !! not saved. Probably do not have permission to write here."
-
-
-
