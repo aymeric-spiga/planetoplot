@@ -58,6 +58,7 @@ baroclinic = -interm/rho # equation (8.49)
 baroclinic_dim = 100.*baroclinic/beta
 
 ## plot
+ppplot.figuref(x=8,y=6)
 pl = ppplot.plot2d()
 pl.f,pl.c = dqs_dy_dim,u
 pl.x,pl.y = lat2d,p2d
@@ -77,6 +78,23 @@ pl.make()
 #ppplot.show()
 ppplot.save(mode="png",filename="dimensionless-rayleigh-kuo_section")
 #
+ppplot.figuref(x=8,y=6)
 pl.f = dqs_dy_dim+baroclinic_dim
 pl.make()
 ppplot.save(mode="png",filename="dimensionless-baroclinic-rayleigh_section")
+#
+ppplot.figuref(x=8,y=6)
+pl = ppplot.plot2d()
+pl.f,pl.c = u,t
+pl.x,pl.y = lat2d,p2d
+pl.xlabel = "Latitude"
+pl.ylabel = "Pressure (Pa)"
+pl.logy,pl.invert = True,True
+pl.xmin,pl.xmax = -65.,-45.
+pl.ymin,pl.ymax = 5e3,2e5
+pl.fmt = "%0.f"
+pl.units = r'm s$^{-1}$'
+pl.colorbar = "seismic"
+pl.vmin,pl.vmax,pl.div = -80.,80.,40
+pl.make()
+ppplot.save(mode="png",filename="jet_section")
