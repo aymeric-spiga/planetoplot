@@ -73,6 +73,17 @@ def kron2ls(krontab):
   return lstab
 
 ####################################################
+def addvar(filename,dimname,varname,varfield):
+  f = nc.Dataset(filename,'a',format='NETCDF3_CLASSIC')
+  var = f.createVariable(varname, 'd', dimname) 
+  if   len(dimname) == 4: var[:,:,:,:] = varfield
+  elif len(dimname) == 3: var[:,:,:] = varfield
+  varfield = None ; var = None
+  f.close()
+  print "... ... done: "+varname
+  return
+
+####################################################
 print "... getting fields from file !"
 press,xdim,ydim,zdim,tdim=pp(file=fileAP,var="p",x=999).getfd()
 u=pp(file=fileAP,var="u",x=999).getf() ; print "... ... done: u"
@@ -116,20 +127,38 @@ targetp3d = np.tile(targetp1d,(nt,1))
 targetp3d = np.tile(np.transpose(targetp3d),(nlat,1,1))
 targetp3d = np.transpose(targetp3d)
 
+# *** CURVATURE TERMS ***
+lat2d = np.tile(ydim,(nz,1))
+acosphi2d = myp.acosphi(lat=lat2d)
+cosphi2d = acosphi2d / myp.a
+latrad,lat2drad = ydim*np.pi/180.,lat2d*np.pi/180.
+beta = myp.beta(lat=lat2d)
+f = myp.fcoriolis(lat=lat2d)
+print "... ... done: coordinates"
+
+# *** ANGULAR MOMENTUM ***
+  # -- see Lauritzen et al. JAMES 2014
+  # dV = r^2 cosphi dlambda dphi dr (shallow atm)
+  # rho dr = - dp / g (hydrostatic equilibrium)
+  # hence dm = rho dV = - r^2 cosphi dlambda dphi dp / g
+dlat = np.abs(latrad[1]-latrad[0])
+dlon = 2*np.pi
+dp = np.zeros((nt,nz,nlat))
+dp[:,0:nz-2,:] = targetp3d[:,1:nz-1,:] - targetp3d[:,0:nz-2,:]
+dp[:,nz-1,:] = dp[:,nz-2,:] 
+dm = - myp.a*acosphi2d * dlon * dlat * dp/myp.g # mass for each considered grid mesh
+angmom = dm * myp.angmom(u=u,lat=lat2d) / 1.e25 
+# units as in Lauritzen et al. JAMES 2014 E25 kg m2 s-1
+# -- plus, a normalization is needed (otherwise overflow absurdities)
+print "... ... done: angular momentum"
+
 if not short:
 
  # *** BASIC DIAGNOSTICS ***
  rho = targetp3d / (myp.R*temp) # density
  tpot = myp.tpot(temp,targetp3d) # potential temperature
  emt = rho*vpup # eddy momentum transport
-
- # *** CURVATURE TERMS ***
- lat2d = np.tile(ydim,(nz,1))
- acosphi2d = myp.acosphi(lat=lat2d)
- cosphi2d = acosphi2d / myp.a
- latrad,lat2drad = ydim*np.pi/180.,lat2d*np.pi/180.
- beta = myp.beta(lat=lat2d)
- f = myp.fcoriolis(lat=lat2d)
+ # meridional heat flux?rho*vptp
  print "... ... done: basic diagnostics"
 
  # *** DIAGNOSTICS FOR INSTABILITY
@@ -210,81 +239,29 @@ if includels:
 
 #var = f.createVariable('p', 'd', nam4[1])
 #var[:] = targetp1d
-var = f.createVariable('p',  'd', nam4) ## OK with planetoplot
-var[:,:,:,:]          = targetp3d
-targetp3d = None ; var = None
-print "... ... done: p"
+## 4D below OK with planetoplot
 
-var = f.createVariable('u',  'd', nam4)
-var[:,:,:,:]          = u
-u = None ; var = None
-print "... ... done: u"
+f.close()
 
-var = f.createVariable('temp',  'd', nam4)
-var[:,:,:,:]          = temp
-temp = None ; var = None
-print "... ... done: temp"
-
+#####################################################
+print "... adding 3D variables !"
+addvar("precast.nc",nam4,'p',targetp3d)
+addvar("precast.nc",nam4,'u',u)
+addvar("precast.nc",nam4,'temp',temp)
+addvar("precast.nc",nam4,'angmom',angmom)
 if not short:
-
- var = f.createVariable('eke',  'd', nam4)
- var[:,:,:,:]          = eke
- eke = None ; var = None
- print "... ... done: eke"
- 
- var = f.createVariable('tpot',  'd', nam4)
- var[:,:,:,:]          = tpot
- tpot = None ; var = None
- print "... ... done: tpot"
- 
- var = f.createVariable('N2',  'd', nam4)
- var[:,:,:,:]          = N2
- N2 = None ; var = None
- print "... ... done: N2"
- 
- var = f.createVariable('effbeta_bt',  'd', nam4)
- var[:,:,:,:]          = effbeta_bt
- effbeta_bt = None ; var = None
- print "... ... done: effbeta_bt"
-
- var = f.createVariable('effbeta_bc',  'd', nam4)
- var[:,:,:,:]          = effbeta_bc
- effbeta_bc = None ; var = None
- print "... ... done: effbeta_bc"
- 
- var = f.createVariable('ushear',  'd', nam4)
- var[:,:,:,:]          = ushear
- ushear = None ; var = None
- print "... ... done: ushear"
- 
- var = f.createVariable('divFphi',  'd', nam4)
- var[:,:,:,:]          = divFphi
- divFphi = None ; var = None
- print "... ... done: divFphi"
- 
- var = f.createVariable('vstar',  'd', nam4)
- var[:,:,:,:]          = vstar
- vstar = None ; var = None
- print "... ... done: vstar"
-
- var = f.createVariable('EtoM',  'd', nam4)
- var[:,:,:,:]          = EtoM
- EtoM = None ; var = None
- print "... ... done: EtoM"
+  addvar("precast.nc",nam4,'eke',eke)
+  addvar("precast.nc",nam4,'tpot',tpot)
+  addvar("precast.nc",nam4,'N2',N2)
+  addvar("precast.nc",nam4,'effbeta_bt',effbeta_bt)
+  addvar("precast.nc",nam4,'effbeta_bc',effbeta_bc)
+  addvar("precast.nc",nam4,'ushear',ushear)
+  addvar("precast.nc",nam4,'divFphi',divFphi)
+  addvar("precast.nc",nam4,'vstar',vstar)
+  addvar("precast.nc",nam4,'EtoM',EtoM)
 
 #####################################################
 print "... adding 2D variables !"
-
-var = f.createVariable('ISR',  'd', (nam4[0],nam4[2],nam4[3]))
-var[:,:,:] = ISR
-ISR = None ; var = None
-print "... ... ISR"
-
-var = f.createVariable('OLR',  'd', (nam4[0],nam4[2],nam4[3]))
-var[:,:,:] = OLR
-OLR = None ; var = None
-print "... ... OLR"
-
-#####################################################
-print "... closing file !"
-f.close()
+namdim2d = (nam4[0],nam4[2],nam4[3])
+addvar("precast.nc",namdim2d,'ISR',ISR)
+addvar("precast.nc",namdim2d,'OLR',OLR)
