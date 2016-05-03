@@ -23,6 +23,7 @@ myp = planets.Saturn
 day_per_year = 24430.
 ####################################################
 short = False
+includels = True
 ####################################################
 
 #--------------------------------------------------------------------------------------------------------------------------
@@ -104,7 +105,8 @@ nlon = 1
 
 # *** TIME AXIS
 tdim = fix_time_axis(tdim,day_per_year)
-lstab = kron2ls(tdim*day_per_year)
+if includels:
+  lstab = kron2ls(tdim*day_per_year)
 
 # *** VERTICAL COORDINATES
 # pseudo-altitude (log-pressure) coordinates
@@ -201,9 +203,10 @@ for iii in range(len(shp4)):
   var[:] = fie4[iii]
   var = None
 
-var = f.createVariable('Ls', 'd', nam4[0])
-var[:] = lstab
-lstab = None ; var = None
+if includels:
+  var = f.createVariable('Ls', 'd', nam4[0])
+  var[:] = lstab
+  lstab = None ; var = None
 
 #var = f.createVariable('p', 'd', nam4[1])
 #var[:] = targetp1d
