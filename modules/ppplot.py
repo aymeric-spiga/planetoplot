@@ -10,7 +10,7 @@ import time as timelib
 import numpy as np
 import matplotlib.pyplot as mpl
 from matplotlib.cm import get_cmap
-from matplotlib.ticker import FormatStrFormatter,MaxNLocator
+import matplotlib.ticker as mtick
 # personal librairies
 import ppcompute
 ###############################################
@@ -193,6 +193,27 @@ def rainbow(cb="jet",num=8):
     pal = mpl.cm.get_cmap(name=cb)
     ax._get_lines.set_color_cycle([pal(i) for i in np.linspace(0,0.9,num)])
 
+# a function to define nice minor ticks for log plots
+def special_log(x, pos):
+    norm = ppcompute.get_norm(x)
+    out = x/norm
+    if out in [2,3,5,7]:
+      ret = r'$%.0f$' % (out)
+    #elif out == 1:
+    #  expo = ppcompute.get_exponent(x)
+    #  ret = r'$1 \cdot 10^{%.0f}$' % (expo)
+    else:
+      ret = ''
+    return ret
+
+# a function for nice date printing (from JB Madeleine)
+def set_dates(ax):
+    import matplotlib.dates as mdates
+    ax.xaxis.set_major_formatter(mdates.DateFormatter('%m/%d/%y %Hh'))
+    #ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%b-%d %H:%M:%S'))
+    ax.xaxis.set_major_locator(mdates.DayLocator())
+    mpl.setp(mpl.xticks()[1], rotation=30, ha='right') # rotate the x labels
+
 # a function to define subplot
 # ... user can change settings in set_multiplot.txt read above
 # -------------------------------
@@ -211,7 +232,7 @@ def definesubplot(numplot, fig, factor=1., sup=False):
     # commensurate font
     if factor != 0.: fontsize = fontsize / factor
     # change parameter
-    mpl.rcParams['font.size'] = fontsize
+    changefont(fontsize)
     return subv,subh
 
 # a function to calculate automatically bounds (or simply prescribe those)
@@ -556,9 +577,9 @@ class plot():
     # normalize by the typical power
     def normalize(self):
         absmax = ppcompute.mean(np.abs(self.f))
-        exponent=int(round(np.log10(absmax)))
-        norm = 10.**exponent
+        norm = ppcompute.get_norm(absmax)
         self.f = self.f / norm
+        exponent = ppcompute.get_exponent(absmax)
         self.units = r'$10^{'+str(exponent)+'}$ s$^{-1}$ '+self.units
 
 ################################
@@ -655,21 +676,27 @@ class plot1d(plot):
         if self.legend is not None:
             if self.legend != "":
                 mpl.legend(loc="best",fancybox=True)
+
         # format labels
+        # -- on which axis?
         if self.swap: 
-          if not self.logx:
-            ax.xaxis.set_major_formatter(FormatStrFormatter(self.fmt))
+          subaxis = ax.xaxis
+          islog = self.logx
         else: 
-          if not self.logy: 
-            ax.yaxis.set_major_formatter(FormatStrFormatter(self.fmt))
+          subaxis = ax.yaxis
+          islog = self.logy
+        # -- make changes
+        if not islog:
+          subaxis.set_major_formatter(mtick.FormatStrFormatter(self.fmt))
+        else:
+          subaxis.set_minor_formatter(mtick.FuncFormatter(special_log))
+          subaxis.grid(True, which='minor', color='grey')
+          #subaxis.set_major_formatter(mtick.FuncFormatter(special_log))
+
         # plot limits: ensure that no curve would be outside the window
         # x-axis
         if self.xdate:
-          import matplotlib.dates as mdates
-          ax.xaxis.set_major_formatter(mdates.DateFormatter('%m/%d/%y'))
-          #ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%b-%d %H:%M:%S'))
-          ax.xaxis.set_major_locator(mdates.DayLocator())
-          mpl.setp(mpl.xticks()[1], rotation=30, ha='right') # rotate the x labels
+          set_dates(ax)
         else:
           x1, x2 = ax.get_xbound()
           xmin = ppcompute.min(x)
@@ -690,12 +717,12 @@ class plot1d(plot):
         ax.set_ybound(lower=y1,upper=y2)
         ## set with .div the number of ticks.
         if not self.logx:
-            ax.xaxis.set_major_locator(MaxNLocator(self.nxticks))
+            ax.xaxis.set_major_locator(mtick.MaxNLocator(self.nxticks))
         else:
             # in logx mode, ticks are set automatically
             pass
         if not self.logy:
-            ax.yaxis.set_major_locator(MaxNLocator(self.nyticks))
+            ax.yaxis.set_major_locator(mtick.MaxNLocator(self.nyticks))
         else:
             # in logy mode, ticks are set automatically
             pass
@@ -889,11 +916,7 @@ class plot2d(plot):
             # make log axes and/or invert ordinate
             ax = mpl.gca()
             if self.xdate:
-              import matplotlib.dates as mdates
-              ax.xaxis.set_major_formatter(mdates.DateFormatter('%m/%d/%y %Hh'))
-              #ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%b-%d %H:%M:%S'))
-              ax.xaxis.set_major_locator(mdates.DayLocator())
-              mpl.setp(mpl.xticks()[1], rotation=30, ha='right') # rotate the x labels
+              set_dates(ax)
             if self.logx: mpl.semilogx()
             if self.logy: mpl.semilogy()
             if self.invert: ax.set_ylim(ax.get_ylim()[::-1])
@@ -909,15 +932,17 @@ class plot2d(plot):
             if self.back is not None: ax.set_axis_bgcolor(self.back)
             # set the number of ticks
             if not self.logx:
-                ax.xaxis.set_major_locator(MaxNLocator(self.nxticks))
+                ax.xaxis.set_major_locator(mtick.MaxNLocator(self.nxticks))
             else:
                 pass
                 #print "!! WARNING. in logx mode, ticks are set automatically."
             if not self.logy:
-                ax.yaxis.set_major_locator(MaxNLocator(self.nyticks))
+                ax.yaxis.set_major_locator(mtick.MaxNLocator(self.nyticks))
             else:
-                pass
+                #pass
                 #print "!! WARNING. in logy mode, ticks are set automatically."
+                ax.yaxis.set_minor_formatter(mtick.FuncFormatter(special_log))
+                #ax.yaxis.grid(True, which='both', color='grey')
             ## specific modulo labels
             if self.modx is not None:
                 ax = labelmodulo(ax,self.modx)
