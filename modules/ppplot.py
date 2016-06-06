@@ -193,6 +193,27 @@ def rainbow(cb="jet",num=8):
     pal = mpl.cm.get_cmap(name=cb)
     ax._get_lines.set_color_cycle([pal(i) for i in np.linspace(0,0.9,num)])
 
+# a function to define nice minor ticks for log plots
+def special_log(x, pos):
+    norm = ppcompute.get_norm(x)
+    out = x/norm
+    if out in [2,3,5,7]:
+      ret = r'$%.0f$' % (out)
+    #elif out == 1:
+    #  expo = ppcompute.get_exponent(x)
+    #  ret = r'$1 \cdot 10^{%.0f}$' % (expo)
+    else:
+      ret = ''
+    return ret
+
+# a function for nice date printing (from JB Madeleine)
+def set_dates(ax):
+    import matplotlib.dates as mdates
+    ax.xaxis.set_major_formatter(mdates.DateFormatter('%m/%d/%y %Hh'))
+    #ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%b-%d %H:%M:%S'))
+    ax.xaxis.set_major_locator(mdates.DayLocator())
+    mpl.setp(mpl.xticks()[1], rotation=30, ha='right') # rotate the x labels
+
 # a function to define subplot
 # ... user can change settings in set_multiplot.txt read above
 # -------------------------------
@@ -543,9 +564,9 @@ class plot():
     # normalize by the typical power
     def normalize(self):
         absmax = ppcompute.mean(np.abs(self.f))
-        exponent=int(round(np.log10(absmax)))
-        norm = 10.**exponent
+        norm = ppcompute.get_norm(absmax)
         self.f = self.f / norm
+        exponent = ppcompute.get_exponent(absmax)
         self.units = r'$10^{'+str(exponent)+'}$ s$^{-1}$ '+self.units
 
 ################################
@@ -652,11 +673,7 @@ class plot1d(plot):
         # plot limits: ensure that no curve would be outside the window
         # x-axis
         if self.xdate:
-          import matplotlib.dates as mdates
-          ax.xaxis.set_major_formatter(mdates.DateFormatter('%m/%d/%y'))
-          #ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%b-%d %H:%M:%S'))
-          ax.xaxis.set_major_locator(mdates.DayLocator())
-          mpl.setp(mpl.xticks()[1], rotation=30, ha='right') # rotate the x labels
+          set_dates(ax)
         else:
           x1, x2 = ax.get_xbound()
           xmin = ppcompute.min(x)
@@ -876,11 +893,7 @@ class plot2d(plot):
             # make log axes and/or invert ordinate
             ax = mpl.gca()
             if self.xdate:
-              import matplotlib.dates as mdates
-              ax.xaxis.set_major_formatter(mdates.DateFormatter('%m/%d/%y %Hh'))
-              #ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%b-%d %H:%M:%S'))
-              ax.xaxis.set_major_locator(mdates.DayLocator())
-              mpl.setp(mpl.xticks()[1], rotation=30, ha='right') # rotate the x labels
+              set_dates(ax)
             if self.logx: mpl.semilogx()
             if self.logy: mpl.semilogy()
             if self.invert: ax.set_ylim(ax.get_ylim()[::-1])
