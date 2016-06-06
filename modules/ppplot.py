@@ -528,6 +528,19 @@ class plot():
     # -------------------------------
     def make(self):
         self.check()
+        # treat the xmin/xmax/ymin/ymax append problem
+        if self.xmin is not None:
+          if np.array(self.xmin).ndim == 1:
+            self.xmin = self.xmin[0]
+        if self.xmax is not None:
+          if np.array(self.xmax).ndim == 1:
+            self.xmax = self.xmax[0]
+        if self.ymin is not None:
+          if np.array(self.ymin).ndim == 1:
+            self.ymin = self.ymin[0]
+        if self.ymax is not None:
+          if np.array(self.ymax).ndim == 1:
+            self.ymax = self.ymax[0]
         # labels, title, etc...
         mpl.xlabel(self.xlabel)
         mpl.ylabel(self.ylabel)
@@ -741,7 +754,7 @@ class plot2d(plot):
                  leftcorrect=False,\
                  clev=None,\
                  cfmt=None,\
-                 clab=True,\
+                 clab=False,\
                  ccol="black",\
                  colorvec="black",\
                  *args, **kwargs):
