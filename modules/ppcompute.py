@@ -135,6 +135,16 @@ def perturbation(field,axis=None):
     field = field - mm
     return field
 
+## get leading exponent
+## author AS
+def get_exponent(value):
+    return np.floor(np.log10(value))
+
+## get normalizing factor corr. to leading exponent
+## author AS
+def get_norm(value):
+    return 10.**get_exponent(value)
+
 ################
 #### SMOOTH ####
 ################
