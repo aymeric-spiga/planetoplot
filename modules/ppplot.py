@@ -10,7 +10,7 @@ import time as timelib
 import numpy as np
 import matplotlib.pyplot as mpl
 from matplotlib.cm import get_cmap
-from matplotlib.ticker import FormatStrFormatter,MaxNLocator
+import matplotlib.ticker as mtick
 # personal librairies
 import ppcompute
 ###############################################
@@ -232,7 +232,7 @@ def definesubplot(numplot, fig, factor=1., sup=False):
     # commensurate font
     if factor != 0.: fontsize = fontsize / factor
     # change parameter
-    mpl.rcParams['font.size'] = fontsize
+    changefont(fontsize)
     return subv,subh
 
 # a function to calculate automatically bounds (or simply prescribe those)
@@ -663,13 +663,23 @@ class plot1d(plot):
         if self.legend is not None:
             if self.legend != "":
                 mpl.legend(loc="best",fancybox=True)
+
         # format labels
+        # -- on which axis?
         if self.swap: 
-          if not self.logx:
-            ax.xaxis.set_major_formatter(FormatStrFormatter(self.fmt))
+          subaxis = ax.xaxis
+          islog = self.logx
         else: 
-          if not self.logy: 
-            ax.yaxis.set_major_formatter(FormatStrFormatter(self.fmt))
+          subaxis = ax.yaxis
+          islog = self.logy
+        # -- make changes
+        if not islog:
+          subaxis.set_major_formatter(mtick.FormatStrFormatter(self.fmt))
+        else:
+          subaxis.set_minor_formatter(mtick.FuncFormatter(special_log))
+          subaxis.grid(True, which='minor', color='grey')
+          #subaxis.set_major_formatter(mtick.FuncFormatter(special_log))
+
         # plot limits: ensure that no curve would be outside the window
         # x-axis
         if self.xdate:
@@ -694,12 +704,12 @@ class plot1d(plot):
         ax.set_ybound(lower=y1,upper=y2)
         ## set with .div the number of ticks.
         if not self.logx:
-            ax.xaxis.set_major_locator(MaxNLocator(self.nxticks))
+            ax.xaxis.set_major_locator(mtick.MaxNLocator(self.nxticks))
         else:
             # in logx mode, ticks are set automatically
             pass
         if not self.logy:
-            ax.yaxis.set_major_locator(MaxNLocator(self.nyticks))
+            ax.yaxis.set_major_locator(mtick.MaxNLocator(self.nyticks))
         else:
             # in logy mode, ticks are set automatically
             pass
@@ -909,12 +919,12 @@ class plot2d(plot):
             if self.back is not None: ax.set_axis_bgcolor(self.back)
             # set the number of ticks
             if not self.logx:
-                ax.xaxis.set_major_locator(MaxNLocator(self.nxticks))
+                ax.xaxis.set_major_locator(mtick.MaxNLocator(self.nxticks))
             else:
                 pass
                 #print "!! WARNING. in logx mode, ticks are set automatically."
             if not self.logy:
-                ax.yaxis.set_major_locator(MaxNLocator(self.nyticks))
+                ax.yaxis.set_major_locator(mtick.MaxNLocator(self.nyticks))
             else:
                 pass
                 #print "!! WARNING. in logy mode, ticks are set automatically."
