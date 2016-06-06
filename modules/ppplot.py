@@ -926,8 +926,10 @@ class plot2d(plot):
             if not self.logy:
                 ax.yaxis.set_major_locator(mtick.MaxNLocator(self.nyticks))
             else:
-                pass
+                #pass
                 #print "!! WARNING. in logy mode, ticks are set automatically."
+                ax.yaxis.set_minor_formatter(mtick.FuncFormatter(special_log))
+                #ax.yaxis.grid(True, which='both', color='grey')
             ## specific modulo labels
             if self.modx is not None:
                 ax = labelmodulo(ax,self.modx)
