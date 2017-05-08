@@ -7,8 +7,9 @@ import netCDF4 as nc
 import planets
 
 ####################################################
-fileAP="DRAG90days_DISSIP10000_year1-10_512_every200d_zonmean_stride4lat.nc"
-#fileAP="test.nc"
+#fileAP="DRAG90days_DISSIP10000_year1-10_512_every200d_zonmean_stride4lat.nc"
+fileAP="test.nc"
+#fileAP="DRAG90days_DISSIP10000_year9_512_every200d_zonmean_stride4lat.nc"
 ####################################################
 p_upper,p_lower,nlev = 4.0e2,2.5e5,40 # whole atm
 #p_upper,p_lower,nlev = 3e3, 2e5, 40 # tropo
@@ -25,10 +26,39 @@ day_per_year = 24430.
 short = False
 includels = True
 ####################################################
+charx = "999" # already zonal means
+ispressure = True
+####################################################
+outfile = "precast.nc"
+nopole = False
+####################################################
+
+#fileAP="diagfired.nc"
+#p_upper,p_lower,nlev = 1e-4,1e3,50
+#targetp1d = np.logspace(np.log10(p_lower),np.log10(p_upper),nlev)
+#myp = planets.Mars
+#day_per_year = np.ceil(myp.dayperyear())
+#charx = "-180,180" # compute zonal mean
+#ispressure = False
+#outfile = "diagfired_precast.nc"
+#nopole = True
+
+fileAP="test.nc"
+p_upper,p_lower,nlev = 0.5e2,3.5e5,100 # whole atm
+targetp1d = np.logspace(np.log10(p_lower),np.log10(p_upper),nlev)
+myp = planets.Jupiter
+day_per_year = np.ceil(myp.dayperyear())
+charx = "-180,180" # compute zonal mean
+ispressure = True
+outfile = "test_precast.nc"
+nopole = True
+
+
 
 #--------------------------------------------------------------------------------------------------------------------------
 #--------------------------------------------------------------------------------------------------------------------------
 #--------------------------------------------------------------------------------------------------------------------------
+
 
 ####################################################
 def interpolate(targetp1d,sourcep3d,fieldsource3d):
@@ -146,7 +176,10 @@ nlon = 1
 # *** TIME AXIS
 tdim = fix_time_axis(tdim,day_per_year)
 if includels:
+ if myp.name == "Saturn":
   lstab = kron2ls(tdim*day_per_year)
+ else:
+  lstab = np.zeros(nt)
 
 # *** VERTICAL COORDINATES
 # pseudo-altitude (log-pressure) coordinates
@@ -163,6 +196,7 @@ cosphi2d = acosphi2d / myp.a
 latrad,lat2drad = ydim*np.pi/180.,lat2d*np.pi/180.
 beta = myp.beta(lat=lat2d)
 f = myp.fcoriolis(lat=lat2d)
+tanphia = myp.tanphia(lat=lat2d)
 print "... ... done: coordinates"
 
 # *** ANGULAR MOMENTUM ***
