@@ -267,9 +267,23 @@ if not short:
    mcdudt[ttt,:,:] = - ((du_dy - f) * vstar[ttt,:,:]) - (du_dp*omegastar[ttt,:,:])
  print "... ... done: EP flux"
 
+## pole problem
+if nopole and not short:
+  divFphi[:,:,0] = np.nan
+  divFphi[:,:,-1] = np.nan
+  vstar[:,:,0] = np.nan
+  vstar[:,:,-1] = np.nan
+  effbeta_bt[:,:,0] = np.nan
+  effbeta_bt[:,:,-1] = np.nan
+  effbeta_bc[:,:,0] = np.nan
+  effbeta_bc[:,:,-1] = np.nan
+  omegastar[:,:,0] = np.nan
+  omegastar[:,:,-1] = np.nan
+
+
 ####################################################
 print "... creating the target file !"
-f = nc.Dataset("precast.nc",'w',format='NETCDF3_CLASSIC')
+f = nc.Dataset(outfile,'w',format='NETCDF3_CLASSIC')
 
 xdim = [999.]
 dimx = 'longitude'
@@ -300,23 +314,28 @@ f.close()
 
 #####################################################
 print "... adding 3D variables !"
-addvar("precast.nc",nam4,'p',targetp3d)
-addvar("precast.nc",nam4,'u',u)
-addvar("precast.nc",nam4,'temp',temp)
-addvar("precast.nc",nam4,'angmom',angmom)
+addvar(outfile,nam4,'p',targetp3d)
+addvar(outfile,nam4,'u',u)
+addvar(outfile,nam4,'temp',temp)
+addvar(outfile,nam4,'angmom',angmom)
 if not short:
-  addvar("precast.nc",nam4,'eke',eke)
-  addvar("precast.nc",nam4,'tpot',tpot)
-  addvar("precast.nc",nam4,'N2',N2)
-  addvar("precast.nc",nam4,'effbeta_bt',effbeta_bt)
-  addvar("precast.nc",nam4,'effbeta_bc',effbeta_bc)
-  addvar("precast.nc",nam4,'ushear',ushear)
-  addvar("precast.nc",nam4,'divFphi',divFphi)
-  addvar("precast.nc",nam4,'vstar',vstar)
-  addvar("precast.nc",nam4,'EtoM',EtoM)
+  addvar(outfile,nam4,'eke',eke)
+  addvar(outfile,nam4,'tpot',tpot)
+  addvar(outfile,nam4,'N2',N2)
+  addvar(outfile,nam4,'effbeta_bt',effbeta_bt)
+  addvar(outfile,nam4,'effbeta_bc',effbeta_bc)
+  addvar(outfile,nam4,'ushear',ushear)
+  addvar(outfile,nam4,'divFphi',divFphi)
+  addvar(outfile,nam4,'percentdivFp',percentdivFp)
+  addvar(outfile,nam4,'vstar',vstar)
+  addvar(outfile,nam4,'EtoM',EtoM)
+  addvar(outfile,nam4,'omegastar',omegastar)
+  addvar(outfile,nam4,'mcdudt',mcdudt)
+  #addvar(outfile,nam4,'ratio',ratio)
 
 #####################################################
-print "... adding 2D variables !"
-namdim2d = (nam4[0],nam4[2],nam4[3])
-addvar("precast.nc",namdim2d,'ISR',ISR)
-addvar("precast.nc",namdim2d,'OLR',OLR)
+if 0 == 1:
+  print "... adding 2D variables !"
+  namdim2d = (nam4[0],nam4[2],nam4[3])
+  addvar(outfile,namdim2d,'ISR',ISR)
+  addvar(outfile,namdim2d,'OLR',OLR)
