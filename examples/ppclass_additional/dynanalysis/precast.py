@@ -84,12 +84,32 @@ def addvar(filename,dimname,varname,varfield):
   return
 
 ####################################################
+def getp_fromapbp(fileAP):
+  aps=pp(file=fileAP,var="aps",x=0,y=0).getf()
+  bps=pp(file=fileAP,var="bps",x=0,y=0).getf()
+  ps=pp(file=fileAP,var="ps").getf()
+  nt,ny,nx = ps.shape
+  nz = len(aps)
+  p = np.zeros((nt,nz,ny,nx))
+  for tt in range(nt):
+   for kk in range(nz):
+    p[tt,kk,:,:] = aps[kk]+bps[kk]*ps[tt,:,:]
+  return ppcompute.mean(p,axis=3)
+
+####################################################
+print "... getting pressure field !"
+if ispressure:
+  press=pp(file=fileAP,var="p",x=charx).getf()
+else:
+  press=getp_fromapbp(fileAP)
+
+####################################################
 print "... getting fields from file !"
-press,xdim,ydim,zdim,tdim=pp(file=fileAP,var="p",x=999).getfd()
-u=pp(file=fileAP,var="u",x=999).getf() ; print "... ... done: u"
-temp=pp(file=fileAP,var="temp",x=999).getf() ; print "... ... done: temp"
-ISR=pp(file=fileAP,var="ISR",x=999.).getf() ; print "... ... done: ISR"
-OLR=pp(file=fileAP,var="OLR",x=999.).getf() ; print "... ... done: OLR"
+u,xdim,ydim,zdim,tdim=pp(file=fileAP,var="u",x=charx).getfd() ; print "... ... done: u"
+temp=pp(file=fileAP,var="temp",x=charx).getf() ; print "... ... done: temp"
+if 0 == 1:
+  ISR=pp(file=fileAP,var="ISR",x=charx).getf() ; print "... ... done: ISR"
+  OLR=pp(file=fileAP,var="OLR",x=charx).getf() ; print "... ... done: OLR"
 if not short:
   v=pp(file=fileAP,var="v",x=999).getf() ; print "... ... done: v"
   vpup=pp(file=fileAP,var="vpup",x=999).getf() ; print "... ... done: vpup"
