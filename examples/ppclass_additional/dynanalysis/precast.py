@@ -190,6 +190,21 @@ if not short:
  # meridional heat flux?rho*vptp
  print "... ... done: basic diagnostics"
 
+ # *** VERTICAL VELOCITY
+ omega = np.zeros((nt,nz,nlat))
+ for ttt in range(nt):
+   dv_dy,dummy = ppcompute.deriv2d(v[ttt,:,:]*cosphi2d,latrad,targetp1d) / acosphi2d
+   integrand = dv_dy #- ((v[ttt,:,:]/myp.a)*myp.tanphi(lat=lat2d))
+   #omega_to_w = -1. / (rho[ttt,:,:]*myp.g)
+   dptab = dp[ttt,:,:]
+   for zzz in range(nz):
+     integral = np.zeros((nlat))
+     for zzzint in range(zzz):
+       integral = integral - integrand[zzzint,:]*dptab[zzzint,:]
+     omega[ttt,zzz,:] = integral
+     #w[ttt,zzz,:] = omega[ttt,zzz,:]*omega_to_w[zzz,:]
+ print "... ... done: vertical velocity" 
+
  # *** DIAGNOSTICS FOR INSTABILITY
  N2 = np.zeros((nt,nz,nlat)) # static stability
  effbeta_bt = np.zeros((nt,nz,nlat)) # barotropic effective beta
