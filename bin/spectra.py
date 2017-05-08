@@ -94,7 +94,7 @@ if opt.ymin is None:
 
 ## FIELD
 vb = False
-tab,x,y,z,t = pp(file=infile,var=opt.var,y=opt.y,z=opt.z,verbose=vb).getfd()
+tab,x,y,z,t = pp(file=infile,var=opt.var,y=opt.y,z=opt.z,verbose=vb).getfd() # pert_x ne change rien
 
 ## symm / anti-symm components, see Wheeler 1999
 #tabtropN = pp(file=infile,var=opt.var,y=+5.,z=opt.z,verbose=vb).getf()
@@ -121,6 +121,8 @@ if (nx % 2 == 0):
 # data points each dx planet --> result in zonal wavenumber
 dx = 1./nx
 # data points each opt.dt time units --> result in (time unit)^-1
+lowerperiod = 3.*opt.dt # Nyquist rate + 1
+higherperiod = opt.dt*float(nt-1)/2. # half size of sample
 
 ## PERFORM 2D FFT
 ## http://docs.scipy.org/doc/scipy/reference/fftpack.html
@@ -188,8 +190,11 @@ while itit <= opt.ndom:
   dominant_wn = specx[ij[0]]
   dominant_fq = spect[ij[1]]
   spower = search[ij]
+  if (1./dominant_fq) < lowerperiod: reliable = "x"
+  else: reliable = "o"
   # -- print result
-  fifi.write("%2i %4.0f %8.1f %8.1f %8.1f\n" % (itit,dominant_wn,360.*dominant_fq,1./dominant_fq,np.log10(spower)))
+  if reliable == "o":
+    fifi.write("%2i %4.0f %8.1f %8.1f %8.1f %4s\n" % (itit,dominant_wn,360.*dominant_fq,1./dominant_fq,np.log10(spower),reliable))
   # -- iterate
   zelab = search < spower # remove maximum found
   search[ij[0],:] = -9999. # remove wavenumber found (otherwise loop could find other maxima for this wn)
@@ -201,12 +206,18 @@ fifi.close()
 print(open(txtfile, "r").read())
 
 ## COMPUTE FREQUENCY/PERIOD AXIS
+lowerperiod = 2.5*opt.dt # Nyquist rate + 1
+higherperiod = opt.dt*float(nt-1)/2. # half size of sample
 if not opt.period:
   # frequency: longitude degree per UNIT
   spect = 360.*spect
+  if opt.ymax is None: opt.ymax = 360./lowerperiod
+  elif opt.ymin is None: opt.ymin = 360./higherperiod
 else:
   # period: UNIT
   spect = 1./(spect)
+  if opt.ymin is None: opt.ymin = lowerperiod
+  elif opt.ymax is None: opt.ymax = higherperiod
 
 ## PLOT
 if not opt.noplot:
@@ -242,17 +253,21 @@ if (opt.reldis):
   nutab = [-3,-2,-1,+1,+2,+3]
   #nutab = [-5,-4,-3,-2,-1,0,+1,+2,+3,+4,+5]
   #nutab = [-2,-1,0,+1,+2]
-  #nutab = [-1,0,+1]
+  nutab = [-1,0,+1]
+  #lz = 3000.
   ####################################
   #T0=pp(file=opt.file,var="temp",y=opt.y,z=opt.z,x=0,t="0,10000").getf()
   ##--environ 120K, OK.
   ###################################
   n2tab = []
   #n2tab.append(0.3e-5) # SL nat2011
-  #n2tab.append(1.0e-5) # LL grl2008
-  n2tab.append(mypl.N2())
+  n2tab.append(1.0e-5) # LL grl2008
+  #n2tab.append(mypl.N2()) # simple
   #n2tab.append(mypl.N2(dTdz=-0.7e-3)) # proche LL
   ####################################
+  hache = 100.
+  #hache = 10.
+  #hache = 1.
 
   # ensure number of points 
   # -- is enough for smooth lines
@@ -283,7 +298,8 @@ if (opt.reldis):
      if nnn == 0: p.ccol = "cyan"
      elif nnn > 0: p.ccol = "magenta"
      else: p.ccol = "red"
-     p.c = mypl.dispeqw(s,sigma,nu=nnn,lz=lz,N2=n2n2)
+     #p.c = mypl.dispeqw(s,sigma,nu=nnn,lz=lz,N2=n2n2)
+     p.c = mypl.dispeqw(s,sigma,nu=nnn,h=hache)
      p.make()
 
 ### SHOW or SAVE PLOT
