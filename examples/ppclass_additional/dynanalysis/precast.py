@@ -233,27 +233,38 @@ if not short:
  # *** EP FLUX and RESIDUAL CIRCULATION
  # *** see Andrews et al. JAS 83
  divFphi = np.zeros((nt,nz,nlat)) # meridional divergence of EP flux
- vstar = np.zeros((nt,nz,nlat)) # residual mean meridional circulation
+ percentdivFp = np.zeros((nt,nz,nlat)) # % vertical divergence of EP flux (usually small)
  EtoM = np.zeros((nt,nz,nlat)) # conversion from eddy to mean
+ vstar = np.zeros((nt,nz,nlat)) # residual mean meridional circulation
+ omegastar = np.zeros((nt,nz,nlat)) # residual mean vertical circulation
+ mcdudt = np.zeros((nt,nz,nlat)) # equivalent acceleration (meridional circulation)
  for ttt in range(nt):
    # (Del Genio et al. 2007) eddy to mean conversion: product emt with du/dy
    du_dy,dummy = ppcompute.deriv2d(u[ttt,:,:]*cosphi2d,latrad,targetp1d) / acosphi2d
-   EtoM[ttt,:,:] = emt[ttt,:,:]*du_dy
+   EtoM[ttt,:,:] = vpup[ttt,:,:]*du_dy #emt[ttt,:,:]*du_dy
    # vertical derivatives with pressure
    dummy,dt_dp = ppcompute.deriv2d(temp[ttt,:,:],latrad,targetp1d)
    dummy,du_dp = ppcompute.deriv2d(u[ttt,:,:],latrad,targetp1d)
    # (equation 2.2) psi function
    rcp = myp.R / myp.cp
    psi = - vptp[ttt,:,:] / ( (rcp*temp[ttt,:,:]/targetp3d[ttt,:,:]) - (dt_dp) ) 
-   # (equation 2.1) EP flux
+   # (equation 2.1) EP flux (phi)
    Fphi = acosphi2d * ( - vpup[ttt,:,:] + psi*du_dp ) 
+   # (equation 2.1) EP flux (p)
+   Fp = - psi * (du_dy - f) # neglect <u'omega'>
    # (equation 2.3) divergence of EP flux
    divFphi[ttt,:,:],dummy = ppcompute.deriv2d(Fphi*cosphi2d,latrad,targetp1d) / acosphi2d
-   # (equation 2.7) equivalent acceleration
+   dummy,percentdivFp[ttt,:,:] = ppcompute.deriv2d(Fp,latrad,targetp1d)
+   percentdivFp[ttt,:,:] = 100. * percentdivFp[ttt,:,:] / divFphi[ttt,:,:]
+   # (equation 2.7) equivalent acceleration (eddies)
    divFphi[ttt,:,:] = divFphi[ttt,:,:] / acosphi2d
    # (equation 2.6) residual mean meridional circulation
    dummy,dpsi_dp = ppcompute.deriv2d(psi,latrad,targetp1d)
    vstar[ttt,:,:] = v[ttt,:,:] - dpsi_dp
+   dpsi_dy,dummy = ppcompute.deriv2d(psi*cosphi2d,latrad,targetp1d) / acosphi2d
+   omegastar[ttt,:,:] = omega[ttt,:,:] + dpsi_dy
+   # (equation 2.7) equivalent acceleration (meridional circulation)
+   mcdudt[ttt,:,:] = - ((du_dy - f) * vstar[ttt,:,:]) - (du_dp*omegastar[ttt,:,:])
  print "... ... done: EP flux"
 
 ####################################################
