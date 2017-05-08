@@ -111,11 +111,20 @@ if 0 == 1:
   ISR=pp(file=fileAP,var="ISR",x=charx).getf() ; print "... ... done: ISR"
   OLR=pp(file=fileAP,var="OLR",x=charx).getf() ; print "... ... done: OLR"
 if not short:
-  v=pp(file=fileAP,var="v",x=999).getf() ; print "... ... done: v"
-  vpup=pp(file=fileAP,var="vpup",x=999).getf() ; print "... ... done: vpup"
-  vptp=pp(file=fileAP,var="vptp",x=999).getf() ; print "... ... done: vptp"
-  upup=pp(file=fileAP,var="upup",x=999).getf() ; print "... ... done: upup"
-  vpvp=pp(file=fileAP,var="vpup",x=999).getf() ; print "... ... done: vpvp" 
+  v=pp(file=fileAP,var="v",x=charx).getf() ; print "... ... done: v"
+  if charx == "999":
+    vpup=pp(file=fileAP,var="vpup",x=charx).getf() ; print "... ... done: vpup"
+    vptp=pp(file=fileAP,var="vptp",x=charx).getf() ; print "... ... done: vptp"
+    upup=pp(file=fileAP,var="upup",x=charx).getf() ; print "... ... done: upup"
+    vpvp=pp(file=fileAP,var="vpup",x=charx).getf() ; print "... ... done: vpvp" 
+  else:
+    staru4D=pp(file=fileAP,var="u",compute="pert_x").getf()
+    starv4D=pp(file=fileAP,var="v",compute="pert_x").getf()
+    start4D=pp(file=fileAP,var="temp",compute="pert_x").getf()
+    vpup=ppcompute.mean(starv4D*staru4D,axis=3)
+    vptp=ppcompute.mean(starv4D*start4D,axis=3) 
+    upup=ppcompute.mean(staru4D*staru4D,axis=3) 
+    vpvp=ppcompute.mean(starv4D*starv4D,axis=3) 
 
 ####################################################
 print "... interpolating !"
