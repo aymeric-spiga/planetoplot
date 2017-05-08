@@ -342,6 +342,7 @@ class pp():
             self.trans = other.trans ; self.back = other.back
             self.showcb = other.showcb
             self.logy = other.logy
+            self.svx = other.svx ; self.svy = other.svy
         else:
             print "!! ERROR !! argument must be a pp object." ; exit()
 
@@ -1063,6 +1064,7 @@ class pp():
                           pl.nxticks,pl.nyticks,\
                           pl.xmin,pl.xmax,\
                           pl.ymin,pl.ymax,\
+                          pl.linestyle,\
                           pl.title,pl.swaplab # save titles and labels
                     # possibility to color lines according to a color map
                     # ... made so that all plots span the whole color map automatically.
@@ -1078,6 +1080,7 @@ class pp():
                         pl.nxticks,pl.nyticks,\
                         pl.xmin,pl.xmax,\
                         pl.ymin,pl.ymax,\
+                        pl.linestyle,\
                         pl.title,pl.swaplab = sav 
                     else:
                         prev_plot = self.plotin.p[self.n-1]
