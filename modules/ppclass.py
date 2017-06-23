@@ -1064,7 +1064,6 @@ class pp():
                           pl.nxticks,pl.nyticks,\
                           pl.xmin,pl.xmax,\
                           pl.ymin,pl.ymax,\
-                          pl.linestyle,\
                           pl.title,pl.swaplab # save titles and labels
                     # possibility to color lines according to a color map
                     # ... made so that all plots span the whole color map automatically.
@@ -1072,7 +1071,7 @@ class pp():
                         if self.verbose: print "**** OK. We make a rainbow spaghetti plot with color map ",self.colorbar
                         ppplot.rainbow(cb=self.colorbar,num=self.howmanyplots)
                 else: 
-                    pl.invert = False ; pl.linestyle = None # don't invert again axis
+                    pl.invert = False # don't invert again axis
                     # set saved titles and labels
                     if self.plotin is None:
                         pl.xlabel,pl.ylabel,\
@@ -1080,7 +1079,6 @@ class pp():
                         pl.nxticks,pl.nyticks,\
                         pl.xmin,pl.xmax,\
                         pl.ymin,pl.ymax,\
-                        pl.linestyle,\
                         pl.title,pl.swaplab = sav 
                     else:
                         prev_plot = self.plotin.p[self.n-1]
