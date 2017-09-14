@@ -206,15 +206,16 @@ print "... ... done: coordinates"
   # hence dm = rho dV = - r^2 cosphi dlambda dphi dp / g
 dlat = np.abs(latrad[1]-latrad[0])
 dlon = 2*np.pi
-dp = np.zeros((nt,nz,nlat))
-dp[:,0:nz-2,:] = targetp3d[:,1:nz-1,:] - targetp3d[:,0:nz-2,:]
-dp[:,nz-1,:] = dp[:,nz-2,:] 
-dm = - myp.a*acosphi2d * dlon * dlat * dp/myp.g # mass for each considered grid mesh
+dp = np.gradient(targetp3d,axis=1)
+dm = - myp.a*acosphi2d * dlon * dlat * dp/myp.g # mass for each considered grid mesh #should have glat!
 angmom = dm * myp.angmom(u=u,lat=lat2d) / 1.e25 
 # units as in Lauritzen et al. JAMES 2014 E25 kg m2 s-1
 # -- plus, a normalization is needed (otherwise overflow absurdities)
 print "... ... done: angular momentum"
 
+##########################
+## EXTENDED DIAGNOSTICS ##
+##########################
 if not short:
 
  # *** BASIC DIAGNOSTICS ***
