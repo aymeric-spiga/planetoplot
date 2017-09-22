@@ -238,13 +238,14 @@ if not short:
  w = np.isnan(v) # save NaN locations 
  v[w] = 0. # necessary otherwise integrations fail
  # integration loop
+ x = targetp1d[:] # coordinate
+ x = np.insert(x,0,0) # JL: integrate from p=0 towards p
  for ttt in range(nt):
   for yyy in range(nlat):
    y = v[ttt,:,yyy] # integrand
-   x = targetp1d[:] # coordinate
-   for zzz in range(nz):
-     # a minus sign is added because x coordinates is decreasing
-     psim[ttt,zzz,yyy] = -scipy.integrate.simps(y[zzz:nz],x[zzz:nz])*alph[zzz,yyy]
+   y = np.insert(y,0,y[0]) # JL: integrate from p=0 towards p
+   for zzz in range(0,nz):
+     psim[ttt,zzz,yyy] = scipy.integrate.simps(y[0:zzz+1],x[0:zzz+1])*alph[0,yyy]
  print "... ... done: streamfunction"
  # reset to NaN after integration
  v[w] = np.nan ; psim[w] = np.nan
@@ -340,7 +341,8 @@ if nopole and not short:
   effbeta_bc[:,:,-1] = np.nan
   omegastar[:,:,0] = np.nan
   omegastar[:,:,-1] = np.nan
-
+  psim[:,:,0] = np.nan
+  psim[:,:,-1] = np.nan
 
 ####################################################
 print "... creating the target file !"
@@ -393,6 +395,7 @@ if not short:
   addvar(outfile,nam4,'omegastar',omegastar)
   addvar(outfile,nam4,'mcdudt',mcdudt)
   #addvar(outfile,nam4,'ratio',ratio)
+  addvar(outfile,nam4,'psim',psim)
 
 #####################################################
 if 0 == 1:
