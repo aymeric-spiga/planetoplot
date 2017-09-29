@@ -342,6 +342,7 @@ class pp():
             self.trans = other.trans ; self.back = other.back
             self.showcb = other.showcb
             self.logy = other.logy
+            self.svx = other.svx ; self.svy = other.svy
         else:
             print "!! ERROR !! argument must be a pp object." ; exit()
 
@@ -1070,7 +1071,7 @@ class pp():
                         if self.verbose: print "**** OK. We make a rainbow spaghetti plot with color map ",self.colorbar
                         ppplot.rainbow(cb=self.colorbar,num=self.howmanyplots)
                 else: 
-                    pl.invert = False ; pl.linestyle = None # don't invert again axis
+                    pl.invert = False # don't invert again axis
                     # set saved titles and labels
                     if self.plotin is None:
                         pl.xlabel,pl.ylabel,\

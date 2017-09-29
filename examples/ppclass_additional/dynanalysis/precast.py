@@ -7,8 +7,9 @@ import netCDF4 as nc
 import planets
 
 ####################################################
-fileAP="DRAG90days_DISSIP10000_year1-10_512_every200d_zonmean_stride4lat.nc"
-#fileAP="test.nc"
+#fileAP="DRAG90days_DISSIP10000_year1-10_512_every200d_zonmean_stride4lat.nc"
+fileAP="test.nc"
+#fileAP="DRAG90days_DISSIP10000_year9_512_every200d_zonmean_stride4lat.nc"
 ####################################################
 p_upper,p_lower,nlev = 4.0e2,2.5e5,40 # whole atm
 #p_upper,p_lower,nlev = 3e3, 2e5, 40 # tropo
@@ -25,10 +26,39 @@ day_per_year = 24430.
 short = False
 includels = True
 ####################################################
+charx = "999" # already zonal means
+ispressure = True
+####################################################
+outfile = "precast.nc"
+nopole = False
+####################################################
+
+#fileAP="diagfired.nc"
+#p_upper,p_lower,nlev = 1e-4,1e3,50
+#targetp1d = np.logspace(np.log10(p_lower),np.log10(p_upper),nlev)
+#myp = planets.Mars
+#day_per_year = np.ceil(myp.dayperyear())
+#charx = "-180,180" # compute zonal mean
+#ispressure = False
+#outfile = "diagfired_precast.nc"
+#nopole = True
+
+fileAP="test.nc"
+p_upper,p_lower,nlev = 0.5e2,3.5e5,100 # whole atm
+targetp1d = np.logspace(np.log10(p_lower),np.log10(p_upper),nlev)
+myp = planets.Jupiter
+day_per_year = np.ceil(myp.dayperyear())
+charx = "-180,180" # compute zonal mean
+ispressure = True
+outfile = "test_precast.nc"
+nopole = True
+
+
 
 #--------------------------------------------------------------------------------------------------------------------------
 #--------------------------------------------------------------------------------------------------------------------------
 #--------------------------------------------------------------------------------------------------------------------------
+
 
 ####################################################
 def interpolate(targetp1d,sourcep3d,fieldsource3d):
@@ -84,18 +114,47 @@ def addvar(filename,dimname,varname,varfield):
   return
 
 ####################################################
+def getp_fromapbp(fileAP):
+  aps=pp(file=fileAP,var="aps",x=0,y=0).getf()
+  bps=pp(file=fileAP,var="bps",x=0,y=0).getf()
+  ps=pp(file=fileAP,var="ps").getf()
+  nt,ny,nx = ps.shape
+  nz = len(aps)
+  p = np.zeros((nt,nz,ny,nx))
+  for tt in range(nt):
+   for kk in range(nz):
+    p[tt,kk,:,:] = aps[kk]+bps[kk]*ps[tt,:,:]
+  return ppcompute.mean(p,axis=3)
+
+####################################################
+print "... getting pressure field !"
+if ispressure:
+  press=pp(file=fileAP,var="p",x=charx).getf()
+else:
+  press=getp_fromapbp(fileAP)
+
+####################################################
 print "... getting fields from file !"
-press,xdim,ydim,zdim,tdim=pp(file=fileAP,var="p",x=999).getfd()
-u=pp(file=fileAP,var="u",x=999).getf() ; print "... ... done: u"
-temp=pp(file=fileAP,var="temp",x=999).getf() ; print "... ... done: temp"
-ISR=pp(file=fileAP,var="ISR",x=999.).getf() ; print "... ... done: ISR"
-OLR=pp(file=fileAP,var="OLR",x=999.).getf() ; print "... ... done: OLR"
+u,xdim,ydim,zdim,tdim=pp(file=fileAP,var="u",x=charx).getfd() ; print "... ... done: u"
+temp=pp(file=fileAP,var="temp",x=charx).getf() ; print "... ... done: temp"
+if 0 == 1:
+  ISR=pp(file=fileAP,var="ISR",x=charx).getf() ; print "... ... done: ISR"
+  OLR=pp(file=fileAP,var="OLR",x=charx).getf() ; print "... ... done: OLR"
 if not short:
-  v=pp(file=fileAP,var="v",x=999).getf() ; print "... ... done: v"
-  vpup=pp(file=fileAP,var="vpup",x=999).getf() ; print "... ... done: vpup"
-  vptp=pp(file=fileAP,var="vptp",x=999).getf() ; print "... ... done: vptp"
-  upup=pp(file=fileAP,var="upup",x=999).getf() ; print "... ... done: upup"
-  vpvp=pp(file=fileAP,var="vpup",x=999).getf() ; print "... ... done: vpvp" 
+  v=pp(file=fileAP,var="v",x=charx).getf() ; print "... ... done: v"
+  if charx == "999":
+    vpup=pp(file=fileAP,var="vpup",x=charx).getf() ; print "... ... done: vpup"
+    vptp=pp(file=fileAP,var="vptp",x=charx).getf() ; print "... ... done: vptp"
+    upup=pp(file=fileAP,var="upup",x=charx).getf() ; print "... ... done: upup"
+    vpvp=pp(file=fileAP,var="vpup",x=charx).getf() ; print "... ... done: vpvp" 
+  else:
+    staru4D=pp(file=fileAP,var="u",compute="pert_x").getf()
+    starv4D=pp(file=fileAP,var="v",compute="pert_x").getf()
+    start4D=pp(file=fileAP,var="temp",compute="pert_x").getf()
+    vpup=ppcompute.mean(starv4D*staru4D,axis=3)
+    vptp=ppcompute.mean(starv4D*start4D,axis=3) 
+    upup=ppcompute.mean(staru4D*staru4D,axis=3) 
+    vpvp=ppcompute.mean(starv4D*starv4D,axis=3) 
 
 ####################################################
 print "... interpolating !"
@@ -117,7 +176,10 @@ nlon = 1
 # *** TIME AXIS
 tdim = fix_time_axis(tdim,day_per_year)
 if includels:
+ if myp.name == "Saturn":
   lstab = kron2ls(tdim*day_per_year)
+ else:
+  lstab = np.zeros(nt)
 
 # *** VERTICAL COORDINATES
 # pseudo-altitude (log-pressure) coordinates
@@ -134,6 +196,7 @@ cosphi2d = acosphi2d / myp.a
 latrad,lat2drad = ydim*np.pi/180.,lat2d*np.pi/180.
 beta = myp.beta(lat=lat2d)
 f = myp.fcoriolis(lat=lat2d)
+tanphia = myp.tanphia(lat=lat2d)
 print "... ... done: coordinates"
 
 # *** ANGULAR MOMENTUM ***
@@ -143,15 +206,16 @@ print "... ... done: coordinates"
   # hence dm = rho dV = - r^2 cosphi dlambda dphi dp / g
 dlat = np.abs(latrad[1]-latrad[0])
 dlon = 2*np.pi
-dp = np.zeros((nt,nz,nlat))
-dp[:,0:nz-2,:] = targetp3d[:,1:nz-1,:] - targetp3d[:,0:nz-2,:]
-dp[:,nz-1,:] = dp[:,nz-2,:] 
-dm = - myp.a*acosphi2d * dlon * dlat * dp/myp.g # mass for each considered grid mesh
+dp = np.gradient(targetp3d,axis=1)
+dm = - myp.a*acosphi2d * dlon * dlat * dp/myp.g # mass for each considered grid mesh #should have glat!
 angmom = dm * myp.angmom(u=u,lat=lat2d) / 1.e25 
 # units as in Lauritzen et al. JAMES 2014 E25 kg m2 s-1
 # -- plus, a normalization is needed (otherwise overflow absurdities)
 print "... ... done: angular momentum"
 
+##########################
+## EXTENDED DIAGNOSTICS ##
+##########################
 if not short:
 
  # *** BASIC DIAGNOSTICS ***
@@ -160,6 +224,47 @@ if not short:
  emt = rho*vpup # eddy momentum transport
  # meridional heat flux?rho*vptp
  print "... ... done: basic diagnostics"
+
+ # *** MASS STREAMFUNCTION ***
+ # *** AND VERTICAL VELOCITY ***
+ # NB: slide 7 in https://atmos.washington.edu/~dennis/501/501_Gen_Circ_Atmos.pdf
+ # term = 2 pi a cosphi / g
+ # --> PSIM = term * int_0^p v dp
+ import scipy
+ import scipy.integrate
+ psim = np.zeros((nt,nz,nlat)) # mass streamfunction
+ omega = np.zeros((nt,nz,nlat)) # vertical velocity in pressure coordinate
+ alph = 2.*np.pi*acosphi2d/myp.g
+ w = np.isnan(v) # save NaN locations 
+ v[w] = 0. # necessary otherwise integrations fail
+ # integration loop
+ for ttt in range(nt):
+  for yyy in range(nlat):
+   y = v[ttt,:,yyy] # integrand
+   x = targetp1d[:] # coordinate
+   for zzz in range(nz):
+     # a minus sign is added because x coordinates is decreasing
+     psim[ttt,zzz,yyy] = -scipy.integrate.simps(y[zzz:nz],x[zzz:nz])*alph[zzz,yyy]
+ print "... ... done: streamfunction"
+ # reset to NaN after integration
+ v[w] = np.nan ; psim[w] = np.nan
+ # derivatives of streamfunction --> velocity (notably omega)
+ for ttt in range(nt):
+   dpsim_dphi,dpsim_dp = ppcompute.deriv2d(psim[ttt,:,:],latrad,targetp1d)/alph
+   # meridional: v = 1/term dPSIM/dp
+   vphi = dpsim_dp
+   # vertical: omega = (-1/a) 1/term dPSIM/dphi
+   omega[ttt,:,:] = -dpsim_dphi/myp.a
+   ##CHECK against actual v
+   #import ppplot ; pl = ppplot.plot2d()
+   #pl.f, pl.x, pl.y = vphi, ydim, pseudoz ; pl.title = r'$d\Psi_M/dp$' 
+   #pl.makesave(mode="png",filename="v_from_streamfunction") 
+   #pl.f = v[ttt,:,:] ; pl.title = r'v'
+   #pl.makesave(mode="png",filename="v_actual")
+   #pl.f = v[ttt,:,:]-vphi[:,:] ; pl.title = r'v - $d\Psi_M/dp$'
+   #pl.makesave(mode="png",filename="v_diff")
+   #print "max diff:",ppcompute.max(v[ttt,:,:]-vphi[:,:]) 
+ print "... ... done: vertical velocity"
 
  # *** DIAGNOSTICS FOR INSTABILITY
  N2 = np.zeros((nt,nz,nlat)) # static stability
@@ -189,32 +294,57 @@ if not short:
  # *** EP FLUX and RESIDUAL CIRCULATION
  # *** see Andrews et al. JAS 83
  divFphi = np.zeros((nt,nz,nlat)) # meridional divergence of EP flux
- vstar = np.zeros((nt,nz,nlat)) # residual mean meridional circulation
+ percentdivFp = np.zeros((nt,nz,nlat)) # % vertical divergence of EP flux (usually small)
  EtoM = np.zeros((nt,nz,nlat)) # conversion from eddy to mean
+ vstar = np.zeros((nt,nz,nlat)) # residual mean meridional circulation
+ omegastar = np.zeros((nt,nz,nlat)) # residual mean vertical circulation
+ mcdudt = np.zeros((nt,nz,nlat)) # equivalent acceleration (meridional circulation)
  for ttt in range(nt):
    # (Del Genio et al. 2007) eddy to mean conversion: product emt with du/dy
    du_dy,dummy = ppcompute.deriv2d(u[ttt,:,:]*cosphi2d,latrad,targetp1d) / acosphi2d
-   EtoM[ttt,:,:] = emt[ttt,:,:]*du_dy
+   EtoM[ttt,:,:] = vpup[ttt,:,:]*du_dy #emt[ttt,:,:]*du_dy
    # vertical derivatives with pressure
    dummy,dt_dp = ppcompute.deriv2d(temp[ttt,:,:],latrad,targetp1d)
    dummy,du_dp = ppcompute.deriv2d(u[ttt,:,:],latrad,targetp1d)
    # (equation 2.2) psi function
    rcp = myp.R / myp.cp
    psi = - vptp[ttt,:,:] / ( (rcp*temp[ttt,:,:]/targetp3d[ttt,:,:]) - (dt_dp) ) 
-   # (equation 2.1) EP flux
+   # (equation 2.1) EP flux (phi)
    Fphi = acosphi2d * ( - vpup[ttt,:,:] + psi*du_dp ) 
+   # (equation 2.1) EP flux (p)
+   Fp = - psi * (du_dy - f) # neglect <u'omega'>
    # (equation 2.3) divergence of EP flux
    divFphi[ttt,:,:],dummy = ppcompute.deriv2d(Fphi*cosphi2d,latrad,targetp1d) / acosphi2d
-   # (equation 2.7) equivalent acceleration
+   dummy,percentdivFp[ttt,:,:] = ppcompute.deriv2d(Fp,latrad,targetp1d)
+   percentdivFp[ttt,:,:] = 100. * percentdivFp[ttt,:,:] / divFphi[ttt,:,:]
+   # (equation 2.7) equivalent acceleration (eddies)
    divFphi[ttt,:,:] = divFphi[ttt,:,:] / acosphi2d
    # (equation 2.6) residual mean meridional circulation
    dummy,dpsi_dp = ppcompute.deriv2d(psi,latrad,targetp1d)
    vstar[ttt,:,:] = v[ttt,:,:] - dpsi_dp
+   dpsi_dy,dummy = ppcompute.deriv2d(psi*cosphi2d,latrad,targetp1d) / acosphi2d
+   omegastar[ttt,:,:] = omega[ttt,:,:] + dpsi_dy
+   # (equation 2.7) equivalent acceleration (meridional circulation)
+   mcdudt[ttt,:,:] = - ((du_dy - f) * vstar[ttt,:,:]) - (du_dp*omegastar[ttt,:,:])
  print "... ... done: EP flux"
+
+## pole problem
+if nopole and not short:
+  divFphi[:,:,0] = np.nan
+  divFphi[:,:,-1] = np.nan
+  vstar[:,:,0] = np.nan
+  vstar[:,:,-1] = np.nan
+  effbeta_bt[:,:,0] = np.nan
+  effbeta_bt[:,:,-1] = np.nan
+  effbeta_bc[:,:,0] = np.nan
+  effbeta_bc[:,:,-1] = np.nan
+  omegastar[:,:,0] = np.nan
+  omegastar[:,:,-1] = np.nan
+
 
 ####################################################
 print "... creating the target file !"
-f = nc.Dataset("precast.nc",'w',format='NETCDF3_CLASSIC')
+f = nc.Dataset(outfile,'w',format='NETCDF3_CLASSIC')
 
 xdim = [999.]
 dimx = 'longitude'
@@ -245,23 +375,28 @@ f.close()
 
 #####################################################
 print "... adding 3D variables !"
-addvar("precast.nc",nam4,'p',targetp3d)
-addvar("precast.nc",nam4,'u',u)
-addvar("precast.nc",nam4,'temp',temp)
-addvar("precast.nc",nam4,'angmom',angmom)
+addvar(outfile,nam4,'p',targetp3d)
+addvar(outfile,nam4,'u',u)
+addvar(outfile,nam4,'temp',temp)
+addvar(outfile,nam4,'angmom',angmom)
 if not short:
-  addvar("precast.nc",nam4,'eke',eke)
-  addvar("precast.nc",nam4,'tpot',tpot)
-  addvar("precast.nc",nam4,'N2',N2)
-  addvar("precast.nc",nam4,'effbeta_bt',effbeta_bt)
-  addvar("precast.nc",nam4,'effbeta_bc',effbeta_bc)
-  addvar("precast.nc",nam4,'ushear',ushear)
-  addvar("precast.nc",nam4,'divFphi',divFphi)
-  addvar("precast.nc",nam4,'vstar',vstar)
-  addvar("precast.nc",nam4,'EtoM',EtoM)
+  addvar(outfile,nam4,'eke',eke)
+  addvar(outfile,nam4,'tpot',tpot)
+  addvar(outfile,nam4,'N2',N2)
+  addvar(outfile,nam4,'effbeta_bt',effbeta_bt)
+  addvar(outfile,nam4,'effbeta_bc',effbeta_bc)
+  addvar(outfile,nam4,'ushear',ushear)
+  addvar(outfile,nam4,'divFphi',divFphi)
+  addvar(outfile,nam4,'percentdivFp',percentdivFp)
+  addvar(outfile,nam4,'vstar',vstar)
+  addvar(outfile,nam4,'EtoM',EtoM)
+  addvar(outfile,nam4,'omegastar',omegastar)
+  addvar(outfile,nam4,'mcdudt',mcdudt)
+  #addvar(outfile,nam4,'ratio',ratio)
 
 #####################################################
-print "... adding 2D variables !"
-namdim2d = (nam4[0],nam4[2],nam4[3])
-addvar("precast.nc",namdim2d,'ISR',ISR)
-addvar("precast.nc",namdim2d,'OLR',OLR)
+if 0 == 1:
+  print "... adding 2D variables !"
+  namdim2d = (nam4[0],nam4[2],nam4[3])
+  addvar(outfile,namdim2d,'ISR',ISR)
+  addvar(outfile,namdim2d,'OLR',OLR)
