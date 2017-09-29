@@ -1975,6 +1975,8 @@ class onerequest():
               self.field = ppcompute.min  (self.field,axis=nr)
             elif self.compute == "max":    
               self.field = ppcompute.max  (self.field,axis=nr)
+            elif self.compute == "sum":
+              self.field = ppcompute.sum  (self.field,axis=nr)
             else:                          
               print "!! ERROR !! operation not supported." ; exit()
             # b. reshaping
