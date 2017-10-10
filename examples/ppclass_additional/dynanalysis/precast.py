@@ -116,11 +116,16 @@ def addvar(filename,dimname,varname,varfield):
 
 ####################################################
 def getp_fromapbp(fileAP):
-  aps=pp(file=fileAP,var="aps",x=0,y=0).getf()
-  bps=pp(file=fileAP,var="bps",x=0,y=0).getf()
+  try:
+    aps=pp(file=fileAP,var="aps",x=0,y=0).getf()
+    bps=pp(file=fileAP,var="bps",x=0,y=0).getf()
+    nz = len(aps)
+  except:
+    print "info: read apbp.txt"
+    aps,bps = np.loadtxt("apbp.txt",unpack=True)
+    nz = len(aps)-1
   ps=pp(file=fileAP,var="ps").getf()
   nt,ny,nx = ps.shape
-  nz = len(aps)
   p = np.zeros((nt,nz,ny,nx))
   for tt in range(nt):
    for kk in range(nz):
