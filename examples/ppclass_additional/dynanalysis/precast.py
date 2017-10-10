@@ -28,6 +28,7 @@ includels = True
 ####################################################
 charx = "999" # already zonal means
 ispressure = True
+vartemp = "temp" 
 ####################################################
 outfile = "precast.nc"
 nopole = False
@@ -136,7 +137,7 @@ else:
 ####################################################
 print "... getting fields from file !"
 u,xdim,ydim,zdim,tdim=pp(file=fileAP,var="u",x=charx).getfd() ; print "... ... done: u"
-temp=pp(file=fileAP,var="temp",x=charx).getf() ; print "... ... done: temp"
+temp=pp(file=fileAP,var=vartemp,x=charx).getf() ; print "... ... done: "+vartemp
 if 0 == 1:
   ISR=pp(file=fileAP,var="ISR",x=charx).getf() ; print "... ... done: ISR"
   OLR=pp(file=fileAP,var="OLR",x=charx).getf() ; print "... ... done: OLR"
@@ -150,7 +151,7 @@ if not short:
   else:
     staru4D=pp(file=fileAP,var="u",compute="pert_x").getf()
     starv4D=pp(file=fileAP,var="v",compute="pert_x").getf()
-    start4D=pp(file=fileAP,var="temp",compute="pert_x").getf()
+    start4D=pp(file=fileAP,var=vartemp,compute="pert_x").getf()
     vpup=ppcompute.mean(starv4D*staru4D,axis=3)
     vptp=ppcompute.mean(starv4D*start4D,axis=3) 
     upup=ppcompute.mean(staru4D*staru4D,axis=3) 
@@ -159,7 +160,7 @@ if not short:
 ####################################################
 print "... interpolating !"
 u = interpolate(targetp1d,press,u) ; print "... ... done: u"
-temp = interpolate(targetp1d,press,temp) ; print "... ... done: temp"
+temp = interpolate(targetp1d,press,temp) ; print "... ... done: "+vartemp
 if not short:
   v = interpolate(targetp1d,press,v) ; print "... ... done: v"
   vpup = interpolate(targetp1d,press,vpup) ; print "... ... done: vpup"
@@ -350,7 +351,7 @@ f.close()
 print "... adding 3D variables !"
 addvar(outfile,nam4,'p',targetp3d)
 addvar(outfile,nam4,'u',u)
-addvar(outfile,nam4,'temp',temp)
+addvar(outfile,nam4,vartemp,temp)
 addvar(outfile,nam4,'angmom',angmom)
 if not short:
   addvar(outfile,nam4,'eke',eke)
