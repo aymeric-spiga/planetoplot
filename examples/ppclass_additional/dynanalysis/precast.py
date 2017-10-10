@@ -212,15 +212,16 @@ print "... ... done: coordinates"
   # hence dm = rho dV = - r^2 cosphi dlambda dphi dp / g
 dlat = np.abs(latrad[1]-latrad[0])
 dlon = 2*np.pi
-dp = np.zeros((nt,nz,nlat))
-dp[:,0:nz-2,:] = targetp3d[:,1:nz-1,:] - targetp3d[:,0:nz-2,:]
-dp[:,nz-1,:] = dp[:,nz-2,:] 
-dm = - myp.a*acosphi2d * dlon * dlat * dp/myp.g # mass for each considered grid mesh
+dp = np.gradient(targetp3d,axis=1)
+dm = - myp.a*acosphi2d * dlon * dlat * dp/myp.g # mass for each considered grid mesh #should have glat!
 angmom = dm * myp.angmom(u=u,lat=lat2d) / 1.e25 
 # units as in Lauritzen et al. JAMES 2014 E25 kg m2 s-1
 # -- plus, a normalization is needed (otherwise overflow absurdities)
 print "... ... done: angular momentum"
 
+##########################
+## EXTENDED DIAGNOSTICS ##
+##########################
 if not short:
 
  # *** BASIC DIAGNOSTICS ***
@@ -230,20 +231,46 @@ if not short:
  # meridional heat flux?rho*vptp
  print "... ... done: basic diagnostics"
 
- # *** VERTICAL VELOCITY
- omega = np.zeros((nt,nz,nlat))
+ # *** MASS STREAMFUNCTION ***
+ # *** AND VERTICAL VELOCITY ***
+ # NB: slide 7 in https://atmos.washington.edu/~dennis/501/501_Gen_Circ_Atmos.pdf
+ # term = 2 pi a cosphi / g
+ # --> PSIM = term * int_0^p v dp
+ import scipy
+ import scipy.integrate
+ psim = np.zeros((nt,nz,nlat)) # mass streamfunction
+ omega = np.zeros((nt,nz,nlat)) # vertical velocity in pressure coordinate
+ alph = 2.*np.pi*acosphi2d/myp.g
+ w = np.isnan(v) # save NaN locations 
+ v[w] = 0. # necessary otherwise integrations fail
+ # integration loop
  for ttt in range(nt):
-   dv_dy,dummy = ppcompute.deriv2d(v[ttt,:,:]*cosphi2d,latrad,targetp1d) / acosphi2d
-   integrand = dv_dy #- ((v[ttt,:,:]/myp.a)*myp.tanphi(lat=lat2d))
-   #omega_to_w = -1. / (rho[ttt,:,:]*myp.g)
-   dptab = dp[ttt,:,:]
+  for yyy in range(nlat):
+   y = v[ttt,:,yyy] # integrand
+   x = targetp1d[:] # coordinate
    for zzz in range(nz):
-     integral = np.zeros((nlat))
-     for zzzint in range(zzz):
-       integral = integral - integrand[zzzint,:]*dptab[zzzint,:]
-     omega[ttt,zzz,:] = integral
-     #w[ttt,zzz,:] = omega[ttt,zzz,:]*omega_to_w[zzz,:]
- print "... ... done: vertical velocity" 
+     # a minus sign is added because x coordinates is decreasing
+     psim[ttt,zzz,yyy] = -scipy.integrate.simps(y[zzz:nz],x[zzz:nz])*alph[zzz,yyy]
+ print "... ... done: streamfunction"
+ # reset to NaN after integration
+ v[w] = np.nan ; psim[w] = np.nan
+ # derivatives of streamfunction --> velocity (notably omega)
+ for ttt in range(nt):
+   dpsim_dphi,dpsim_dp = ppcompute.deriv2d(psim[ttt,:,:],latrad,targetp1d)/alph
+   # meridional: v = 1/term dPSIM/dp
+   vphi = dpsim_dp
+   # vertical: omega = (-1/a) 1/term dPSIM/dphi
+   omega[ttt,:,:] = -dpsim_dphi/myp.a
+   ##CHECK against actual v
+   #import ppplot ; pl = ppplot.plot2d()
+   #pl.f, pl.x, pl.y = vphi, ydim, pseudoz ; pl.title = r'$d\Psi_M/dp$' 
+   #pl.makesave(mode="png",filename="v_from_streamfunction") 
+   #pl.f = v[ttt,:,:] ; pl.title = r'v'
+   #pl.makesave(mode="png",filename="v_actual")
+   #pl.f = v[ttt,:,:]-vphi[:,:] ; pl.title = r'v - $d\Psi_M/dp$'
+   #pl.makesave(mode="png",filename="v_diff")
+   #print "max diff:",ppcompute.max(v[ttt,:,:]-vphi[:,:]) 
+ print "... ... done: vertical velocity"
 
  # *** DIAGNOSTICS FOR INSTABILITY
  N2 = np.zeros((nt,nz,nlat)) # static stability
