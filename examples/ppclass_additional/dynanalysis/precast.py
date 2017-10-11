@@ -313,7 +313,7 @@ if not short:
    # (equation 2.1) EP flux (phi)
    Fphi = acosphi2d * ( - vpup[ttt,:,:] + psi*du_dp ) 
    # (equation 2.1) EP flux (p)
-   Fp = - psi * (du_dy - f) # neglect <u'omega'>
+   Fp = - acosphi2d * psi * (du_dy - f) # neglect <u'omega'>
    # (equation 2.3) divergence of EP flux
    divFphi[ttt,:,:],dummy = ppcompute.deriv2d(Fphi*cosphi2d,latrad,targetp1d) / acosphi2d
    dummy,percentdivFp[ttt,:,:] = ppcompute.deriv2d(Fp,latrad,targetp1d)
