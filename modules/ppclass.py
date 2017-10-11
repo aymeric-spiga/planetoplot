@@ -165,7 +165,7 @@ class pp():
                       svy=None,\
                       compute="mean",\
                       kind3d="tyx",\
-                      useindex=False,\
+                      useindex="0000",\
                       verbose=False,\
                       quiet=False,\
                       superpose=False,\
@@ -1388,7 +1388,7 @@ class onerequest():
         self.sx = 1 ; self.sy = 1 ; self.sz = 1 ; self.st = 1
         self.missing = '!! missing value: I am not set, damned !!'
         self.kind3d = '!! kind3d: I am not set, damned !!'
-        self.useindex = None
+        self.useindex = "0000"
 
     # open a file. for now it is netcdf. TBD for other formats.
     # check that self.var is inside.
@@ -1452,7 +1452,7 @@ class onerequest():
     def getdimhor(self):
           # LONGITUDE. Try preset fields. If not present set grid points axis.
           self.name_x = "nothing"
-          if not self.useindex:
+          if self.useindex[3] == "0":
            for c in glob_listx:
             if c in self.f.variables.keys():
              self.name_x = c
@@ -1463,7 +1463,7 @@ class onerequest():
             self.field_x = self.f.variables[self.name_x]
           # LATITUDE. Try preset fields. If not present set grid points axis.
           self.name_y = "nothing"
-          if not self.useindex:
+          if self.useindex[2] == "0":
            for c in glob_listy:
             if c in self.f.variables.keys():
              self.name_y = c
@@ -1505,7 +1505,7 @@ class onerequest():
           # ALTITUDE. Try preset fields. If not present set grid points axis.
           # WARNING: how do we do if several are available? the last one is chosen.
           self.name_z = "nothing"
-          if not self.useindex:
+          if self.useindex[1] == "0":
            for c in glob_listz:
             if c in self.f.variables.keys():
              self.name_z = c
@@ -1537,7 +1537,7 @@ class onerequest():
     def getdimt(self):
           # TIME. Try preset fields.
           self.name_t = "nothing"
-          if not self.useindex:
+          if self.useindex[0] == "0":
            for c in glob_listt:
             if c in self.f.variables.keys():
              self.name_t = c
@@ -1976,6 +1976,8 @@ class onerequest():
               self.field = ppcompute.min  (self.field,axis=nr)
             elif self.compute == "max":    
               self.field = ppcompute.max  (self.field,axis=nr)
+            elif self.compute == "sum":
+              self.field = ppcompute.sum  (self.field,axis=nr)
             else:                          
               print "!! ERROR !! operation not supported." ; exit()
             # b. reshaping
