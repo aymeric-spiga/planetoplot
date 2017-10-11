@@ -54,6 +54,18 @@ ispressure = True
 outfile = "test_precast.nc"
 nopole = True
 
+fileAP="Xhistins_999.nc"
+p_upper,p_lower,nlev = 4.0e2,2.5e5,40
+targetp1d = np.logspace(np.log10(p_lower),np.log10(p_upper),nlev)
+myp = planets.Saturn
+day_per_year = 24430.
+short = False
+includels = False
+charx = "-180,180"
+ispressure = False
+vartemp = "temperature"
+outfile = "precast.nc"
+nopole = True
 
 
 #--------------------------------------------------------------------------------------------------------------------------
