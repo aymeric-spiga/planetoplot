@@ -1962,6 +1962,7 @@ class onerequest():
         # prepare and execute (possibly sequential) means
         roll = [self.method_t, self.method_z, self.method_y, self.method_x]
         reshapedim = [nt,nz,ny,nx]
+        mm = None
         for nr in range(len(roll)):
           rrr = roll[nr]
           if "comp" in rrr:
@@ -1978,21 +1979,27 @@ class onerequest():
               self.field = ppcompute.max  (self.field,axis=nr)
             elif self.compute == "sum":
               self.field = ppcompute.sum  (self.field,axis=nr)
+            elif "pert" in self.compute:
+              mm = ppcompute.mean(self.field,axis=nr)
+              # if bounds are given with pert computation
+              # calculate here the mean with those bounds
+              # then gives this to ppcompute.perturbation below
             else:                          
               print "!! ERROR !! operation not supported." ; exit()
             # b. reshaping
-            reshapedim[nr] = 1
-            self.field = np.reshape(self.field,reshapedim) 
+            if "pert" not in self.compute:
+              reshapedim[nr] = 1
+              self.field = np.reshape(self.field,reshapedim) 
             # c. particular cases for 2D coordinates
             if nr == 2 and self.field_x.ndim == 2: self.field_x = self.field_x[0,:] # TBD: this is OK for regular grid but not for irregular
             if nr == 3 and self.field_y.ndim == 2: self.field_y = self.field_y[:,0] # TBD: this is OK for regular grid but not for irregular
-        # computations for which only setting compute is needed
+        # computations for which only setting compute is given
         if   "_x" in self.compute: zeaxis = 3
         elif "_y" in self.compute: zeaxis = 2
         elif "_z" in self.compute: zeaxis = 1
         elif "_t" in self.compute: zeaxis = 0
         if   "pert" in self.compute: 
-           self.field = ppcompute.perturbation(self.field,axis=zeaxis)
+           self.field = ppcompute.perturbation(self.field,axis=zeaxis,mm=mm)
         elif "diff" in self.compute:
            dadiff = np.diff(self.field,axis=zeaxis)
            # (diff ouput has one value less in impacted dimension. fix this.)
@@ -2004,7 +2011,7 @@ class onerequest():
         # take root mean square for quadratic mean
         if self.compute == "qmean": self.field = np.sqrt(self.field)
         # error handling and verbose
-        if self.field.ndim != self.dimplot: 
+        if ("pert" not in self.compute) and (self.field.ndim != self.dimplot): 
             print "!! ERROR !! Problem: self.field is different than plot dimensions", self.field.ndim, self.dimplot ; exit()
         if self.verbose: 
             print "**** OK. Final shape for "+self.var+" after averaging and squeezing",self.field.shape
