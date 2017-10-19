@@ -226,9 +226,12 @@ dlat = np.abs(latrad[1]-latrad[0])
 dlon = 2*np.pi
 dp = np.gradient(targetp3d,axis=1)
 dm = - myp.a*acosphi2d * dlon * dlat * dp/myp.g # mass for each considered grid mesh #should have glat!
-angmom = dm * myp.angmom(u=u,lat=lat2d) / 1.e25 
+sangmom = myp.sangmom(u=u,lat=lat2d) # specific angular momentum
+angmomperumass = myp.angmom(u=u,lat=lat2d)
+angmom = dm * angmomperumass / 1.e25
 # units as in Lauritzen et al. JAMES 2014 E25 kg m2 s-1
 # -- plus, a normalization is needed (otherwise overflow absurdities)
+superindex = myp.superrot(u=u,lat=lat2d)
 print "... ... done: angular momentum"
 
 ##########################
@@ -240,6 +243,7 @@ if not short:
  rho = targetp3d / (myp.R*temp) # density
  tpot = myp.tpot(temp,targetp3d) # potential temperature
  emt = rho*vpup # eddy momentum transport
+ amt_mmc = v*sangmom # angular momentum transport by mean meridional circulation
  # meridional heat flux?rho*vptp
  print "... ... done: basic diagnostics"
 
@@ -312,12 +316,15 @@ if not short:
 
  # *** EP FLUX and RESIDUAL CIRCULATION
  # *** see Andrews et al. JAS 83
+ Fphi = np.zeros((nt,nz,nlat)) # EP flux H
+ Fp = np.zeros((nt,nz,nlat)) # EP flux V
  divFphi = np.zeros((nt,nz,nlat)) # meridional divergence of EP flux
- percentdivFp = np.zeros((nt,nz,nlat)) # % vertical divergence of EP flux (usually small)
+ divFp = np.zeros((nt,nz,nlat)) # vertical divergence of EP flux (usually small)
  EtoM = np.zeros((nt,nz,nlat)) # conversion from eddy to mean
  vstar = np.zeros((nt,nz,nlat)) # residual mean meridional circulation
  omegastar = np.zeros((nt,nz,nlat)) # residual mean vertical circulation
- mcdudt = np.zeros((nt,nz,nlat)) # equivalent acceleration (meridional circulation)
+ rmcdudt = np.zeros((nt,nz,nlat)) # equivalent acceleration (meridional circulation)
+ edddudt = np.zeros((nt,nz,nlat)) # equivalent acceleration (eddies, div EP flux)
  for ttt in range(nt):
    # (Del Genio et al. 2007) eddy to mean conversion: product emt with du/dy
    du_dy,dummy = ppcompute.deriv2d(u[ttt,:,:]*cosphi2d,latrad,targetp1d) / acosphi2d
@@ -329,22 +336,21 @@ if not short:
    rcp = myp.R / myp.cp
    psi = - vptp[ttt,:,:] / ( (rcp*temp[ttt,:,:]/targetp3d[ttt,:,:]) - (dt_dp) ) 
    # (equation 2.1) EP flux (phi)
-   Fphi = acosphi2d * ( - vpup[ttt,:,:] + psi*du_dp ) 
+   Fphi[ttt,:,:] = acosphi2d * ( - vpup[ttt,:,:] + psi*du_dp ) 
    # (equation 2.1) EP flux (p)
-   Fp = - acosphi2d * psi * (du_dy - f) # neglect <u'omega'>
+   Fp[ttt,:,:] = - acosphi2d * psi * (du_dy - f) # neglect <u'omega'>
    # (equation 2.3) divergence of EP flux
-   divFphi[ttt,:,:],dummy = ppcompute.deriv2d(Fphi*cosphi2d,latrad,targetp1d) / acosphi2d
-   dummy,percentdivFp[ttt,:,:] = ppcompute.deriv2d(Fp,latrad,targetp1d)
-   percentdivFp[ttt,:,:] = 100. * percentdivFp[ttt,:,:] / divFphi[ttt,:,:]
-   # (equation 2.7) equivalent acceleration (eddies)
-   divFphi[ttt,:,:] = divFphi[ttt,:,:] / acosphi2d
+   divFphi[ttt,:,:],dummy = ppcompute.deriv2d(Fphi[ttt,:,:]*cosphi2d,latrad,targetp1d) / acosphi2d
+   dummy,divFp[ttt,:,:] = ppcompute.deriv2d(Fp[ttt,:,:],latrad,targetp1d)
    # (equation 2.6) residual mean meridional circulation
    dummy,dpsi_dp = ppcompute.deriv2d(psi,latrad,targetp1d)
    vstar[ttt,:,:] = v[ttt,:,:] - dpsi_dp
    dpsi_dy,dummy = ppcompute.deriv2d(psi*cosphi2d,latrad,targetp1d) / acosphi2d
    omegastar[ttt,:,:] = omega[ttt,:,:] + dpsi_dy
-   # (equation 2.7) equivalent acceleration (meridional circulation)
-   mcdudt[ttt,:,:] = - ((du_dy - f) * vstar[ttt,:,:]) - (du_dp*omegastar[ttt,:,:])
+   # (equation 2.7) equivalent acceleration on horizontal (eddies)
+   edddudt[ttt,:,:] = divFphi[ttt,:,:] / acosphi2d
+   # (equation 2.7) equivalent acceleration (residual meridional circulation)
+   rmcdudt[ttt,:,:] = - ((du_dy - f) * vstar[ttt,:,:]) - (du_dp*omegastar[ttt,:,:])
  print "... ... done: EP flux"
 
 ## pole problem
@@ -399,19 +405,25 @@ addvar(outfile,nam4,'p',targetp3d)
 addvar(outfile,nam4,'u',u)
 addvar(outfile,nam4,vartemp,temp)
 addvar(outfile,nam4,'angmom',angmom)
+addvar(outfile,nam4,'superindex',superindex)
 if not short:
+  addvar(outfile,nam4,'amt_mmc',amt_mmc)
+  addvar(outfile,nam4,'vpup',vpup)
+  addvar(outfile,nam4,'vptp',vptp)
   addvar(outfile,nam4,'eke',eke)
   addvar(outfile,nam4,'tpot',tpot)
   addvar(outfile,nam4,'N2',N2)
   addvar(outfile,nam4,'effbeta_bt',effbeta_bt)
   addvar(outfile,nam4,'effbeta_bc',effbeta_bc)
   addvar(outfile,nam4,'ushear',ushear)
+  addvar(outfile,nam4,'Fphi',Fphi)
   addvar(outfile,nam4,'divFphi',divFphi)
-  addvar(outfile,nam4,'percentdivFp',percentdivFp)
+  addvar(outfile,nam4,'divFp',divFp)
   addvar(outfile,nam4,'vstar',vstar)
   addvar(outfile,nam4,'EtoM',EtoM)
   addvar(outfile,nam4,'omegastar',omegastar)
-  addvar(outfile,nam4,'mcdudt',mcdudt)
+  addvar(outfile,nam4,'rmcdudt',rmcdudt)
+  addvar(outfile,nam4,'edddudt',edddudt)
   #addvar(outfile,nam4,'ratio',ratio)
   addvar(outfile,nam4,'psim',psim)
 
