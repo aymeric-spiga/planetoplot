@@ -5,6 +5,7 @@ from ppclass import pp
 import ppcompute
 import netCDF4 as nc
 import planets
+import time
 
 ####################################################
 #fileAP="DRAG90days_DISSIP10000_year1-10_512_every200d_zonmean_stride4lat.nc"
@@ -73,6 +74,10 @@ use_spline = False
 #--------------------------------------------------------------------------------------------------------------------------
 #--------------------------------------------------------------------------------------------------------------------------
 
+####################################################
+def etape(charvar,time0):
+  ttt = round(time.time()-time0,2)
+  print "TIME=",ttt,"... ... done: "+charvar
 
 ####################################################
 def interpolate(targetp1d,sourcep3d,fieldsource3d,spline=False):
@@ -146,14 +151,15 @@ def kron2ls(krontab):
   return lstab
 
 ####################################################
-def addvar(filename,dimname,varname,varfield):
+def addvar(filename,dimname,varname,varfield,time0=None):
   f = nc.Dataset(filename,'a',format='NETCDF3_CLASSIC')
   var = f.createVariable(varname, 'd', dimname) 
   if   len(dimname) == 4: var[:,:,:,:] = varfield
   elif len(dimname) == 3: var[:,:,:] = varfield
   varfield = None ; var = None
   f.close()
-  print "... ... done: "+varname
+  if time0 is not None:
+    etape(varname,time0)
   return
 
 ####################################################
