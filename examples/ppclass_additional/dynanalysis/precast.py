@@ -75,7 +75,9 @@ use_spline = False
 
 
 ####################################################
-def interpolate(targetp1d,sourcep3d,fieldsource3d):
+def interpolate(targetp1d,sourcep3d,fieldsource3d,spline=False):
+  if spline:
+    from scipy import interpolate
   nt,nz,nlat = fieldsource3d.shape
   coordsource3d = -np.log(sourcep3d) # interpolate in logp
   coordtarget1d = -np.log(targetp1d) # interpolate in logp
@@ -83,7 +85,34 @@ def interpolate(targetp1d,sourcep3d,fieldsource3d):
   fieldtarget3d = np.zeros((nt,nzt,nlat))
   for nnn in range(nlat):
    for ttt in range(nt):
-    fieldtarget3d[ttt,:,nnn] = np.interp(coordtarget1d,coordsource3d[ttt,:,nnn],fieldsource3d[ttt,:,nnn],left=np.nan,right=np.nan)
+    xs = coordsource3d[ttt,:,nnn]
+    ys = fieldsource3d[ttt,:,nnn]
+    if not spline:
+      fieldtarget3d[ttt,:,nnn] = np.interp(coordtarget1d,xs,ys,left=np.nan,right=np.nan)
+    else:
+      tck = interpolate.splrep(xs, ys, s=0)
+      fieldtarget3d[ttt,:,nnn] = interpolate.splev(coordtarget1d, tck, der=0)
+  return fieldtarget3d
+
+####################################################
+def interpolate4(targetp1d,sourcep3d,fieldsource3d,spline=False):
+  if spline: 
+    from scipy import interpolate
+  nt,nz,nlat,nlon = fieldsource3d.shape
+  coordsource3d = -np.log(sourcep3d) # interpolate in logp
+  coordtarget1d = -np.log(targetp1d) # interpolate in logp
+  nzt = coordtarget1d.size
+  fieldtarget3d = np.zeros((nt,nzt,nlat,nlon))
+  for mmm in range(nlon):
+   for nnn in range(nlat):
+    for ttt in range(nt):
+     xs = coordsource3d[ttt,:,nnn,mmm]
+     ys = fieldsource3d[ttt,:,nnn,mmm]
+     if not spline:
+       fieldtarget3d[ttt,:,nnn,mmm] = np.interp(coordtarget1d,xs,ys,left=np.nan,right=np.nan)
+     else:
+       tck = interpolate.splrep(xs, ys, s=0)
+       fieldtarget3d[ttt,:,nnn,mmm] = interpolate.splev(coordtarget1d, tck, der=0)
   return fieldtarget3d
 
 ####################################################
