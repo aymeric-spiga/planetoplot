@@ -172,53 +172,107 @@ def getp_fromapbp(fileAP):
     print "info: read apbp.txt"
     aps,bps = np.loadtxt("apbp.txt",unpack=True)
     nz = len(aps)-1
+  #print "... ps"
   ps=pp(file=fileAP,var="ps").getf()
   nt,ny,nx = ps.shape
   p = np.zeros((nt,nz,ny,nx))
+  if method == 1:
+    ps=ppcompute.mean(ps,axis=2)
+    p = np.zeros((nt,nz,ny))
+  #print "... compute p"
   for tt in range(nt):
    for kk in range(nz):
-    p[tt,kk,:,:] = aps[kk]+bps[kk]*ps[tt,:,:]
-  return ppcompute.mean(p,axis=3)
+    if method == 1:
+      p[tt,kk,:] = aps[kk]+bps[kk]*ps[tt,:]
+    elif method == 2:
+      p[tt,kk,:,:] = aps[kk]+bps[kk]*ps[tt,:,:]
+  return p
+  #return ppcompute.mean(p,axis=3)
 
 ####################################################
-print "... getting pressure field !"
+####################################################
+####################################################
+####################################################
+
+#lstab = pp(file=fileAP,var="ls",x=0,y=0,z=0).getf()
+#lstab = lstab*180./np.pi
+#lstab = fix_time_axis(lstab,360.) # in years
+
+####################################################
+time0 = time.time()
+
+####################################################
 if ispressure:
   press=pp(file=fileAP,var="p",x=charx).getf()
 else:
   press=getp_fromapbp(fileAP)
+etape("pressure field",time0)
 
 ####################################################
 print "... getting fields from file !"
-u,xdim,ydim,zdim,tdim=pp(file=fileAP,var="u",x=charx).getfd() ; print "... ... done: u"
-temp=pp(file=fileAP,var=vartemp,x=charx).getf() ; print "... ... done: "+vartemp
-if 0 == 1:
-  ISR=pp(file=fileAP,var="ISR",x=charx).getf() ; print "... ... done: ISR"
-  OLR=pp(file=fileAP,var="OLR",x=charx).getf() ; print "... ... done: OLR"
+if method == 1:
+ u,xdim,ydim,zdim,tdim=pp(file=fileAP,var="u",x=charx).getfd() ; etape("u",time0)
+ temp=pp(file=fileAP,var=vartemp,x=charx).getf() ; etape(vartemp,time0)
+elif method == 2:
+ u,xdim,ydim,zdim,tdim=pp(file=fileAP,var="u").getfd() ; etape("u",time0)
+ temp=pp(file=fileAP,var=vartemp).getf() ; etape(vartemp,time0)
+#if 0 == 1:
+#  ISR=pp(file=fileAP,var="ISR",x=charx).getf() ; print "... ... done: ISR"
+#  OLR=pp(file=fileAP,var="OLR",x=charx).getf() ; print "... ... done: OLR"
 if not short:
-  v=pp(file=fileAP,var="v",x=charx).getf() ; print "... ... done: v"
-  if charx == "999":
-    vpup=pp(file=fileAP,var="vpup",x=charx).getf() ; print "... ... done: vpup"
-    vptp=pp(file=fileAP,var="vptp",x=charx).getf() ; print "... ... done: vptp"
-    upup=pp(file=fileAP,var="upup",x=charx).getf() ; print "... ... done: upup"
-    vpvp=pp(file=fileAP,var="vpup",x=charx).getf() ; print "... ... done: vpvp" 
-  else:
-    staru4D=pp(file=fileAP,var="u",compute="pert_x").getf()
-    starv4D=pp(file=fileAP,var="v",compute="pert_x").getf()
-    start4D=pp(file=fileAP,var=vartemp,compute="pert_x").getf()
-    vpup=ppcompute.mean(starv4D*staru4D,axis=3)
-    vptp=ppcompute.mean(starv4D*start4D,axis=3) 
-    upup=ppcompute.mean(staru4D*staru4D,axis=3) 
-    vpvp=ppcompute.mean(starv4D*starv4D,axis=3) 
+ if method == 2:
+   v=pp(file=fileAP,var="v").getf() ; etape("v",time0)
+ elif method == 1:
+   v=pp(file=fileAP,var="v",x=charx).getf() ; etape("v",time0)
+   print "... coupled terms"
+   if charx == "999":
+     vpup=pp(file=fileAP,var="vpup",x=charx).getf() ; etape("vpup",time0)
+     vptp=pp(file=fileAP,var="vptp",x=charx).getf() ; etape("vptp",time0)
+     upup=pp(file=fileAP,var="upup",x=charx).getf() ; etape("upup",time0)
+     vpvp=pp(file=fileAP,var="vpvp",x=charx).getf() ; etape("vpvp",time0)
+   else:
+     staru4D=pp(file=fileAP,var="u",compute="pert_x",x=charx).getf() ; etape("staru4D",time0)
+     starv4D=pp(file=fileAP,var="v",compute="pert_x",x=charx).getf() ; etape("starv4D",time0)
+     start4D=pp(file=fileAP,var=vartemp,compute="pert_x",x=charx).getf() ; etape("start4D",time0)
+     vpup=ppcompute.mean(starv4D*staru4D,axis=3) ; etape("vpup",time0)
+     vptp=ppcompute.mean(starv4D*start4D,axis=3) ; etape("vptp",time0)
+     upup=ppcompute.mean(staru4D*staru4D,axis=3) ; etape("upup",time0)
+     vpvp=ppcompute.mean(starv4D*starv4D,axis=3) ; etape("vpvp",time0)
+     del staru4D ; del starv4D ; del start4D
 
 ####################################################
 print "... interpolating !"
-u = interpolate(targetp1d,press,u) ; print "... ... done: u"
-temp = interpolate(targetp1d,press,temp) ; print "... ... done: "+vartemp
-if not short:
-  v = interpolate(targetp1d,press,v) ; print "... ... done: v"
-  vpup = interpolate(targetp1d,press,vpup) ; print "... ... done: vpup"
-  vptp = interpolate(targetp1d,press,vptp) ; print "... ... done: vptp"
-  eke = interpolate(targetp1d,press,0.5*(vpvp + upup)) ; print "... ... done: eke"
+if method == 1:
+  u = interpolate(targetp1d,press,u,spline=use_spline) ; etape("u",time0)
+  temp = interpolate(targetp1d,press,temp,spline=use_spline) ; etape(vartemp,time0)
+  if not short:
+    v = interpolate(targetp1d,press,v,spline=use_spline) ; etape("v",time0)
+    vpup = interpolate(targetp1d,press,vpup,spline=use_spline) ; etape("vpup",time0)
+    vptp = interpolate(targetp1d,press,vptp,spline=use_spline) ; etape("vptp",time0)
+    eke = interpolate(targetp1d,press,0.5*(vpvp + upup),spline=use_spline) ; etape("eke",time0)
+elif method == 2:
+  u = interpolate4(targetp1d,press,u,spline=use_spline)
+  um = ppcompute.mean(u,axis=3) ; etape("u",time0)
+  temp = interpolate4(targetp1d,press,temp,spline=use_spline)
+  tm = ppcompute.mean(temp,axis=3) ; etape(vartemp,time0)
+  if not short:
+     v = interpolate4(targetp1d,press,v,spline=use_spline)
+     vm = ppcompute.mean(v,axis=3) ; etape("v",time0)
+     vum = ppcompute.mean(v*u,axis=3) ; etape("vum",time0)
+     vtm = ppcompute.mean(v*temp,axis=3) ; etape("vtm",time0)
+     utm = ppcompute.mean(u*temp,axis=3) ; etape("utm",time0)
+     uum = ppcompute.mean(u*u,axis=3) ; etape("uum",time0)
+     vvm = ppcompute.mean(v*v,axis=3) ; etape("vvm",time0)
+     del v
+     # [u'v'] = [uv] - [u][v] en temporel
+     vpup = vum - vm*um ; del vum ; etape("vpup",time0)
+     vptp = vtm - vm*tm ; del vtm ; etape("vptp",time0)
+     eke = 0.5*((uum - um*um) + (vvm - vm*vm)) ; del uum ; del vvm ; etape("eke",time0)
+     v = vm ; del vm
+  ##
+  del press ; del u ; del temp
+  u = um ; del um
+  temp = tm ; del tm
 
 ####################################################
 print "... computations !"
@@ -244,6 +298,8 @@ targetp3d = np.tile(np.transpose(targetp3d),(nlat,1,1))
 targetp3d = np.transpose(targetp3d)
 
 # *** CURVATURE TERMS ***
+if method == 2:
+  ydim = ydim[:,0]
 lat2d = np.tile(ydim,(nz,1))
 acosphi2d = myp.acosphi(lat=lat2d)
 cosphi2d = acosphi2d / myp.a
@@ -251,7 +307,7 @@ latrad,lat2drad = ydim*np.pi/180.,lat2d*np.pi/180.
 beta = myp.beta(lat=lat2d)
 f = myp.fcoriolis(lat=lat2d)
 tanphia = myp.tanphia(lat=lat2d)
-print "... ... done: coordinates"
+etape("coordinates",time0)
 
 # *** ANGULAR MOMENTUM ***
   # -- see Lauritzen et al. JAMES 2014
@@ -268,7 +324,7 @@ angmom = dm * angmomperumass / 1.e25
 # units as in Lauritzen et al. JAMES 2014 E25 kg m2 s-1
 # -- plus, a normalization is needed (otherwise overflow absurdities)
 superindex = myp.superrot(u=u,lat=lat2d)
-print "... ... done: angular momentum"
+etape("angular momentum",time0)
 
 ##########################
 ## EXTENDED DIAGNOSTICS ##
@@ -281,7 +337,7 @@ if not short:
  emt = rho*vpup # eddy momentum transport
  amt_mmc = v*sangmom # angular momentum transport by mean meridional circulation
  # meridional heat flux?rho*vptp
- print "... ... done: basic diagnostics"
+ etape("basic diagnostics",time0)
 
  # *** MASS STREAMFUNCTION ***
  # *** AND VERTICAL VELOCITY ***
@@ -304,7 +360,7 @@ if not short:
    y = np.insert(y,0,y[0]) # JL: integrate from p=0 towards p
    for zzz in range(0,nz):
      psim[ttt,zzz,yyy] = scipy.integrate.simps(y[0:zzz+1],x[0:zzz+1])*alph[0,yyy]
- print "... ... done: streamfunction"
+ etape("streamfunction",time0)
  # reset to NaN after integration
  v[w] = np.nan ; psim[w] = np.nan
  # derivatives of streamfunction --> velocity (notably omega)
@@ -323,7 +379,7 @@ if not short:
    #pl.f = v[ttt,:,:]-vphi[:,:] ; pl.title = r'v - $d\Psi_M/dp$'
    #pl.makesave(mode="png",filename="v_diff")
    #print "max diff:",ppcompute.max(v[ttt,:,:]-vphi[:,:]) 
- print "... ... done: vertical velocity"
+ etape("vertical velocity",time0)
 
  # *** DIAGNOSTICS FOR INSTABILITY
  N2 = np.zeros((nt,nz,nlat)) # static stability
@@ -348,7 +404,7 @@ if not short:
         ushear[ttt,:,:] = interm
         interm = f*f*rho[ttt,:,:]*interm/N2[ttt,:,:]
    effbeta_bc[ttt,:,:] = effbeta_bt[ttt,:,:] - (interm/rho[ttt,:,:]) 
- print "... ... done: instability"
+ etape("instability",time0)
 
  # *** EP FLUX and RESIDUAL CIRCULATION
  # *** see Andrews et al. JAS 83
@@ -387,7 +443,7 @@ if not short:
    edddudt[ttt,:,:] = divFphi[ttt,:,:] / acosphi2d
    # (equation 2.7) equivalent acceleration (residual meridional circulation)
    rmcdudt[ttt,:,:] = - ((du_dy - f) * vstar[ttt,:,:]) - (du_dp*omegastar[ttt,:,:])
- print "... ... done: EP flux"
+ etape("EP flux",time0)
 
 ## pole problem
 if nopole and not short:
@@ -405,7 +461,8 @@ if nopole and not short:
   psim[:,:,-1] = np.nan
 
 ####################################################
-print "... creating the target file !"
+etape("creating the target file",time0)
+
 f = nc.Dataset(outfile,'w',format='NETCDF3_CLASSIC')
 
 xdim = [999.]
@@ -436,7 +493,7 @@ if includels:
 f.close()
 
 #####################################################
-print "... adding 3D variables !"
+etape("3D variables",time0)
 addvar(outfile,nam4,'p',targetp3d)
 addvar(outfile,nam4,'u',u)
 addvar(outfile,nam4,vartemp,temp)
@@ -469,3 +526,5 @@ if 0 == 1:
   namdim2d = (nam4[0],nam4[2],nam4[3])
   addvar(outfile,namdim2d,'ISR',ISR)
   addvar(outfile,namdim2d,'OLR',OLR)
+
+etape("",time0)
