@@ -417,6 +417,10 @@ if not short:
  omegastar = np.zeros((nt,nz,nlat)) # residual mean vertical circulation
  rmcdudt = np.zeros((nt,nz,nlat)) # equivalent acceleration (meridional circulation)
  edddudt = np.zeros((nt,nz,nlat)) # equivalent acceleration (eddies, div EP flux)
+ accrmch = np.zeros((nt,nz,nlat))
+ accrmcv = np.zeros((nt,nz,nlat))
+ acceddh = np.zeros((nt,nz,nlat))
+ dudt = np.zeros((nt,nz,nlat))
  for ttt in range(nt):
    # (Del Genio et al. 2007) eddy to mean conversion: product emt with du/dy
    du_dy,dummy = ppcompute.deriv2d(u[ttt,:,:]*cosphi2d,latrad,targetp1d) / acosphi2d
@@ -443,6 +447,12 @@ if not short:
    edddudt[ttt,:,:] = divFphi[ttt,:,:] / acosphi2d
    # (equation 2.7) equivalent acceleration (residual meridional circulation)
    rmcdudt[ttt,:,:] = - ((du_dy - f) * vstar[ttt,:,:]) - (du_dp*omegastar[ttt,:,:])
+   # (equation 2.5)
+   accrmch[ttt,:,:] = - (du_dy - f)*v[ttt,:,:]
+   accrmcv[ttt,:,:] = - du_dp*omega[ttt,:,:]
+   ddd,dummy = ppcompute.deriv2d(vpup[ttt,:,:]*cosphi2d*cosphi2d,latrad,targetp1d) 
+   acceddh[ttt,:,:] = - ddd / acosphi2d / cosphi2d
+   dudt[ttt,:,:] = accrmch[ttt,:,:] + accrmcv[ttt,:,:] + acceddh[ttt,:,:]
  etape("EP flux",time0)
 
 ## pole problem
@@ -519,6 +529,13 @@ if not short:
   addvar(outfile,nam4,'edddudt',edddudt)
   #addvar(outfile,nam4,'ratio',ratio)
   addvar(outfile,nam4,'psim',psim)
+  addvar(outfile,nam4,'accrmch',accrmch)
+  addvar(outfile,nam4,'accrmcv',accrmcv)
+  addvar(outfile,nam4,'acceddh',acceddh)
+  addvar(outfile,nam4,'dudt',dudt)
+
+
+
 
 #####################################################
 if 0 == 1:
