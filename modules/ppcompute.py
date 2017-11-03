@@ -59,19 +59,19 @@ def mean(field,axis=None):
         else: 
            if type(field).__name__=='MaskedArray':
               field.set_fill_value(np.NaN)
-              zout=np.ma.array(field).mean(axis=axis)
+              zout=np.ma.array(field).mean(axis=axis,dtype=np.float64)
               if axis is not None:
                  zout.set_fill_value(np.NaN)
                  return zout.filled()
               else:return zout
            elif (np.isnan(np.sum(field)) and (type(field).__name__ not in 'MaskedArray')):
-              zout=np.ma.masked_invalid(field).mean(axis=axis)
+              zout=np.ma.masked_invalid(field).mean(axis=axis,dtype=np.float64)
               if axis is not None:
                  zout.set_fill_value([np.NaN])
                  return zout.filled()
               else:return zout
            else: 
-              return np.array(field).mean(axis=axis)
+              return np.array(field).mean(axis=axis,dtype=np.float64)
 
 ## compute sum
 ## author AS + AC
@@ -117,9 +117,13 @@ def meanbin(y,x,bins):
 ## compute perturbation to mean
 ## -- the whole dimension must exist!
 ## author AS
-def perturbation(field,axis=None):
+def perturbation(field,axis=None,mm=None):
     # calculate mean (averaged dim is reduced)
-    mm = mean(field,axis=axis)
+    if mm is None:
+      mm = mean(field,axis=axis)
+    else:
+      if mm.ndim != 3: print "input mean must be a 3-dim array" ; exit() 
+      else: print "mean to compute pert is provided!"
     # include back the reduced dim
     if field.ndim == 4:
       if axis == 0:   mm = mm[np.newaxis,:,:,:]
@@ -134,6 +138,16 @@ def perturbation(field,axis=None):
     # compute perturbations
     field = field - mm
     return field
+
+## get leading exponent
+## author AS
+def get_exponent(value):
+    return np.floor(np.log10(value))
+
+## get normalizing factor corr. to leading exponent
+## author AS
+def get_norm(value):
+    return 10.**get_exponent(value)
 
 ################
 #### SMOOTH ####
@@ -369,11 +383,11 @@ def dxdy(lon,lat,coeff=None,lonlat=False):
     dx = dx*np.cos(phr)
   return dx,dy
  
-def deriv2d(u,lon,lat,coeff=None,lonlat=False,fac=1.):
+def deriv2d(u,coordx,coordy,coeff=None,lonlat=False,fac=1.):
   # compute gradients -- with normalized coordinates
   du_y,du_x = np.gradient(u)
   # compute cartesian increments
-  dx,dy = dxdy(lon,lat,coeff=coeff,lonlat=lonlat)
+  dx,dy = dxdy(coordx,coordy,coeff=coeff,lonlat=lonlat)
   # eventually compute cartesian derivatives
   du_dx = du_x/(fac*dx)
   du_dy = du_y/(fac*dy)

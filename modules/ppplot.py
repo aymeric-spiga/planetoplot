@@ -10,7 +10,7 @@ import time as timelib
 import numpy as np
 import matplotlib.pyplot as mpl
 from matplotlib.cm import get_cmap
-from matplotlib.ticker import FormatStrFormatter,MaxNLocator
+import matplotlib.ticker as mtick
 # personal librairies
 import ppcompute
 ###############################################
@@ -173,6 +173,10 @@ def quickplot(field):
     if ddd == 1: plot1d(f=field).makeshow()
     elif ddd == 2: plot2d(f=field).makeshow()
 
+# a function to change font
+def changefont(num):
+    mpl.rcParams['font.size'] = num
+
 # continuity with matplotlib
 def close():
     mpl.close()
@@ -188,6 +192,27 @@ def rainbow(cb="jet",num=8):
     ax = mpl.gca()
     pal = mpl.cm.get_cmap(name=cb)
     ax._get_lines.set_color_cycle([pal(i) for i in np.linspace(0,0.9,num)])
+
+# a function to define nice minor ticks for log plots
+def special_log(x, pos):
+    norm = ppcompute.get_norm(x)
+    out = x/norm
+    if out in [2,3,5,7]:
+      ret = r'$%.0f$' % (out)
+    #elif out == 1:
+    #  expo = ppcompute.get_exponent(x)
+    #  ret = r'$1 \cdot 10^{%.0f}$' % (expo)
+    else:
+      ret = ''
+    return ret
+
+# a function for nice date printing (from JB Madeleine)
+def set_dates(ax):
+    import matplotlib.dates as mdates
+    ax.xaxis.set_major_formatter(mdates.DateFormatter('%m/%d/%y %Hh'))
+    #ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%b-%d %H:%M:%S'))
+    ax.xaxis.set_major_locator(mdates.DayLocator())
+    mpl.setp(mpl.xticks()[1], rotation=30, ha='right') # rotate the x labels
 
 # a function to define subplot
 # ... user can change settings in set_multiplot.txt read above
@@ -207,7 +232,7 @@ def definesubplot(numplot, fig, factor=1., sup=False):
     # commensurate font
     if factor != 0.: fontsize = fontsize / factor
     # change parameter
-    mpl.rcParams['font.size'] = fontsize
+    changefont(fontsize)
     return subv,subh
 
 # a function to calculate automatically bounds (or simply prescribe those)
@@ -524,6 +549,19 @@ class plot():
     # -------------------------------
     def make(self):
         self.check()
+        # treat the xmin/xmax/ymin/ymax append problem
+        if self.xmin is not None:
+          if np.array(self.xmin).ndim == 1:
+            self.xmin = self.xmin[0]
+        if self.xmax is not None:
+          if np.array(self.xmax).ndim == 1:
+            self.xmax = self.xmax[0]
+        if self.ymin is not None:
+          if np.array(self.ymin).ndim == 1:
+            self.ymin = self.ymin[0]
+        if self.ymax is not None:
+          if np.array(self.ymax).ndim == 1:
+            self.ymax = self.ymax[0]
         # labels, title, etc...
         mpl.xlabel(self.xlabel)
         mpl.ylabel(self.ylabel)
@@ -535,6 +573,14 @@ class plot():
         # if masked array, set masked values to filled values (e.g. np.nan) for plotting purposes
         if type(self.f).__name__ in 'MaskedArray':
             self.f[self.f.mask] = self.f.fill_value
+
+    # normalize by the typical power
+    def normalize(self):
+        absmax = ppcompute.mean(np.abs(self.f))
+        norm = ppcompute.get_norm(absmax)
+        self.f = self.f / norm
+        exponent = ppcompute.get_exponent(absmax)
+        self.units = r'$10^{'+str(exponent)+'}$ s$^{-1}$ '+self.units
 
 ################################
 # a subclass to make a 1D plot #
@@ -630,21 +676,27 @@ class plot1d(plot):
         if self.legend is not None:
             if self.legend != "":
                 mpl.legend(loc="best",fancybox=True)
+
         # format labels
+        # -- on which axis?
         if self.swap: 
-          if not self.logx:
-            ax.xaxis.set_major_formatter(FormatStrFormatter(self.fmt))
+          subaxis = ax.xaxis
+          islog = self.logx
         else: 
-          if not self.logy: 
-            ax.yaxis.set_major_formatter(FormatStrFormatter(self.fmt))
+          subaxis = ax.yaxis
+          islog = self.logy
+        # -- make changes
+        if not islog:
+          subaxis.set_major_formatter(mtick.FormatStrFormatter(self.fmt))
+        else:
+          subaxis.set_minor_formatter(mtick.FuncFormatter(special_log))
+          subaxis.grid(True, which='minor', color='grey')
+          #subaxis.set_major_formatter(mtick.FuncFormatter(special_log))
+
         # plot limits: ensure that no curve would be outside the window
         # x-axis
         if self.xdate:
-          import matplotlib.dates as mdates
-          ax.xaxis.set_major_formatter(mdates.DateFormatter('%m/%d/%y'))
-          #ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%b-%d %H:%M:%S'))
-          ax.xaxis.set_major_locator(mdates.DayLocator())
-          mpl.setp(mpl.xticks()[1], rotation=30, ha='right') # rotate the x labels
+          set_dates(ax)
         else:
           x1, x2 = ax.get_xbound()
           xmin = ppcompute.min(x)
@@ -665,12 +717,12 @@ class plot1d(plot):
         ax.set_ybound(lower=y1,upper=y2)
         ## set with .div the number of ticks.
         if not self.logx:
-            ax.xaxis.set_major_locator(MaxNLocator(self.nxticks))
+            ax.xaxis.set_major_locator(mtick.MaxNLocator(self.nxticks))
         else:
             # in logx mode, ticks are set automatically
             pass
         if not self.logy:
-            ax.yaxis.set_major_locator(MaxNLocator(self.nyticks))
+            ax.yaxis.set_major_locator(mtick.MaxNLocator(self.nyticks))
         else:
             # in logy mode, ticks are set automatically
             pass
@@ -729,6 +781,7 @@ class plot2d(plot):
                  leftcorrect=False,\
                  clev=None,\
                  cfmt=None,\
+                 clab=False,\
                  ccol="black",\
                  colorvec="black",\
                  *args, **kwargs):
@@ -754,6 +807,7 @@ class plot2d(plot):
         self.svy = svy
         self.leftcorrect = leftcorrect
         self.clev = clev
+        self.clab = clab
         self.cfmt = cfmt
         self.ccol = ccol
 
@@ -782,6 +836,8 @@ class plot2d(plot):
         # if projection is set, set mapmode to True
         if self.proj is not None:
             self.mapmode = True
+        else:
+            self.mapmode = False
         # set dummy xy axis if not defined
         if self.x is None: 
             self.x = np.array(range(self.f.shape[0]))
@@ -848,7 +904,8 @@ class plot2d(plot):
                 objC = mpl.contour(x, y, what_I_contour, \
                             self.clev, colors = self.ccol, linewidths = cline)
                 ft = int(mpl.rcParams['font.size']*0.55)
-                mpl.clabel(objC, inline=1, fontsize=ft,\
+                if self.clab:
+                  mpl.clabel(objC, inline=1, fontsize=ft,\
                              inline_spacing=1,fmt=self.cfmt)
             mpl.contourf(x, y, \
                          self.f, \
@@ -859,11 +916,7 @@ class plot2d(plot):
             # make log axes and/or invert ordinate
             ax = mpl.gca()
             if self.xdate:
-              import matplotlib.dates as mdates
-              ax.xaxis.set_major_formatter(mdates.DateFormatter('%m/%d/%y %Hh'))
-              #ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%b-%d %H:%M:%S'))
-              ax.xaxis.set_major_locator(mdates.DayLocator())
-              mpl.setp(mpl.xticks()[1], rotation=30, ha='right') # rotate the x labels
+              set_dates(ax)
             if self.logx: mpl.semilogx()
             if self.logy: mpl.semilogy()
             if self.invert: ax.set_ylim(ax.get_ylim()[::-1])
@@ -879,15 +932,17 @@ class plot2d(plot):
             if self.back is not None: ax.set_axis_bgcolor(self.back)
             # set the number of ticks
             if not self.logx:
-                ax.xaxis.set_major_locator(MaxNLocator(self.nxticks))
+                ax.xaxis.set_major_locator(mtick.MaxNLocator(self.nxticks))
             else:
                 pass
                 #print "!! WARNING. in logx mode, ticks are set automatically."
             if not self.logy:
-                ax.yaxis.set_major_locator(MaxNLocator(self.nyticks))
+                ax.yaxis.set_major_locator(mtick.MaxNLocator(self.nyticks))
             else:
-                pass
+                #pass
                 #print "!! WARNING. in logy mode, ticks are set automatically."
+                ax.yaxis.set_minor_formatter(mtick.FuncFormatter(special_log))
+                #ax.yaxis.grid(True, which='both', color='grey')
             ## specific modulo labels
             if self.modx is not None:
                 ax = labelmodulo(ax,self.modx)
@@ -936,6 +991,7 @@ class plot2d(plot):
             if self.proj == "cyl":
                 format = '%.0f'
                 partab = np.r_[-90.:90.+15.:15.]
+                mertab = np.r_[-180.:180.:30.]
             # ... global projections
             elif self.proj in ["ortho","moll","robin"]:
                 wlat[0] = None ; wlat[1] = None ; wlon[0] = None ; wlon[1] = None

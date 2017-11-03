@@ -59,7 +59,8 @@ parser.add_option('--sx',action='store',dest='sx',type="int",default=1,help="Loa
 parser.add_option('--sy',action='store',dest='sy',type="int",default=1,help="Load data every sy grid points over y dimension")
 parser.add_option('--sz',action='store',dest='sz',type="int",default=1,help="Load data every sz grid points over z dimension")
 parser.add_option('--st',action='store',dest='st',type="int",default=1,help="Load data every st grid points over t dimension")
-parser.add_option('--useindex',action='store_true',dest="useindex",default=False,help="Use index for arrays and not values of dimensions")
+parser.add_option('--useindex',action='store',dest="useindex",type="string",default="0000",help="Use index for arrays and not values of dimensions 1/0 as tzyx")
+parser.add_option('--kind3d',action='store',dest='kind3d',type="string",default="tyx",help="dimensions if rank<4: tzy, tyx (default)")
 # plot options --> upper case. see ppplot.
 parser = ppplot.opt(parser)
 parser = ppplot.opt1d(parser)
@@ -110,6 +111,7 @@ user.sx = opt.sx ; user.sy = opt.sy
 user.sz = opt.sz ; user.st = opt.st
 user.svx = opt.svx ; user.svy = opt.svy
 user.savtxt = opt.savtxt
+user.kind3d = opt.kind3d
 if opt.xp is not None: user.xp = opt.xp
 if opt.yp is not None: user.yp = opt.yp
 # define field
@@ -138,7 +140,8 @@ user.makeplot()
 # save a .sh file with the command #
 ####################################
 command = ""
-for arg in sys.argv: command = command + arg + ' '
+for arg in sys.argv: 
+  command = command + arg + ' '
 if opt.filename is not None:
   try:
     f = open(opt.folder+'/'+opt.filename+'.sh', 'w')

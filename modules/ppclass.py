@@ -165,7 +165,7 @@ class pp():
                       svy=None,\
                       compute="mean",\
                       kind3d="tyx",\
-                      useindex=False,\
+                      useindex="0000",\
                       verbose=False,\
                       quiet=False,\
                       superpose=False,\
@@ -342,6 +342,7 @@ class pp():
             self.trans = other.trans ; self.back = other.back
             self.showcb = other.showcb
             self.logy = other.logy
+            self.svx = other.svx ; self.svy = other.svy
         else:
             print "!! ERROR !! argument must be a pp object." ; exit()
 
@@ -1070,7 +1071,7 @@ class pp():
                         if self.verbose: print "**** OK. We make a rainbow spaghetti plot with color map ",self.colorbar
                         ppplot.rainbow(cb=self.colorbar,num=self.howmanyplots)
                 else: 
-                    pl.invert = False ; pl.linestyle = None # don't invert again axis
+                    pl.invert = False # don't invert again axis
                     # set saved titles and labels
                     if self.plotin is None:
                         pl.xlabel,pl.ylabel,\
@@ -1387,7 +1388,7 @@ class onerequest():
         self.sx = 1 ; self.sy = 1 ; self.sz = 1 ; self.st = 1
         self.missing = '!! missing value: I am not set, damned !!'
         self.kind3d = '!! kind3d: I am not set, damned !!'
-        self.useindex = None
+        self.useindex = "0000"
 
     # open a file. for now it is netcdf. TBD for other formats.
     # check that self.var is inside.
@@ -1451,7 +1452,7 @@ class onerequest():
     def getdimhor(self):
           # LONGITUDE. Try preset fields. If not present set grid points axis.
           self.name_x = "nothing"
-          if not self.useindex:
+          if self.useindex[3] == "0":
            for c in glob_listx:
             if c in self.f.variables.keys():
              self.name_x = c
@@ -1462,7 +1463,7 @@ class onerequest():
             self.field_x = self.f.variables[self.name_x]
           # LATITUDE. Try preset fields. If not present set grid points axis.
           self.name_y = "nothing"
-          if not self.useindex:
+          if self.useindex[2] == "0":
            for c in glob_listy:
             if c in self.f.variables.keys():
              self.name_y = c
@@ -1487,9 +1488,10 @@ class onerequest():
                self.field_y = self.field_y[0,:,:]
           # if xy axis are apparently undefined, set 2D grid points axis.
           if "grid points" not in self.name_x:
-            if np.all(self.field_x == self.field_x[0,0]) \
+            if (self.dim_x > 1) \
+             and (np.all(self.field_x == self.field_x[0,0]) \
              or self.field_x.min() == self.field_x.max() \
-             or self.field_y.min() == self.field_y.max():
+             or self.field_y.min() == self.field_y.max()):
                if self.verbose: print "!! WARNING !! xy axis look undefined. creating non-dummy ones."
                self.field_x = np.array(range(self.dim_x)) ; self.name_x = "x grid points"
                self.field_y = np.array(range(self.dim_y)) ; self.name_y = "y grid points"
@@ -1503,7 +1505,7 @@ class onerequest():
           # ALTITUDE. Try preset fields. If not present set grid points axis.
           # WARNING: how do we do if several are available? the last one is chosen.
           self.name_z = "nothing"
-          if not self.useindex:
+          if self.useindex[1] == "0":
            for c in glob_listz:
             if c in self.f.variables.keys():
              self.name_z = c
@@ -1535,7 +1537,7 @@ class onerequest():
     def getdimt(self):
           # TIME. Try preset fields.
           self.name_t = "nothing"
-          if not self.useindex:
+          if self.useindex[0] == "0":
            for c in glob_listt:
             if c in self.f.variables.keys():
              self.name_t = c
@@ -1553,13 +1555,14 @@ class onerequest():
             if self.dim_t == 1:
                 self.field_t = np.array([dafirst])
             else:
-                daint = self.tabtime[1] - dafirst
-                dalast = dafirst + (self.dim_t-1)*daint
-                self.field_t = np.linspace(dafirst,dalast,num=self.dim_t)
-                if self.verbose:
-                    print "!! WARNING !! WARNING !! Time axis is supposed to be equally spaced !!"
-                    if dalast != self.tabtime[self.dim_t-1]:
-                        print "!! WARNING !! Time axis has been recast to be monotonic",dalast,self.tabtime[self.dim_t-1]
+                self.field_t = self.tabtime[:]
+                #daint = self.tabtime[1] - dafirst
+                #dalast = dafirst + (self.dim_t-1)*daint
+                #self.field_t = np.linspace(dafirst,dalast,num=self.dim_t)
+                #if self.verbose:
+                #    print "!! WARNING !! WARNING !! Time axis is supposed to be equally spaced !!"
+                #    if dalast != self.tabtime[self.dim_t-1]:
+                #        print "!! WARNING !! Time axis has been recast to be monotonic",dalast,self.tabtime[self.dim_t-1]
           except:
             # ... or if a problem encountered, define a simple time axis
             if self.verbose: print "**** OK. There is something weird. Let us go for a simple time axis."
@@ -1959,29 +1962,44 @@ class onerequest():
         # prepare and execute (possibly sequential) means
         roll = [self.method_t, self.method_z, self.method_y, self.method_x]
         reshapedim = [nt,nz,ny,nx]
+        mm = None
         for nr in range(len(roll)):
           rrr = roll[nr]
           if "comp" in rrr:
             # a. computing
             if self.verbose: print "**** OK. Computing over axis number ",nr
-            if self.compute == "meanarea": self.field = ppcompute.sum  (self.field,axis=nr)
-            elif "mean" in self.compute:   self.field = ppcompute.mean (self.field,axis=nr)
-            elif self.compute == "min":    self.field = ppcompute.min  (self.field,axis=nr)
-            elif self.compute == "max":    self.field = ppcompute.max  (self.field,axis=nr)
-            else:                          print "!! ERROR !! operation not supported." ; exit()
+            if (self.compute == "meanarea") and (nr>1): 
+              self.field = ppcompute.sum  (self.field,axis=nr)
+              if self.verbose: print "**** This is a meanarea computation."
+            elif "mean" in self.compute:   
+              self.field = ppcompute.mean (self.field,axis=nr)
+            elif self.compute == "min":    
+              self.field = ppcompute.min  (self.field,axis=nr)
+            elif self.compute == "max":    
+              self.field = ppcompute.max  (self.field,axis=nr)
+            elif self.compute == "sum":
+              self.field = ppcompute.sum  (self.field,axis=nr)
+            elif "pert" in self.compute:
+              mm = ppcompute.mean(self.field,axis=nr)
+              # if bounds are given with pert computation
+              # calculate here the mean with those bounds
+              # then gives this to ppcompute.perturbation below
+            else:                          
+              print "!! ERROR !! operation not supported." ; exit()
             # b. reshaping
-            reshapedim[nr] = 1
-            self.field = np.reshape(self.field,reshapedim) 
+            if "pert" not in self.compute:
+              reshapedim[nr] = 1
+              self.field = np.reshape(self.field,reshapedim) 
             # c. particular cases for 2D coordinates
             if nr == 2 and self.field_x.ndim == 2: self.field_x = self.field_x[0,:] # TBD: this is OK for regular grid but not for irregular
             if nr == 3 and self.field_y.ndim == 2: self.field_y = self.field_y[:,0] # TBD: this is OK for regular grid but not for irregular
-        # computations for which only setting compute is needed
+        # computations for which only setting compute is given
         if   "_x" in self.compute: zeaxis = 3
         elif "_y" in self.compute: zeaxis = 2
         elif "_z" in self.compute: zeaxis = 1
         elif "_t" in self.compute: zeaxis = 0
         if   "pert" in self.compute: 
-           self.field = ppcompute.perturbation(self.field,axis=zeaxis)
+           self.field = ppcompute.perturbation(self.field,axis=zeaxis,mm=mm)
         elif "diff" in self.compute:
            dadiff = np.diff(self.field,axis=zeaxis)
            # (diff ouput has one value less in impacted dimension. fix this.)
@@ -1993,7 +2011,7 @@ class onerequest():
         # take root mean square for quadratic mean
         if self.compute == "qmean": self.field = np.sqrt(self.field)
         # error handling and verbose
-        if self.field.ndim != self.dimplot: 
+        if ("pert" not in self.compute) and (self.field.ndim != self.dimplot): 
             print "!! ERROR !! Problem: self.field is different than plot dimensions", self.field.ndim, self.dimplot ; exit()
         if self.verbose: 
             print "**** OK. Final shape for "+self.var+" after averaging and squeezing",self.field.shape
