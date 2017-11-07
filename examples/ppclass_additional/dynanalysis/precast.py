@@ -170,8 +170,11 @@ def getp_fromapbp(fileAP):
     nz = len(aps)
   except:
     print "info: read apbp.txt"
-    aps,bps = np.loadtxt("apbp.txt",unpack=True)
-    nz = len(aps)-1
+    ap,bp = np.loadtxt("apbp.txt",unpack=True)
+    nz = len(ap)
+    aps = 0.5*(ap[0:nz-1]+ap[1:nz])
+    bps = 0.5*(bp[0:nz-1]+bp[1:nz])
+    nz = len(aps)
   #print "... ps"
   ps=pp(file=fileAP,var="ps").getf()
   nt,ny,nx = ps.shape
