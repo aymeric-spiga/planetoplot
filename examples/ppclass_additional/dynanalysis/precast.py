@@ -55,8 +55,9 @@ ispressure = True
 outfile = "test_precast.nc"
 nopole = True
 
-fileAP="Xhistins_tmp.nc"
-p_upper,p_lower,nlev = 4.0e2,2.5e5,40
+fileAP="Xhistins_170.nc"
+fileAP="Xhistins_200.nc"
+p_upper,p_lower,nlev = 1e2,3.5e5,50 # whole atm
 targetp1d = np.logspace(np.log10(p_lower),np.log10(p_upper),nlev)
 myp = planets.Saturn
 day_per_year = 24430.
