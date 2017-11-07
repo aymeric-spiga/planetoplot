@@ -356,13 +356,18 @@ if not short:
  v[w] = 0. # necessary otherwise integrations fail
  # integration loop
  x = targetp1d[:] # coordinate
- x = np.insert(x,0,0) # JL: integrate from p=0 towards p
+ #x = np.insert(x,0,0) # JL: integrate from p=0 towards p
+ x = np.append(x,0) # JL: integrate from p=0 towards p
  for ttt in range(nt):
   for yyy in range(nlat):
    y = v[ttt,:,yyy] # integrand
-   y = np.insert(y,0,y[0]) # JL: integrate from p=0 towards p
+   #y = np.insert(y,0,y[0]) # JL: integrate from p=0 towards p
+   y = np.append(y,y[-1]) # JL: integrate from p=0 towards p
    for zzz in range(0,nz):
-     psim[ttt,zzz,yyy] = scipy.integrate.simps(y[0:zzz+1],x[0:zzz+1])*alph[0,yyy]
+#     the minus sign below comes from the fact that x is ordered by decreasing values of p
+#           whereas the integral should be performed from 0 to p. 
+     psim[ttt,zzz,yyy] = -scipy.integrate.simps(y[zzz:],x[zzz:])*alph[0,yyy]
+     #psim[ttt,zzz,yyy] = scipy.integrate.simps(y[0:zzz+1],x[0:zzz+1])*alph[0,yyy]
  etape("streamfunction",time0)
  # reset to NaN after integration
  v[w] = np.nan ; psim[w] = np.nan
