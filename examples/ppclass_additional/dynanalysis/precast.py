@@ -134,22 +134,22 @@ def fix_time_axis(tdim,period):
     corrected_tdim[iii] = float(nperiod) + float(tdim[iii]/period)
   return corrected_tdim
 
-####################################################
-def kron2ls(krontab):
-  # load Capderou calendar
-  jour,kron,Ms,Ls,M,v,declin,equt,ra,distr = np.loadtxt("saturne_calendrier_mod.txt",skiprows=11,unpack=True)
-  nnn = kron.size
-  # last point is not 0 but 360
-  Ls[-1] = 360.
-  # duplicate arrays for several years
-  # ... with additional offset each year (no modulo)
-  nyears = 20
-  for yyy in range(nyears):
-    kron = np.append(kron,kron[1:nnn]+(day_per_year*(yyy+1)))
-    Ls = np.append(Ls,Ls[1:nnn]+(360.*(yyy+1)))
-  # interpolate Capderou calendar on array given as input
-  lstab = np.interp(krontab,kron,Ls)
-  return lstab
+#####################################################
+#def kron2ls(krontab):
+#  # load Capderou calendar
+#  jour,kron,Ms,Ls,M,v,declin,equt,ra,distr = np.loadtxt("saturne_calendrier_mod.txt",skiprows=11,unpack=True)
+#  nnn = kron.size
+#  # last point is not 0 but 360
+#  Ls[-1] = 360.
+#  # duplicate arrays for several years
+#  # ... with additional offset each year (no modulo)
+#  nyears = 20
+#  for yyy in range(nyears):
+#    kron = np.append(kron,kron[1:nnn]+(day_per_year*(yyy+1)))
+#    Ls = np.append(Ls,Ls[1:nnn]+(360.*(yyy+1)))
+#  # interpolate Capderou calendar on array given as input
+#  lstab = np.interp(krontab,kron,Ls)
+#  return lstab
 
 ####################################################
 def addvar(filename,dimname,varname,varfield,time0=None):
@@ -198,9 +198,6 @@ def getp_fromapbp(fileAP):
 ####################################################
 ####################################################
 
-#lstab = pp(file=fileAP,var="ls",x=0,y=0,z=0).getf()
-#lstab = lstab*180./np.pi
-#lstab = fix_time_axis(lstab,360.) # in years
 
 ####################################################
 time0 = time.time()
@@ -286,11 +283,15 @@ nt,nz,nlat = u.shape
 nlon = 1
 
 # *** TIME AXIS
-tdim = fix_time_axis(tdim,day_per_year)
 if includels:
  if myp.name == "Saturn":
-  lstab = kron2ls(tdim*day_per_year)
+  ##lstab = kron2ls(tdim*day_per_year) # vieux fichiers
+  lstab = pp(file=fileAP,var="ls",x=0,y=0,z=0).getf()
+  lstab = lstab*180./np.pi
+  #lstab = fix_time_axis(lstab,360.) # in years
  else:
+  day_per_year = np.ceil(myp.dayperyear())
+  tdim = fix_time_axis(tdim,day_per_year)
   lstab = np.zeros(nt)
 
 # *** VERTICAL COORDINATES
