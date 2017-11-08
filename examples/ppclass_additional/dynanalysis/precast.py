@@ -8,31 +8,25 @@ import planets
 import time
 
 ####################################################
-#fileAP="DRAG90days_DISSIP10000_year1-10_512_every200d_zonmean_stride4lat.nc"
-fileAP="test.nc"
-#fileAP="DRAG90days_DISSIP10000_year9_512_every200d_zonmean_stride4lat.nc"
+fileAP="Xhistins_tmp.nc" 
+outfile = "precast.nc"
 ####################################################
-p_upper,p_lower,nlev = 4.0e2,2.5e5,40 # whole atm
-#p_upper,p_lower,nlev = 3e3, 2e5, 40 # tropo
-#p_upper,p_lower,nlev = 5e2, 5e4, 20 # Cassini
+vartemp = "temperature"
+ispressure = False
+####################################################
+p_upper,p_lower,nlev = 1e2,3.5e5,50 # whole atm
 targetp1d = np.logspace(np.log10(p_lower),np.log10(p_upper),nlev)
 #####################################################
-#targetp1d = np.array([5.,10.,20.,50.,100.,200.,500.,1000.,2000.])
-#targetp1d = targetp1d*100.
-#targetp1d = targetp1d[::-1]
-#####################################################
 myp = planets.Saturn
-day_per_year = 24430.
 ####################################################
 short = False
 includels = True
 ####################################################
-charx = "999" # already zonal means
-ispressure = True
-vartemp = "temp" 
-####################################################
-outfile = "precast.nc"
+charx = "0,360" #999: already zonal mean
 nopole = False
+####################################################
+method = 1 #2
+use_spline = False
 ####################################################
 
 #fileAP="diagfired.nc"
@@ -44,32 +38,6 @@ nopole = False
 #ispressure = False
 #outfile = "diagfired_precast.nc"
 #nopole = True
-
-fileAP="test.nc"
-p_upper,p_lower,nlev = 0.5e2,3.5e5,100 # whole atm
-targetp1d = np.logspace(np.log10(p_lower),np.log10(p_upper),nlev)
-myp = planets.Jupiter
-day_per_year = np.ceil(myp.dayperyear())
-charx = "-180,180" # compute zonal mean
-ispressure = True
-outfile = "test_precast.nc"
-nopole = True
-
-fileAP="Xhistins_170.nc"
-fileAP="Xhistins_200.nc"
-p_upper,p_lower,nlev = 1e2,3.5e5,50 # whole atm
-targetp1d = np.logspace(np.log10(p_lower),np.log10(p_upper),nlev)
-myp = planets.Saturn
-day_per_year = 24430.
-short = False
-includels = False
-charx = "0,360"
-ispressure = False
-vartemp = "temperature"
-outfile = "precast.nc"
-nopole = False #True
-method = 1 #2
-use_spline = False
 
 #--------------------------------------------------------------------------------------------------------------------------
 #--------------------------------------------------------------------------------------------------------------------------
