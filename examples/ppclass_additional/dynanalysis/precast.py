@@ -8,31 +8,25 @@ import planets
 import time
 
 ####################################################
-#fileAP="DRAG90days_DISSIP10000_year1-10_512_every200d_zonmean_stride4lat.nc"
-fileAP="test.nc"
-#fileAP="DRAG90days_DISSIP10000_year9_512_every200d_zonmean_stride4lat.nc"
+fileAP="Xhistins_tmp.nc" 
+outfile = "precast.nc"
 ####################################################
-p_upper,p_lower,nlev = 4.0e2,2.5e5,40 # whole atm
-#p_upper,p_lower,nlev = 3e3, 2e5, 40 # tropo
-#p_upper,p_lower,nlev = 5e2, 5e4, 20 # Cassini
+vartemp = "temperature"
+ispressure = False
+####################################################
+p_upper,p_lower,nlev = 1e2,3.5e5,50 # whole atm
 targetp1d = np.logspace(np.log10(p_lower),np.log10(p_upper),nlev)
 #####################################################
-#targetp1d = np.array([5.,10.,20.,50.,100.,200.,500.,1000.,2000.])
-#targetp1d = targetp1d*100.
-#targetp1d = targetp1d[::-1]
-#####################################################
 myp = planets.Saturn
-day_per_year = 24430.
 ####################################################
 short = False
 includels = True
 ####################################################
-charx = "999" # already zonal means
-ispressure = True
-vartemp = "temp" 
-####################################################
-outfile = "precast.nc"
+charx = "0,360" #999: already zonal mean
 nopole = False
+####################################################
+method = 1 #2
+use_spline = False
 ####################################################
 
 #fileAP="diagfired.nc"
@@ -44,31 +38,6 @@ nopole = False
 #ispressure = False
 #outfile = "diagfired_precast.nc"
 #nopole = True
-
-fileAP="test.nc"
-p_upper,p_lower,nlev = 0.5e2,3.5e5,100 # whole atm
-targetp1d = np.logspace(np.log10(p_lower),np.log10(p_upper),nlev)
-myp = planets.Jupiter
-day_per_year = np.ceil(myp.dayperyear())
-charx = "-180,180" # compute zonal mean
-ispressure = True
-outfile = "test_precast.nc"
-nopole = True
-
-fileAP="Xhistins_tmp.nc"
-p_upper,p_lower,nlev = 4.0e2,2.5e5,40
-targetp1d = np.logspace(np.log10(p_lower),np.log10(p_upper),nlev)
-myp = planets.Saturn
-day_per_year = 24430.
-short = False
-includels = False
-charx = "0,360"
-ispressure = False
-vartemp = "temperature"
-outfile = "precast.nc"
-nopole = False #True
-method = 1 #2
-use_spline = False
 
 #--------------------------------------------------------------------------------------------------------------------------
 #--------------------------------------------------------------------------------------------------------------------------
@@ -133,22 +102,22 @@ def fix_time_axis(tdim,period):
     corrected_tdim[iii] = float(nperiod) + float(tdim[iii]/period)
   return corrected_tdim
 
-####################################################
-def kron2ls(krontab):
-  # load Capderou calendar
-  jour,kron,Ms,Ls,M,v,declin,equt,ra,distr = np.loadtxt("saturne_calendrier_mod.txt",skiprows=11,unpack=True)
-  nnn = kron.size
-  # last point is not 0 but 360
-  Ls[-1] = 360.
-  # duplicate arrays for several years
-  # ... with additional offset each year (no modulo)
-  nyears = 20
-  for yyy in range(nyears):
-    kron = np.append(kron,kron[1:nnn]+(day_per_year*(yyy+1)))
-    Ls = np.append(Ls,Ls[1:nnn]+(360.*(yyy+1)))
-  # interpolate Capderou calendar on array given as input
-  lstab = np.interp(krontab,kron,Ls)
-  return lstab
+#####################################################
+#def kron2ls(krontab):
+#  # load Capderou calendar
+#  jour,kron,Ms,Ls,M,v,declin,equt,ra,distr = np.loadtxt("saturne_calendrier_mod.txt",skiprows=11,unpack=True)
+#  nnn = kron.size
+#  # last point is not 0 but 360
+#  Ls[-1] = 360.
+#  # duplicate arrays for several years
+#  # ... with additional offset each year (no modulo)
+#  nyears = 20
+#  for yyy in range(nyears):
+#    kron = np.append(kron,kron[1:nnn]+(day_per_year*(yyy+1)))
+#    Ls = np.append(Ls,Ls[1:nnn]+(360.*(yyy+1)))
+#  # interpolate Capderou calendar on array given as input
+#  lstab = np.interp(krontab,kron,Ls)
+#  return lstab
 
 ####################################################
 def addvar(filename,dimname,varname,varfield,time0=None):
@@ -170,8 +139,11 @@ def getp_fromapbp(fileAP):
     nz = len(aps)
   except:
     print "info: read apbp.txt"
-    aps,bps = np.loadtxt("apbp.txt",unpack=True)
-    nz = len(aps)-1
+    ap,bp = np.loadtxt("apbp.txt",unpack=True)
+    nz = len(ap)
+    aps = 0.5*(ap[0:nz-1]+ap[1:nz])
+    bps = 0.5*(bp[0:nz-1]+bp[1:nz])
+    nz = len(aps)
   #print "... ps"
   ps=pp(file=fileAP,var="ps").getf()
   nt,ny,nx = ps.shape
@@ -194,9 +166,6 @@ def getp_fromapbp(fileAP):
 ####################################################
 ####################################################
 
-#lstab = pp(file=fileAP,var="ls",x=0,y=0,z=0).getf()
-#lstab = lstab*180./np.pi
-#lstab = fix_time_axis(lstab,360.) # in years
 
 ####################################################
 time0 = time.time()
@@ -282,11 +251,15 @@ nt,nz,nlat = u.shape
 nlon = 1
 
 # *** TIME AXIS
-tdim = fix_time_axis(tdim,day_per_year)
 if includels:
  if myp.name == "Saturn":
-  lstab = kron2ls(tdim*day_per_year)
+  ##lstab = kron2ls(tdim*day_per_year) # vieux fichiers
+  lstab = pp(file=fileAP,var="ls",x=0,y=0,z=0).getf()
+  lstab = lstab*180./np.pi
+  #lstab = fix_time_axis(lstab,360.) # in years
  else:
+  day_per_year = np.ceil(myp.dayperyear())
+  tdim = fix_time_axis(tdim,day_per_year)
   lstab = np.zeros(nt)
 
 # *** VERTICAL COORDINATES
@@ -353,13 +326,18 @@ if not short:
  v[w] = 0. # necessary otherwise integrations fail
  # integration loop
  x = targetp1d[:] # coordinate
- x = np.insert(x,0,0) # JL: integrate from p=0 towards p
+ #x = np.insert(x,0,0) # JL: integrate from p=0 towards p
+ x = np.append(x,0) # JL: integrate from p=0 towards p
  for ttt in range(nt):
   for yyy in range(nlat):
    y = v[ttt,:,yyy] # integrand
-   y = np.insert(y,0,y[0]) # JL: integrate from p=0 towards p
+   #y = np.insert(y,0,y[0]) # JL: integrate from p=0 towards p
+   y = np.append(y,y[-1]) # JL: integrate from p=0 towards p
    for zzz in range(0,nz):
-     psim[ttt,zzz,yyy] = scipy.integrate.simps(y[0:zzz+1],x[0:zzz+1])*alph[0,yyy]
+#     the minus sign below comes from the fact that x is ordered by decreasing values of p
+#           whereas the integral should be performed from 0 to p. 
+     psim[ttt,zzz,yyy] = -scipy.integrate.simps(y[zzz:],x[zzz:])*alph[0,yyy]
+     #psim[ttt,zzz,yyy] = scipy.integrate.simps(y[0:zzz+1],x[0:zzz+1])*alph[0,yyy]
  etape("streamfunction",time0)
  # reset to NaN after integration
  v[w] = np.nan ; psim[w] = np.nan
