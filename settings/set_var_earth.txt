@@ -1,0 +1,102 @@
+##################################
+## set_var.txt
+## var ; format ; colormap ; label
+##################################
+T ; %.0f ; gist_heat ; Temperature ; K
+TEMP ; %.1f ; gist_heat ; Temperature ; K 
+TPOT ; %.0f ; Paired ; Potential temperature ; K  
+TSURF ; %.0f ; RdBu_r ; Surface temperature ; K
+TK ; %.0f ; gist_heat ; Temperature ; K
+U ; %.1f ; jet ; Zonal wind ; m s$^{-1}$
+UM ; %.1f ; jet ; Zonal wind ; m s$^{-1}$
+V ; %.1f ; jet ; Meridional wind ; m s$^{-1}$
+VM ; %.1f ; jet ; Meridional wind ; m s$^{-1}$
+W ; %.2f ; RdBu_r ; Vertical wind ; m s$^{-1}$
+U025 ; %.1f ; jet ; Wind speed 25cm above the surface ; m s$^{-1}$
+WIND ; %.0f ; YlOrRd ; Wind speed ; m s$^{-1}$
+UV ; %.0f ; YlOrRd ; Wind speed ; m s$^{-1}$
+UVMET ; %.0f ; YlOrRd ; Wind speed ; m s$^{-1}$
+PTOT ; %.0f ; jet ; Pressure ; Pa
+PSFC ; %.1f ; RdYlBu_r ; Surface pressure ; Pa
+PS ; %.1f ; RdYlBu_r ; Surface pressure ; Pa
+ANOMALY ; %.1f ; gist_ncar ; Anomaly ; %
+HGT ; %.1e ; spectral ; Topography ; m
+HGT_M ; %.1e ; spectral ; Topography ; m
+ZMOL ; %.0f ; spectral ; Topography ; km
+MARS_TI ; %.0f ; jet ; Thermal inertia ; tiu
+THERMAL_INERTIA ; %.0f ; jet ; Thermal inertia ; tiu
+ALBEDO ; %.2f ; Greys_r ; Albedo ; dimless
+TAU ; %.1f ; YlOrBr_r ; Opacity ; dimless
+TAU_DUST ; %.1f ; Oranges_r ; Dust opacity ; dimless
+QDUST ; %.6f ; Oranges_r ; Dust mass mixing ratio ; kg/kg
+CCNQ ; %.2e ; YlOrBr ; Cloud condensation nuclei ; kg/kg
+CCNN ; %.2e ; YlOrBr ; Cloud condensation nuclei density ; dimless
+QH2O ; %.2e ; PuBu ; Water vapor mixing ratio ; kg/kg
+MTOT ; %.1e ; spectral ; Column vapor ; pr. $\mu$m
+ICETOT ; %.1e ; YlGnBu_r ; Column ice ; pr. $\mu$m
+TAU_ICE ; %.2f ; Blues ; Ice cloud opacity ; dimless
+TAUICE ; %.2f ; Blues ; Ice cloud opacity ; dimless
+VMR_ICE ; %.0f ; Blues ; Ice volume mix. rat. ; ppm
+VMR_H2OICE ; %.0f ; PuBu ; Ice volume mix. rat. ; dimless
+VMR_H2OVAP ; %.0f ; PuBu ; Vapor volume mix. rat. ; dimless
+QSURFICE ; %.0f ; hot_r ; Surface ice ; dimless
+WATERCAPTAG ; %.0f ; Blues ; Cap grid point ; dimless
+TAUTES ; %.2f ; jet ; Opacity ; dimless
+TAUTESAP ; %.2f ; jet ; Opacity ; dimless
+USTM ; %.2f ; jet ; Friction velocity ; m s$^{-1}$
+HFX ; %.0f ; RdYlBu ; Sensible heat flux ; W m$^{-2}$
+WSTAR ; %.1f ; YlOrRd ; Turbulent convective velocity scale ; m s$^{-1}$
+CO2 ; %.2f ; YlOrBr_r ; CO$_2$ mixing ratio ; dimless
+ENFACT ; %.1.f ; jet ; Enrichment factor ; dimless
+T_NADIR_DAY ; %.0f ; RdBu_r ; Temperature ; K
+T_NADIR_NIT ; %.0f ; RdBu_r ; Temperature ; K
+TEMP_DAY ; %.0f ; gist_heat ; Temperature ; K
+TEMP_NIGHT ; %.0f ; gist_heat ; Temperature ; K
+DTEMP ; %.0f ; gist_heat ; Temperature ; K
+NTEMP ; %.0f ; gist_heat ; Temperature ; K
+DNUMBINTEMP ; %.0f ; gist_heat ; Temperature ; K
+NNUMBINTEMP ; %.0f ; gist_heat ; Temperature ; K
+OLR ; %.0f ; gist_heat ; Outgoing Longwave Radiation ; W m$^{-2}$
+ASR ; %.0f ; gist_heat ; Absorbed Solar Radiation ; W m$^{-2}$
+ISR ; %.0f ; gist_heat ; Incoming Solar Radiation ; W m$^{-2}$
+ALE ; %.3F; Pubu ; Total Available Lifting Energy ; J kg$^{-1}$
+ALE_WK; %.0F ; jet ; Wake Available Lifting Energy ; J kg$^{-1}$
+ALP ; %.3F; PuBu ; Available Lifting Power ; W m$^{-2}$
+ALP_BL ; %.0F ; jet ; Boundary Layer ALP ; W m$^{-2}$
+ALP_WK ; %.0F ; jet ; Wake ALP ; W m$^{-2}$
+BILS; %.0F; hot ; Surf. total heat flux ; W m$^{-2}$
+BILS_LATENT ; %.0F; spectral ; Surf.total heat flux ; W m$^{-2}$
+CAPE ; %.0F ; gist_heat ; Convection Available Potential Energy ; J kg$^{-1}$
+CIN ; %.f ; hot ; Convective INhibition ; J kg$^{-1}$
+CLDT ; %.1F ; spectrale ; Total Cloudiness ;
+DMC ; %.5F ; spectrale ; Deep convective Mass Flux ; kg m$^{2}$ s$^{-1}$
+DTCON ; %.6F ; spectrale ; Convection dT ; K s$^{-1}$
+DTEVA ; %.6F ; spectrale ; Reevaporation dT ; K s$^{-1}$
+EVAP ; %.6F ; jet ; Evaporation ; kg s$^{-1}$ m$^{-2}$
+FLAT ; %.0F; hot ; Latent heat flux ; W m$^{-2}$
+LWP ; %.2f ; spectral ; Liquid water path ; kg m$^{-2}$
+MC ; %.5F ; spectrale ; Convective mass flux ; kg m$^{2}$ s$^{-1}$
+MCD ; %.5F ; spectrale ; Downdraft Convective Mass Flux ; kg m$^{2}$ s$^{-1}$
+OLIQ ; %.6f ; spectral ; Liquid Water content; kg kg$^{-1}$
+OVAP ; %.5f ; RdYlBu_r ; Specific Humidity ; kg kg$^{-1}$
+PLCL ; %.0F ; jet ; Lifting Condensation Level ; hPa
+PLFC ; %.0F ; jet ; Level of Free Convection ; hPa
+PLUC ; %.5f ; hot ; Convective Precip ; kg m$^{-2}$ s$^{-1}$
+PLUL ; %.6F; Blues ; Large scale Precipitation ; kg m$^{2}$ s$^{-1}$
+PRECIP ; %.5f ; hot ; Total Precip liq+sol ; kg m$^{-2}$ s$^{-1}$
+PRW ; %.2f ; spectral ; Precipitable water ; kg m$^{-2}$
+RNEB ;%.3F ; spectral ; Cloud Fraction ;
+RNEBCON ; %.3F ; jet ; Convective Cloud Fraction ; 
+SOLL0 ; %.0F ; jet ; IR rad. at surface; W m$^{-2}$
+SOLS0; %.0F ; jet ; Solar rad. at surface ; W m$^{-2}$
+SWdnSFC ; %.1f ; spectral ; Downward surface SW flux ; W m$^{-2}$
+SWdnSFCclr ; %.0F ; jet ; SWdn clear sky at surface ; W m$^{-2}$
+SWupTOAclr ; %.0F ; jet ; SWup clear sky at TOA ; W m$^{-2}$
+T2M ; %.1f ; spectral ; 2m temperature ; K
+THETA ; %.1F ; spectral ; Potential air temperature ; K
+TOPL ; %.0f ; binary ; IR flux at TOA ; W m$^{-2}$
+TOPS ; %.0f ; gray ; VIS flux at TOA ; W m$^{-2}$
+TSOL ;%.1F; YlOrBr ; Surface Temperature ; K
+WAKE_H ; %.0f ; spectral ; Mean wake depth h$_{w}$ ; m
+WAPE ; %.5f ; hot ; Wake Available Potential Energy ; J kg$^{-1}$
+ZMAX_TH ; %.1f ; spectral ; PBL depth ; km
