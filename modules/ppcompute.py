@@ -17,9 +17,9 @@ def findset(whereset,string="planetoplot"):
         for path in os.environ['PYTHONPATH'].split(os.pathsep):
             if string in path: whereset = path + "/../settings/"
         if whereset is None:
-            print "!! ERROR !! "+ string + " not in $PYTHONPATH"
-            print "--> either put it in $PYTHONPATH or change whereset"
-            exit()
+            print "!! WARNING !! "+ string + " not in $PYTHONPATH"
+            print "--> set to current directory instead"
+            whereset = "./"
     # ... if the last / is missing put it
     if whereset[-1] != "/": whereset = whereset + "/"
     return whereset
