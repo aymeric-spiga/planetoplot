@@ -920,7 +920,7 @@ class plot2d(plot):
             if self.c is not None: 
                 objC = self.ax.contour(x, y, what_I_contour, \
                             self.clev, colors = self.ccol, linewidths = cline)
-                ft = int(self.ax.rcParams['font.size']*0.55)
+                ft = int(mpl.rcParams['font.size']*0.55)
                 if self.clab:
                   self.ax.clabel(objC, inline=1, fontsize=ft,\
                              inline_spacing=1,fmt=self.cfmt)
