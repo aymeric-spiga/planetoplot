@@ -1092,6 +1092,7 @@ class pp():
                 self.fig.add_subplot(self.subv,self.subh,self.n+1,axisbg=pl.axisbg)
             if self.verbose: print "**** Done subplot %i / %i " %( self.n+1,self.howmanyplots ) 
             # finally make the plot
+            pl.fig = self.fig
             pl.make()
             # possibly print results in a text file
             if self.savtxt:
