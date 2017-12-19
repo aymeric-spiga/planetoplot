@@ -329,10 +329,13 @@ def show():
 
 # a generic function to show (GUI) or save a plot (PNG,EPS,PDF,...)
 # -------------------------------
-def save(mode=None,filename=None,folder="./",includedate=False,res=150,custom=False):
+def save(mode=None,filename=None,folder="./",includedate=False,res=150,custom=False,fig=None):
     # no filename or no mode set --> graphical user interface
     if filename is None or mode is None:
       show()
+    # call agg backend directly (see function sendagg)
+    elif mode == 'agg' and fig is not None:
+      sendagg(fig,filename=filename+".png",dpi=res)
     # otherwise --> an image is saved
     else:
       # a few settings

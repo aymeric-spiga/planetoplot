@@ -1106,7 +1106,7 @@ class pp():
         # ... added a fix (customplot=True) for the label problem in basemap
         if not self.quiet: print "**** PPCLASS. Done step: makeplot"
         if (self.n == self.howmanyplots):
-            ppplot.save(mode=self.out,filename=self.filename,folder=self.folder,custom=self.customplot,includedate=self.includedate,res=self.res)
+            ppplot.save(mode=self.out,filename=self.filename,folder=self.folder,custom=self.customplot,includedate=self.includedate,res=self.res,fig=self.fig)
             mpl.close()
         # SAVE A PICKLE FILE WITH THE self.p ARRAY OF OBJECTS
         if not self.nopickle:
