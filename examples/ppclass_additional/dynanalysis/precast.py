@@ -291,9 +291,10 @@ dlat = np.abs(latrad[1]-latrad[0])
 dlon = 2*np.pi
 dp = np.gradient(targetp3d,axis=1)
 dm = - myp.a*acosphi2d * dlon * dlat * dp/myp.g # mass for each considered grid mesh #should have glat!
-sangmom = myp.sangmom(u=u,lat=lat2d) # specific angular momentum
+wangmomperumass = myp.wangmom(u=u,lat=lat2d) # wind angular momentum
 angmomperumass = myp.angmom(u=u,lat=lat2d)
 angmom = dm * angmomperumass / 1.e25
+wangmom = dm * wangmomperumass / 1.e25
 # units as in Lauritzen et al. JAMES 2014 E25 kg m2 s-1
 # -- plus, a normalization is needed (otherwise overflow absurdities)
 superindex = myp.superrot(u=u,lat=lat2d)
@@ -308,7 +309,7 @@ if not short:
  rho = targetp3d / (myp.R*temp) # density
  tpot = myp.tpot(temp,targetp3d) # potential temperature
  emt = rho*vpup # eddy momentum transport
- amt_mmc = v*sangmom # angular momentum transport by mean meridional circulation
+ amt_mmc = v*wangmom # angular momentum transport by mean meridional circulation
  # meridional heat flux?rho*vptp
  etape("basic diagnostics",time0)
 
@@ -486,6 +487,7 @@ addvar(outfile,nam4,'p',targetp3d)
 addvar(outfile,nam4,'u',u)
 addvar(outfile,nam4,vartemp,temp)
 addvar(outfile,nam4,'angmom',angmom)
+addvar(outfile,nam4,'wangmom',wangmom)
 addvar(outfile,nam4,'superindex',superindex)
 if not short:
   addvar(outfile,nam4,'amt_mmc',amt_mmc)
