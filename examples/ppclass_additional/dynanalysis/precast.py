@@ -30,6 +30,7 @@ method = 1 #2
 use_spline = False
 ####################################################
 tpot_alternate = True # calculate tpot before interpolation
+is_omega = True
 ####################################################
 
 #fileAP="diagfired.nc"
@@ -196,10 +197,12 @@ if tpot_alternate:
 if not short:
  if method == 2:
    v=pp(file=fileAP,var="v").getf() ; etape("v",time0)
-   o=pp(file=fileAP,var="omega").getf() ; etape("omega",time0)
+   if is_omega:
+     o=pp(file=fileAP,var="omega").getf() ; etape("omega",time0)
  elif method == 1:
    v=pp(file=fileAP,var="v",x=charx).getf() ; etape("v",time0)
-   o=pp(file=fileAP,var="omega",x=charx).getf() ; etape("omega",time0)
+   if is_omega:
+     o=pp(file=fileAP,var="omega",x=charx).getf() ; etape("omega",time0)
    print "... coupled terms"
    if charx == "999":
      vpup=pp(file=fileAP,var="vpup",x=charx).getf() ; etape("vpup",time0)
@@ -210,13 +213,14 @@ if not short:
      staru4D=pp(file=fileAP,var="u",compute="pert_x",x=charx).getf() ; etape("staru4D",time0)
      starv4D=pp(file=fileAP,var="v",compute="pert_x",x=charx).getf() ; etape("starv4D",time0)
      start4D=pp(file=fileAP,var=vartemp,compute="pert_x",x=charx).getf() ; etape("start4D",time0)
-     staro4D=pp(file=fileAP,var="omega",compute="pert_x",x=charx).getf() ; etape("staro4D",time0)
      vpup=ppcompute.mean(starv4D*staru4D,axis=3) ; etape("vpup",time0)
      vptp=ppcompute.mean(starv4D*start4D,axis=3) ; etape("vptp",time0)
      upup=ppcompute.mean(staru4D*staru4D,axis=3) ; etape("upup",time0)
      vpvp=ppcompute.mean(starv4D*starv4D,axis=3) ; etape("vpvp",time0)
-     opup=ppcompute.mean(staro4D*staru4D,axis=3) ; etape("opup",time0)
-     del staru4D ; del starv4D ; del start4D ; del staro4D
+     if is_omega:
+       staro4D=pp(file=fileAP,var="omega",compute="pert_x",x=charx).getf() ; etape("staro4D",time0)
+       opup=ppcompute.mean(staro4D*staru4D,axis=3) ; etape("opup",time0) ; del staro4D
+     del staru4D ; del starv4D ; del start4D
 
 ####################################################
 print "... interpolating !"
@@ -227,10 +231,11 @@ if method == 1:
     tpot = interpolate(targetp1d,press,tpot,spline=use_spline) ; etape("tpot",time0)
   if not short:
     v = interpolate(targetp1d,press,v,spline=use_spline) ; etape("v",time0)
-    o = interpolate(targetp1d,press,o,spline=use_spline) ; etape("omega",time0)
     vpup = interpolate(targetp1d,press,vpup,spline=use_spline) ; etape("vpup",time0)
     vptp = interpolate(targetp1d,press,vptp,spline=use_spline) ; etape("vptp",time0)
-    opup = interpolate(targetp1d,press,opup,spline=use_spline) ; etape("opup",time0)
+    if is_omega:
+      o = interpolate(targetp1d,press,o,spline=use_spline) ; etape("omega",time0)
+      opup = interpolate(targetp1d,press,opup,spline=use_spline) ; etape("opup",time0)
     eke = interpolate(targetp1d,press,0.5*(vpvp + upup),spline=use_spline) ; etape("eke",time0)
 elif method == 2:
   u = interpolate4(targetp1d,press,u,spline=use_spline)
@@ -242,22 +247,25 @@ elif method == 2:
   if not short:
      v = interpolate4(targetp1d,press,v,spline=use_spline)
      vm = ppcompute.mean(v,axis=3) ; etape("v",time0)
-     o = interpolate4(targetp1d,press,o,spline=use_spline)
-     om = ppcompute.mean(o,axis=3) ; etape("omega",time0)
      vum = ppcompute.mean(v*u,axis=3) ; etape("vum",time0)
      vtm = ppcompute.mean(v*temp,axis=3) ; etape("vtm",time0)
      utm = ppcompute.mean(u*temp,axis=3) ; etape("utm",time0)
      uum = ppcompute.mean(u*u,axis=3) ; etape("uum",time0)
      vvm = ppcompute.mean(v*v,axis=3) ; etape("vvm",time0)
-     oum = ppcompute.mean(o*u,axis=3) ; etape("oum",time0)
-     del v ; del o
+     if is_omega:
+       o = interpolate4(targetp1d,press,o,spline=use_spline)
+       om = ppcompute.mean(o,axis=3) ; etape("omega",time0)
+       oum = ppcompute.mean(o*u,axis=3) ; etape("oum",time0)
+       del o
+     del v
      # [u'v'] = [uv] - [u][v] en temporel
      vpup = vum - vm*um ; del vum ; etape("vpup",time0)
      vptp = vtm - vm*tm ; del vtm ; etape("vptp",time0)
-     opup = oum - om*um ; del oum ; etape("opup",time0)
      eke = 0.5*((uum - um*um) + (vvm - vm*vm)) ; del uum ; del vvm ; etape("eke",time0)
      v = vm ; del vm
-     o = om ; del om
+     if is_omega:
+       opup = oum - om*um ; del oum ; etape("opup",time0)
+       o = om ; del om
   ##
   del press ; del u ; del temp
   u = um ; del um
@@ -360,27 +368,29 @@ if not short:
 #           whereas the integral should be performed from 0 to p. 
      psim[ttt,zzz,yyy] = -scipy.integrate.simps(y[zzz:],x[zzz:])*alph[0,yyy]
      #psim[ttt,zzz,yyy] = scipy.integrate.simps(y[0:zzz+1],x[0:zzz+1])*alph[0,yyy]
- etape("streamfunction",time0)
  # reset to NaN after integration
  v[w] = np.nan ; psim[w] = np.nan
-# # derivatives of streamfunction --> velocity (notably omega)
-# for ttt in range(nt):
-#   dpsim_dphi,dpsim_dp = ppcompute.deriv2d(psim[ttt,:,:],latrad,targetp1d)/alph
-#   # meridional: v = 1/term dPSIM/dp
-#   vphi = dpsim_dp
-#   # vertical: omega = (-1/a) 1/term dPSIM/dphi
-#   omega[ttt,:,:] = -dpsim_dphi/myp.a
-#   ##CHECK against actual v
-#   #import ppplot ; pl = ppplot.plot2d()
-#   #pl.f, pl.x, pl.y = vphi, ydim, pseudoz ; pl.title = r'$d\Psi_M/dp$' 
-#   #pl.makesave(mode="png",filename="v_from_streamfunction") 
-#   #pl.f = v[ttt,:,:] ; pl.title = r'v'
-#   #pl.makesave(mode="png",filename="v_actual")
-#   #pl.f = v[ttt,:,:]-vphi[:,:] ; pl.title = r'v - $d\Psi_M/dp$'
-#   #pl.makesave(mode="png",filename="v_diff")
-#   #print "max diff:",ppcompute.max(v[ttt,:,:]-vphi[:,:]) 
-# etape("vertical velocity",time0)
- omega = o
+ etape("streamfunction",time0)
+ if not is_omega:
+ # derivatives of streamfunction --> velocity (notably omega)
+  for ttt in range(nt):
+    dpsim_dphi,dpsim_dp = ppcompute.deriv2d(psim[ttt,:,:],latrad,targetp1d)/alph
+    # meridional: v = 1/term dPSIM/dp
+    vphi = dpsim_dp
+    # vertical: omega = (-1/a) 1/term dPSIM/dphi
+    omega[ttt,:,:] = -dpsim_dphi/myp.a
+    ##CHECK against actual v
+    #import ppplot ; pl = ppplot.plot2d()
+    #pl.f, pl.x, pl.y = vphi, ydim, pseudoz ; pl.title = r'$d\Psi_M/dp$' 
+    #pl.makesave(mode="png",filename="v_from_streamfunction") 
+    #pl.f = v[ttt,:,:] ; pl.title = r'v'
+    #pl.makesave(mode="png",filename="v_actual")
+    #pl.f = v[ttt,:,:]-vphi[:,:] ; pl.title = r'v - $d\Psi_M/dp$'
+    #pl.makesave(mode="png",filename="v_diff")
+    #print "max diff:",ppcompute.max(v[ttt,:,:]-vphi[:,:]) 
+  etape("vertical velocity from streamfunction",time0)
+ else:
+  omega = o
 
  # *** DIAGNOSTICS FOR INSTABILITY
  N2 = np.zeros((nt,nz,nlat)) # static stability
@@ -450,7 +460,11 @@ if not short:
    # (equation 2.1) EP flux (phi)
    Fphi[ttt,:,:] = acosphi2d * ( - vpup[ttt,:,:] + psi*du_dp ) 
    # (equation 2.1) EP flux (p)
-   Fp[ttt,:,:] = - acosphi2d * ( - opup[ttt,:,:] + psi * (du_dy - f) )
+   if is_omega:
+     verteddy = - opup[ttt,:,:]
+   else:
+     verteddy = 0. # often a acceptable approximation
+   Fp[ttt,:,:] = - acosphi2d * ( verteddy + psi * (du_dy - f) )   
    # (equation 2.3) divergence of EP flux
    divFphi[ttt,:,:],dummy = ppcompute.deriv2d(Fphi[ttt,:,:]*cosphi2d,latrad,targetp1d) / acosphi2d
    dummy,divFp[ttt,:,:] = ppcompute.deriv2d(Fp[ttt,:,:],latrad,targetp1d)
@@ -467,7 +481,10 @@ if not short:
    accrmch[ttt,:,:] = - (du_dy - f)*v[ttt,:,:]
    accrmcv[ttt,:,:] = - du_dp*omega[ttt,:,:]
    ddd,dummy = ppcompute.deriv2d(vpup[ttt,:,:]*cosphi2d*cosphi2d,latrad,targetp1d) 
-   dummy,ddd2 = ppcompute.deriv2d(opup[ttt,:,:],latrad,targetp1d)
+   if is_omega:
+     dummy,ddd2 = ppcompute.deriv2d(opup[ttt,:,:],latrad,targetp1d)
+   else:
+     ddd2 = 0.
    acceddh[ttt,:,:] = - ddd2 - ddd / acosphi2d / cosphi2d
    dudt[ttt,:,:] = accrmch[ttt,:,:] + accrmcv[ttt,:,:] + acceddh[ttt,:,:]
  etape("EP flux",time0)
