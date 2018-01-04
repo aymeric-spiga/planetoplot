@@ -318,7 +318,7 @@ if not short:
 
  # *** BASIC DIAGNOSTICS ***
  rho = targetp3d / (myp.R*temp) # density
- tpot = myp.tpot(temp,targetp3d) # potential temperature
+ tpot = myp.tpot(temp,targetp3d,p0=targetp1d[0]+1.) # potential temperature
  emt = rho*vpup # eddy momentum transport
  amt_mmc = v*wangmom # angular momentum transport by mean meridional circulation
  # meridional heat flux?rho*vptp
