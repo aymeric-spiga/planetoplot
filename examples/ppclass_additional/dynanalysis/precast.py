@@ -404,17 +404,16 @@ if not short:
      if i==0: 
         ushear[ttt,:,:] = interm
         interm = f*f*rho[ttt,:,:]*interm/N2[ttt,:,:]
-   #
+   # (remove parts of baroclinic effective beta corresponding to neutral conditions)
    interm2 = N2[ttt,:,:]
    w = np.where(np.abs(interm2) < 5.e-6)
    interm2 = effbeta_bt[ttt,:,:] - (interm/rho[ttt,:,:])
-   interm2[w] = np.nan 
-   #
-   effbeta_bc[ttt,:,:] = interm2 #effbeta_bt[ttt,:,:] - (interm/rho[ttt,:,:]) 
-   ### veritable static stability
-   #interm = tpot[ttt,:,:]
-   #dummy,dTdz = ppcompute.deriv2d(interm,latrad,pseudoz)
-   #N2[ttt,:,:] = (myp.g/interm)*dTdz
+   interm2[w] = np.nan
+   effbeta_bc[ttt,:,:] = interm2
+   # recompute static stability from tpot for outputs
+   interm = tpot[ttt,:,:]
+   dummy,dTdz = ppcompute.deriv2d(interm,latrad,pseudoz)
+   N2[ttt,:,:] = (myp.g/interm)*dTdz
    ### TEST
    #interm = u[ttt,:,:]
    #dummy,interm = ppcompute.deriv2d(interm,latrad,targetp1d)
