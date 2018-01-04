@@ -29,6 +29,8 @@ nopole = False
 method = 1 #2
 use_spline = False
 ####################################################
+tpot_alternate = True # calculate tpot before interpolation
+####################################################
 
 #fileAP="diagfired.nc"
 #p_upper,p_lower,nlev = 1e-4,1e3,50
@@ -186,6 +188,8 @@ if method == 1:
 elif method == 2:
  u,xdim,ydim,zdim,tdim=pp(file=fileAP,var="u").getfd() ; etape("u",time0)
  temp=pp(file=fileAP,var=vartemp).getf() ; etape(vartemp,time0)
+if tpot_alternate:
+ tpot = myp.tpot(temp,press,p0=targetp1d[0]+1.) 
 #if 0 == 1:
 #  ISR=pp(file=fileAP,var="ISR",x=charx).getf() ; print "... ... done: ISR"
 #  OLR=pp(file=fileAP,var="OLR",x=charx).getf() ; print "... ... done: OLR"
@@ -219,6 +223,8 @@ print "... interpolating !"
 if method == 1:
   u = interpolate(targetp1d,press,u,spline=use_spline) ; etape("u",time0)
   temp = interpolate(targetp1d,press,temp,spline=use_spline) ; etape(vartemp,time0)
+  if tpot_alternate:
+    tpot = interpolate(targetp1d,press,tpot,spline=use_spline) ; etape("tpot",time0)
   if not short:
     v = interpolate(targetp1d,press,v,spline=use_spline) ; etape("v",time0)
     o = interpolate(targetp1d,press,o,spline=use_spline) ; etape("omega",time0)
@@ -231,6 +237,8 @@ elif method == 2:
   um = ppcompute.mean(u,axis=3) ; etape("u",time0)
   temp = interpolate4(targetp1d,press,temp,spline=use_spline)
   tm = ppcompute.mean(temp,axis=3) ; etape(vartemp,time0)
+  if tpot_alternate:
+     tpot = interpolate4(targetp1d,press,tpot,spline=use_spline) 
   if not short:
      v = interpolate4(targetp1d,press,v,spline=use_spline)
      vm = ppcompute.mean(v,axis=3) ; etape("v",time0)
@@ -319,9 +327,10 @@ if not short:
 
  # *** BASIC DIAGNOSTICS ***
  rho = targetp3d / (myp.R*temp) # density
- tpot = myp.tpot(temp,targetp3d,p0=targetp1d[0]+1.) # potential temperature
  emt = rho*vpup # eddy momentum transport
  amt_mmc = v*wangmom # angular momentum transport by mean meridional circulation
+ if not tpot_alternate:
+   tpot = myp.tpot(temp,targetp3d,p0=targetp1d[0]+1.) # potential temperature
  # meridional heat flux?rho*vptp
  etape("basic diagnostics",time0)
 
