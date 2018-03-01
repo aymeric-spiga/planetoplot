@@ -684,10 +684,10 @@ class plot1d(plot):
         # ... also inverting must be after making the thing logarithmic
         if self.logx: self.ax.set_xscale("log") # not mpl.semilogx() because excludes log on y
         if self.logy: self.ax.set_yscale("log") # not mpl.semilogy() because excludes log on x
-        if self.invert: self.ax.set_ylim(ax.get_ylim()[::-1])
+        if self.invert: self.ax.set_ylim(self.ax.get_ylim()[::-1])
         if self.xmin is not None and self.xmax is not None:
           if self.xmin > self.xmax:
-            self.ax.set_xlim(ax.get_xlim()[::-1])
+            self.ax.set_xlim(self.ax.get_xlim()[::-1])
             self.xmin,self.xmax = self.xmax,self.xmin
         # add a label for line(s)
         if self.legend is not None:
