@@ -1092,6 +1092,7 @@ class pp():
                 self.fig.add_subplot(self.subv,self.subh,self.n+1,axisbg=pl.axisbg)
             if self.verbose: print "**** Done subplot %i / %i " %( self.n+1,self.howmanyplots ) 
             # finally make the plot
+            pl.fig = self.fig
             pl.make()
             # possibly print results in a text file
             if self.savtxt:
@@ -1105,7 +1106,7 @@ class pp():
         # ... added a fix (customplot=True) for the label problem in basemap
         if not self.quiet: print "**** PPCLASS. Done step: makeplot"
         if (self.n == self.howmanyplots):
-            ppplot.save(mode=self.out,filename=self.filename,folder=self.folder,custom=self.customplot,includedate=self.includedate,res=self.res)
+            ppplot.save(mode=self.out,filename=self.filename,folder=self.folder,custom=self.customplot,includedate=self.includedate,res=self.res,fig=self.fig)
             mpl.close()
         # SAVE A PICKLE FILE WITH THE self.p ARRAY OF OBJECTS
         if not self.nopickle:
