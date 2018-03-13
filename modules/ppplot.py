@@ -936,7 +936,7 @@ class plot2d(plot):
               set_dates(self.ax)
             if self.logx: self.ax.semilogx()
             if self.logy: self.ax.semilogy()
-            if self.invert: ax.set_ylim(self.ax.get_ylim()[::-1])
+            if self.invert: self.ax.set_ylim(self.ax.get_ylim()[::-1])
             if self.xmin is not None and self.xmax is not None:
               if self.xmin > self.xmax: 
                 self.ax.set_xlim(self.ax.get_xlim()[::-1])
