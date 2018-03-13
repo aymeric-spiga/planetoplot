@@ -8,6 +8,10 @@
 
 ---------------------------------------------------------
 
+[Link to a list of papers using planetoplot](https://ui.adsabs.harvard.edu/#/public-libraries/iSeagtICQ1uN0fc490wxTA)
+
+---------------------------------------------------------
+
 **Contents**
 
 * `modules`

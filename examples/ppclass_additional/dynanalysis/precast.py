@@ -17,7 +17,8 @@ ispressure = False
 p_upper,p_lower,nlev = 1e2,3.5e5,50 # whole atm
 targetp1d = np.logspace(np.log10(p_lower),np.log10(p_upper),nlev)
 #####################################################
-myp = planets.Saturn
+#myp = planets.Saturn
+myp = planets.Planet() ; myp.ini("Saturn_dynamico",whereset="./")
 ####################################################
 short = False
 includels = True
@@ -27,6 +28,9 @@ nopole = False
 ####################################################
 method = 1 #2
 use_spline = False
+####################################################
+tpot_alternate = True # calculate tpot before interpolation
+is_omega = True
 ####################################################
 
 #fileAP="diagfired.nc"
@@ -185,14 +189,20 @@ if method == 1:
 elif method == 2:
  u,xdim,ydim,zdim,tdim=pp(file=fileAP,var="u").getfd() ; etape("u",time0)
  temp=pp(file=fileAP,var=vartemp).getf() ; etape(vartemp,time0)
+if tpot_alternate:
+ tpot = myp.tpot(temp,press,p0=targetp1d[0]+1.) 
 #if 0 == 1:
 #  ISR=pp(file=fileAP,var="ISR",x=charx).getf() ; print "... ... done: ISR"
 #  OLR=pp(file=fileAP,var="OLR",x=charx).getf() ; print "... ... done: OLR"
 if not short:
  if method == 2:
    v=pp(file=fileAP,var="v").getf() ; etape("v",time0)
+   if is_omega:
+     o=pp(file=fileAP,var="omega").getf() ; etape("omega",time0)
  elif method == 1:
    v=pp(file=fileAP,var="v",x=charx).getf() ; etape("v",time0)
+   if is_omega:
+     o=pp(file=fileAP,var="omega",x=charx).getf() ; etape("omega",time0)
    print "... coupled terms"
    if charx == "999":
      vpup=pp(file=fileAP,var="vpup",x=charx).getf() ; etape("vpup",time0)
@@ -207,6 +217,9 @@ if not short:
      vptp=ppcompute.mean(starv4D*start4D,axis=3) ; etape("vptp",time0)
      upup=ppcompute.mean(staru4D*staru4D,axis=3) ; etape("upup",time0)
      vpvp=ppcompute.mean(starv4D*starv4D,axis=3) ; etape("vpvp",time0)
+     if is_omega:
+       staro4D=pp(file=fileAP,var="omega",compute="pert_x",x=charx).getf() ; etape("staro4D",time0)
+       opup=ppcompute.mean(staro4D*staru4D,axis=3) ; etape("opup",time0) ; del staro4D
      del staru4D ; del starv4D ; del start4D
 
 ####################################################
@@ -214,16 +227,23 @@ print "... interpolating !"
 if method == 1:
   u = interpolate(targetp1d,press,u,spline=use_spline) ; etape("u",time0)
   temp = interpolate(targetp1d,press,temp,spline=use_spline) ; etape(vartemp,time0)
+  if tpot_alternate:
+    tpot = interpolate(targetp1d,press,tpot,spline=use_spline) ; etape("tpot",time0)
   if not short:
     v = interpolate(targetp1d,press,v,spline=use_spline) ; etape("v",time0)
     vpup = interpolate(targetp1d,press,vpup,spline=use_spline) ; etape("vpup",time0)
     vptp = interpolate(targetp1d,press,vptp,spline=use_spline) ; etape("vptp",time0)
+    if is_omega:
+      o = interpolate(targetp1d,press,o,spline=use_spline) ; etape("omega",time0)
+      opup = interpolate(targetp1d,press,opup,spline=use_spline) ; etape("opup",time0)
     eke = interpolate(targetp1d,press,0.5*(vpvp + upup),spline=use_spline) ; etape("eke",time0)
 elif method == 2:
   u = interpolate4(targetp1d,press,u,spline=use_spline)
   um = ppcompute.mean(u,axis=3) ; etape("u",time0)
   temp = interpolate4(targetp1d,press,temp,spline=use_spline)
   tm = ppcompute.mean(temp,axis=3) ; etape(vartemp,time0)
+  if tpot_alternate:
+     tpot = interpolate4(targetp1d,press,tpot,spline=use_spline) 
   if not short:
      v = interpolate4(targetp1d,press,v,spline=use_spline)
      vm = ppcompute.mean(v,axis=3) ; etape("v",time0)
@@ -232,12 +252,20 @@ elif method == 2:
      utm = ppcompute.mean(u*temp,axis=3) ; etape("utm",time0)
      uum = ppcompute.mean(u*u,axis=3) ; etape("uum",time0)
      vvm = ppcompute.mean(v*v,axis=3) ; etape("vvm",time0)
+     if is_omega:
+       o = interpolate4(targetp1d,press,o,spline=use_spline)
+       om = ppcompute.mean(o,axis=3) ; etape("omega",time0)
+       oum = ppcompute.mean(o*u,axis=3) ; etape("oum",time0)
+       del o
      del v
      # [u'v'] = [uv] - [u][v] en temporel
      vpup = vum - vm*um ; del vum ; etape("vpup",time0)
      vptp = vtm - vm*tm ; del vtm ; etape("vptp",time0)
      eke = 0.5*((uum - um*um) + (vvm - vm*vm)) ; del uum ; del vvm ; etape("eke",time0)
      v = vm ; del vm
+     if is_omega:
+       opup = oum - om*um ; del oum ; etape("opup",time0)
+       o = om ; del om
   ##
   del press ; del u ; del temp
   u = um ; del um
@@ -291,9 +319,10 @@ dlat = np.abs(latrad[1]-latrad[0])
 dlon = 2*np.pi
 dp = np.gradient(targetp3d,axis=1)
 dm = - myp.a*acosphi2d * dlon * dlat * dp/myp.g # mass for each considered grid mesh #should have glat!
-sangmom = myp.sangmom(u=u,lat=lat2d) # specific angular momentum
+wangmomperumass = myp.wangmom(u=u,lat=lat2d) # wind angular momentum
 angmomperumass = myp.angmom(u=u,lat=lat2d)
 angmom = dm * angmomperumass / 1.e25
+wangmom = dm * wangmomperumass / 1.e25
 # units as in Lauritzen et al. JAMES 2014 E25 kg m2 s-1
 # -- plus, a normalization is needed (otherwise overflow absurdities)
 superindex = myp.superrot(u=u,lat=lat2d)
@@ -306,9 +335,10 @@ if not short:
 
  # *** BASIC DIAGNOSTICS ***
  rho = targetp3d / (myp.R*temp) # density
- tpot = myp.tpot(temp,targetp3d) # potential temperature
  emt = rho*vpup # eddy momentum transport
- amt_mmc = v*sangmom # angular momentum transport by mean meridional circulation
+ amt_mmc = v*wangmom # angular momentum transport by mean meridional circulation
+ if not tpot_alternate:
+   tpot = myp.tpot(temp,targetp3d,p0=targetp1d[0]+1.) # potential temperature
  # meridional heat flux?rho*vptp
  etape("basic diagnostics",time0)
 
@@ -338,26 +368,29 @@ if not short:
 #           whereas the integral should be performed from 0 to p. 
      psim[ttt,zzz,yyy] = -scipy.integrate.simps(y[zzz:],x[zzz:])*alph[0,yyy]
      #psim[ttt,zzz,yyy] = scipy.integrate.simps(y[0:zzz+1],x[0:zzz+1])*alph[0,yyy]
- etape("streamfunction",time0)
  # reset to NaN after integration
  v[w] = np.nan ; psim[w] = np.nan
+ etape("streamfunction",time0)
+ if not is_omega:
  # derivatives of streamfunction --> velocity (notably omega)
- for ttt in range(nt):
-   dpsim_dphi,dpsim_dp = ppcompute.deriv2d(psim[ttt,:,:],latrad,targetp1d)/alph
-   # meridional: v = 1/term dPSIM/dp
-   vphi = dpsim_dp
-   # vertical: omega = (-1/a) 1/term dPSIM/dphi
-   omega[ttt,:,:] = -dpsim_dphi/myp.a
-   ##CHECK against actual v
-   #import ppplot ; pl = ppplot.plot2d()
-   #pl.f, pl.x, pl.y = vphi, ydim, pseudoz ; pl.title = r'$d\Psi_M/dp$' 
-   #pl.makesave(mode="png",filename="v_from_streamfunction") 
-   #pl.f = v[ttt,:,:] ; pl.title = r'v'
-   #pl.makesave(mode="png",filename="v_actual")
-   #pl.f = v[ttt,:,:]-vphi[:,:] ; pl.title = r'v - $d\Psi_M/dp$'
-   #pl.makesave(mode="png",filename="v_diff")
-   #print "max diff:",ppcompute.max(v[ttt,:,:]-vphi[:,:]) 
- etape("vertical velocity",time0)
+  for ttt in range(nt):
+    dpsim_dphi,dpsim_dp = ppcompute.deriv2d(psim[ttt,:,:],latrad,targetp1d)/alph
+    # meridional: v = 1/term dPSIM/dp
+    vphi = dpsim_dp
+    # vertical: omega = (-1/a) 1/term dPSIM/dphi
+    omega[ttt,:,:] = -dpsim_dphi/myp.a
+    ##CHECK against actual v
+    #import ppplot ; pl = ppplot.plot2d()
+    #pl.f, pl.x, pl.y = vphi, ydim, pseudoz ; pl.title = r'$d\Psi_M/dp$' 
+    #pl.makesave(mode="png",filename="v_from_streamfunction") 
+    #pl.f = v[ttt,:,:] ; pl.title = r'v'
+    #pl.makesave(mode="png",filename="v_actual")
+    #pl.f = v[ttt,:,:]-vphi[:,:] ; pl.title = r'v - $d\Psi_M/dp$'
+    #pl.makesave(mode="png",filename="v_diff")
+    #print "max diff:",ppcompute.max(v[ttt,:,:]-vphi[:,:]) 
+  etape("vertical velocity from streamfunction",time0)
+ else:
+  omega = o
 
  # *** DIAGNOSTICS FOR INSTABILITY
  N2 = np.zeros((nt,nz,nlat)) # static stability
@@ -381,7 +414,22 @@ if not short:
      if i==0: 
         ushear[ttt,:,:] = interm
         interm = f*f*rho[ttt,:,:]*interm/N2[ttt,:,:]
-   effbeta_bc[ttt,:,:] = effbeta_bt[ttt,:,:] - (interm/rho[ttt,:,:]) 
+   # (remove parts of baroclinic effective beta corresponding to neutral conditions)
+   interm2 = N2[ttt,:,:]
+   w = np.where(np.abs(interm2) < 5.e-6)
+   interm2 = effbeta_bt[ttt,:,:] - (interm/rho[ttt,:,:])
+   interm2[w] = np.nan
+   effbeta_bc[ttt,:,:] = interm2
+   # recompute static stability from tpot for outputs
+   interm = tpot[ttt,:,:]
+   dummy,dTdz = ppcompute.deriv2d(interm,latrad,pseudoz)
+   N2[ttt,:,:] = (myp.g/interm)*dTdz
+   ### TEST
+   #interm = u[ttt,:,:]
+   #dummy,interm = ppcompute.deriv2d(interm,latrad,targetp1d)
+   #interm = interm*f*f*rho[ttt,:,:]*rho[ttt,:,:]*myp.g*myp.g/N2[ttt,:,:]
+   #dummy,interm = ppcompute.deriv2d(interm,latrad,targetp1d)
+   #effbeta_bc[ttt,:,:] = effbeta_bt[ttt,:,:] - interm
  etape("instability",time0)
 
  # *** EP FLUX and RESIDUAL CIRCULATION
@@ -412,7 +460,11 @@ if not short:
    # (equation 2.1) EP flux (phi)
    Fphi[ttt,:,:] = acosphi2d * ( - vpup[ttt,:,:] + psi*du_dp ) 
    # (equation 2.1) EP flux (p)
-   Fp[ttt,:,:] = - acosphi2d * psi * (du_dy - f) # neglect <u'omega'>
+   if is_omega:
+     verteddy = - opup[ttt,:,:]
+   else:
+     verteddy = 0. # often a acceptable approximation
+   Fp[ttt,:,:] = - acosphi2d * ( verteddy + psi * (du_dy - f) )   
    # (equation 2.3) divergence of EP flux
    divFphi[ttt,:,:],dummy = ppcompute.deriv2d(Fphi[ttt,:,:]*cosphi2d,latrad,targetp1d) / acosphi2d
    dummy,divFp[ttt,:,:] = ppcompute.deriv2d(Fp[ttt,:,:],latrad,targetp1d)
@@ -425,11 +477,15 @@ if not short:
    edddudt[ttt,:,:] = divFphi[ttt,:,:] / acosphi2d
    # (equation 2.7) equivalent acceleration (residual meridional circulation)
    rmcdudt[ttt,:,:] = - ((du_dy - f) * vstar[ttt,:,:]) - (du_dp*omegastar[ttt,:,:])
-   # (equation 2.5)
+   # (equation 2.5) classical (not transformed) Eulerian-mean equations
    accrmch[ttt,:,:] = - (du_dy - f)*v[ttt,:,:]
    accrmcv[ttt,:,:] = - du_dp*omega[ttt,:,:]
    ddd,dummy = ppcompute.deriv2d(vpup[ttt,:,:]*cosphi2d*cosphi2d,latrad,targetp1d) 
-   acceddh[ttt,:,:] = - ddd / acosphi2d / cosphi2d
+   if is_omega:
+     dummy,ddd2 = ppcompute.deriv2d(opup[ttt,:,:],latrad,targetp1d)
+   else:
+     ddd2 = 0.
+   acceddh[ttt,:,:] = - ddd2 - ddd / acosphi2d / cosphi2d
    dudt[ttt,:,:] = accrmch[ttt,:,:] + accrmcv[ttt,:,:] + acceddh[ttt,:,:]
  etape("EP flux",time0)
 
@@ -486,6 +542,7 @@ addvar(outfile,nam4,'p',targetp3d)
 addvar(outfile,nam4,'u',u)
 addvar(outfile,nam4,vartemp,temp)
 addvar(outfile,nam4,'angmom',angmom)
+addvar(outfile,nam4,'wangmom',wangmom)
 addvar(outfile,nam4,'superindex',superindex)
 if not short:
   addvar(outfile,nam4,'amt_mmc',amt_mmc)
@@ -502,6 +559,7 @@ if not short:
   addvar(outfile,nam4,'divFp',divFp)
   addvar(outfile,nam4,'vstar',vstar)
   addvar(outfile,nam4,'EtoM',EtoM)
+  addvar(outfile,nam4,'omegamean',omega)
   addvar(outfile,nam4,'omegastar',omegastar)
   addvar(outfile,nam4,'rmcdudt',rmcdudt)
   addvar(outfile,nam4,'edddudt',edddudt)

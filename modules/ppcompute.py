@@ -203,7 +203,7 @@ def blur_image(im, n, ny=None) :
     	return improc
 
 ## FROM COOKBOOK http://www.scipy.org/Cookbook/SignalSmooth
-def smooth1d(x,window=11,window_type='hanning'):
+def smooth1d(vec,window=11,window_type='hanning'):
     """smooth the data using a window with requested size.
     This method is based on the convolution of a scaled window with the signal.
     The signal is prepared by introducing reflected copies of the signal 
@@ -225,13 +225,15 @@ def smooth1d(x,window=11,window_type='hanning'):
     scipy.signal.lfilter
     TODO: the window parameter could be the window itself if an array instead of a string   
     """
-    if True in np.isnan(x):
+    y = None ; w = None ; s = None ; x = None
+    if True in np.isnan(vec):
         print "!! ERROR !! Smooth is a disaster with missing values. This will be fixed."
         exit()    
-    x = np.array(x)
+    x = np.array(vec)
     if x.ndim != 1:
         raise ValueError, "smooth only accepts 1 dimension arrays."
     if x.size < window:
+        print x.size,window
         raise ValueError, "Input vector needs to be bigger than window size."
     if window<3:
         return x
