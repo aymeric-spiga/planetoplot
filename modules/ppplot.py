@@ -163,7 +163,7 @@ except IOError:
     files_not_present = files_not_present + zefile + " "
 # A note to the user about missing files
 if files_not_present != "":
-    print "warning: files "+files_not_present+" not in "+whereset+" ; those presets will be missing"
+    print("warning: files "+files_not_present+" not in "+whereset+" ; those presets will be missing")
 
 # TBD: should change vector color with colormaps
 #"gist_heat":    "white",\
@@ -242,7 +242,7 @@ def definesubplot(numplot, fig, factor=1., sup=False):
        fig.subplots_adjust(wspace = wspace_t[numplot], hspace = hspace_t[numplot])
        subv, subh = subv_t[numplot],subh_t[numplot]
      except:
-       print "!! WARNING !! no preset found from set_multiplot.txt, or this setting file was not found."
+       print("!! WARNING !! no preset found from set_multiplot.txt, or this setting file was not found.")
        subv = 1 ; subh = numplot
     # commensurate font
     if factor != 0.: fontsize = fontsize / factor
@@ -286,8 +286,8 @@ def calculate_bounds(field,vmin=None,vmax=None,sigma=None):
           else: cmin = 100.*np.abs((amin - zevmin)/amin)
           cmax = 100.*np.abs((amax - zevmax)/amax)
           if cmin > 150. or cmax > 150.:
-            print "!! WARNING !! Bounds are a bit too tight. Might need to reconsider those."
-            print "!! WARNING !! --> actual",amin,amax,"adopted",zevmin,zevmax
+            print("!! WARNING !! Bounds are a bit too tight. Might need to reconsider those.")
+            print("!! WARNING !! --> actual",amin,amax,"adopted",zevmin,zevmax)
     return zevmin, zevmax    
 
 # a function to solve the problem with blank bounds !
@@ -325,7 +325,7 @@ def writeascii (field=None,absc=None,name=None):
         for ttt in timelib.gmtime():
             name = name + "_" + str(ttt)
     if field is None or absc is None:
-        print "!! WARNING !! Not printing the file, incorrect field or absc."
+        print("!! WARNING !! Not printing the file, incorrect field or absc.")
     else:
         if field.ndim == 1:
             myfile = open(name, 'w')
@@ -333,7 +333,7 @@ def writeascii (field=None,absc=None,name=None):
                 myfile.write("%15.5e%15.5e\n" % ( absc[ix], field[ix] ))
             myfile.close()
         else:
-            print "!! WARNING !! Not printing the file, 2D fields not supported yet."
+            print("!! WARNING !! Not printing the file, 2D fields not supported yet.")
     return
 
 # a necessary addition for people used to matplotlib
@@ -362,7 +362,7 @@ def save(mode=None,filename=None,folder="./",includedate=False,res=150,custom=Fa
                   name = name + "_" + "%03d" % (ttt)
           name = name +"."+mode
           ## save file
-          #print "**** Saving file in "+mode+" format... Please wait."
+          print("**** Saving file in "+mode+" format... Please wait.")
           if not custom:
               # ... regular plots
               mpl.savefig(name,dpi=res,pad_inches=pad_inches_value,bbox_inches='tight')
@@ -371,7 +371,7 @@ def save(mode=None,filename=None,folder="./",includedate=False,res=150,custom=Fa
               # TBD: not impacted by pad_inches_value. why?
               mpl.savefig(name,dpi=res) #,bbox_inches='tight')
       else:
-          print "!! ERROR !! File format not supported. Supported: ",possiblesave
+          print("!! ERROR !! File format not supported. Supported: ",possiblesave)
 
 ## use the agg backend directly to create images
 ## ... no pyplot interface, useful for web app
@@ -565,7 +565,7 @@ class plot():
     # check
     # -------------------------------
     def check(self):
-        if self.f is None: print "!! ERROR !! Please define a field to be plotted" ; exit()
+        if self.f is None: print("!! ERROR !! Please define a field to be plotted") ; exit()
         else: self.f = np.array(self.f) # ensure this is a numpy array
         if self.fig is None: self.fig = mpl.figure()
         if self.ax is None: self.ax = self.fig.gca()
@@ -672,7 +672,7 @@ class plot1d(plot):
         # set dummy x axis if not defined
         if self.x is None: 
             self.x = np.array(range(self.f.shape[0]))
-            print "!! WARNING !! dummy coordinates on x axis"
+            print("!! WARNING !! dummy coordinates on x axis")
         else:
             self.x = np.array(self.x) # ensure this is a numpy array
         # swapping if requested
@@ -684,7 +684,7 @@ class plot1d(plot):
         if self.ycoeff is not None: y=y*self.ycoeff
         # check axis
         if x.size != y.size:
-            print "!! ERROR !! x and y sizes don't match on 1D plot.", x.size, y.size
+            print("!! ERROR !! x and y sizes don't match on 1D plot.", x.size, y.size)
             exit()
         # make the 1D plot
         # either request linestyle or let matplotlib decide
@@ -882,18 +882,18 @@ class plot2d(plot):
         if self.x is None: 
             self.x = np.array(range(self.f.shape[1]))
             self.mapmode = False
-            print "!! WARNING !! dummy coordinates on x axis"
+            print("!! WARNING !! dummy coordinates on x axis")
         if self.y is None: 
             self.y = np.array(range(self.f.shape[0]))
             self.mapmode = False
-            print "!! WARNING !! dummy coordinates on y axis"
+            print("!! WARNING !! dummy coordinates on y axis")
         # check sizes
         if self.c is not None:
             if self.c.ndim != 2:
-                print "!! WARNING !! Contour is not a 2D field. No contour.",self.c.ndim
+                print("!! WARNING !! Contour is not a 2D field. No contour.",self.c.ndim)
                 self.c = None
         if self.f.ndim != 2:
-            print "!! ERROR !! Field is not two-dimensional" ; exit()
+            print("!! ERROR !! Field is not two-dimensional") ; exit()
         # transposing if necessary
         shape = self.f.shape
         if shape[0] != shape[1]:
@@ -1006,7 +1006,7 @@ class plot2d(plot):
             # get lon and lat in 2D version.
             # (but first ensure we do have 2D coordinates)
             if self.x.ndim == 1:  [self.x,self.y] = np.meshgrid(self.x,self.y)
-            elif self.x.ndim > 2: print "!! ERROR !! lon and lat arrays must be 1D or 2D"
+            elif self.x.ndim > 2: print("!! ERROR !! lon and lat arrays must be 1D or 2D")
             # get lat lon intervals and associated settings
             wlon = [np.min(self.x),np.max(self.x)]
             wlat = [np.min(self.y),np.max(self.y)]
@@ -1063,9 +1063,9 @@ class plot2d(plot):
             # ... regional projections
             elif self.proj in ["lcc","laea","merc"]:
                 if self.proj in ["lcc","laea"] and wlat[0] == -wlat[1]: 
-                    print "!! ERROR !! with Lambert lat1 must be different than lat2" ; exit()
+                    print("!! ERROR !! with Lambert lat1 must be different than lat2") ; exit()
                 if wlat[0] < -80. and wlat[1] > 80.:
-                    print "!! ERROR !! set an area (not global)" ; exit()
+                    print("!! ERROR !! set an area (not global)") ; exit()
                 format = '%.0f'
             elif self.proj in ["npstere","spstere"]:
                 # in polar projections, blat gives the bounding lat
@@ -1082,15 +1082,15 @@ class plot2d(plot):
                 if self.blon is not None: lon_0 = self.blon
             # ... unsupported projections
             else:
-                print "!! ERROR !! unsupported projection. supported: "+\
-                      "cyl, npstere, spstere, ortho, moll, robin, lcc, laea, merc"
+                print("!! ERROR !! unsupported projection. supported: "+\
+                      "cyl, npstere, spstere, ortho, moll, robin, lcc, laea, merc")
             # finally define projection
-	    try:
-	      from mpl_toolkits.basemap import Basemap
-	    except:
-              print "!! ERROR !! basemap is not available."
-	      print "... either install it or use another plot type."
-	      exit()
+            try:
+              from mpl_toolkits.basemap import Basemap
+            except:
+              print("!! ERROR !! basemap is not available.")
+              print("... either install it or use another plot type.")
+              exit()
             m = Basemap(ax=self.ax,projection=self.proj,\
                         lat_0=lat_0,lon_0=lon_0,\
                         boundinglat=self.blat,\
@@ -1111,16 +1111,16 @@ class plot2d(plot):
             # define background (see set_back.txt)
             if self.back is not None:
               if self.back in back.keys():
-                 print "**** info: loading a background, please wait.",self.back
+                 print("**** info: loading a background, please wait.",self.back)
                  if self.back not in ["coast","sea"]:
                     try: m.warpimage(back[self.back],scale=0.75)
-                    except: print "!! ERROR !! no background image could be loaded. probably not connected to the internet?"
+                    except: print("!! ERROR !! no background image could be loaded. probably not connected to the internet?")
                  elif self.back == "coast":
                     m.drawcoastlines()
                  elif self.back == "sea":
                     m.drawlsmask(land_color='white',ocean_color='aqua')
               else:
-                 print "!! ERROR !! requested background not defined. change name or fill in set_back.txt" ; exit()
+                 print("!! ERROR !! requested background not defined. change name or fill in set_back.txt") ; exit()
             # define x and y given the projection
             x, y = m(self.x, self.y)
             # contour field. first line contour then shaded contour.
@@ -1185,8 +1185,8 @@ class plot2d(plot):
                      #[vecx,vecy] = m.rotate_vector(self.vx,self.vy,self.x,self.y) # for metwinds only ?
                      vecx,vecy = self.vx,self.vy
                    except:
-                     print "!! ERROR !! Problem with field shapes for vector?" 
-                     print self.vx.shape,self.vy.shape,self.x.shape,self.y.shape
+                     print("!! ERROR !! Problem with field shapes for vector?")
+                     print(self.vx.shape,self.vy.shape,self.x.shape,self.y.shape)
                      exit()
                 else:
                    vecx,vecy = self.vx,self.vy 

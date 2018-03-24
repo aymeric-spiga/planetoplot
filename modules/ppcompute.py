@@ -23,8 +23,8 @@ def findset(whereset,string="planetoplot"):
         for path in os.environ['PYTHONPATH'].split(os.pathsep):
             if string in path: whereset = path + "/../settings/"
         if whereset is None:
-            print "!! WARNING !! "+ string + " not in $PYTHONPATH"
-            print "--> set to current directory instead"
+            print("!! WARNING !! "+ string + " not in $PYTHONPATH")
+            print("--> set to current directory instead")
             whereset = "./"
     # ... if the last / is missing put it
     if whereset[-1] != "/": whereset = whereset + "/"
@@ -162,8 +162,8 @@ def perturbation(field,axis=None,mm=None):
     if mm is None:
       mm = mean(field,axis=axis)
     else:
-      if mm.ndim != 3: print "input mean must be a 3-dim array" ; exit() 
-      else: print "mean to compute pert is provided!"
+      if mm.ndim != 3: print("input mean must be a 3-dim array") ; exit() 
+      else: print("mean to compute pert is provided!")
     # include back the reduced dim
     if field.ndim == 4:
       if axis == 0:   mm = mm[np.newaxis,:,:,:]
@@ -171,7 +171,7 @@ def perturbation(field,axis=None,mm=None):
       elif axis == 2: mm = mm[:,:,np.newaxis,:]
       elif axis == 3: mm = mm[:,:,:,np.newaxis]
     else:
-      print "not supported. yet!"
+      print("not supported. yet!")
       exit()
     # repeat the calculated mean on this dimension
     mm = np.repeat(mm,field.shape[axis],axis=axis)
@@ -204,37 +204,37 @@ def smooth2diter(field,n=1):
 
 ## Author: AS. uses gauss_kern and blur_image.
 def smooth2d(field, window=10):
-	## actually blur_image could work with different coeff on x and y
+        ## actually blur_image could work with different coeff on x and y
         if True in np.isnan(field):
-            print "!! ERROR !! Smooth is a disaster with missing values. This will be fixed."
+            print("!! ERROR !! Smooth is a disaster with missing values. This will be fixed.")
             exit()
-	if window > 1:	result = blur_image(field,int(window))
-	else:		result = field
-	return result
+        if window > 1:        result = blur_image(field,int(window))
+        else:                result = field
+        return result
 
 ## FROM COOKBOOK http://www.scipy.org/Cookbook/SignalSmooth
 def gauss_kern(size, sizey=None):
-    	# Returns a normalized 2D gauss kernel array for convolutions
-    	size = int(size)
-    	if not sizey:
-	        sizey = size
-	else:
-	        sizey = int(sizey)
-	x, y = np.mgrid[-size:size+1, -sizey:sizey+1]
-	g = np.exp(-(x**2/float(size)+y**2/float(sizey)))
-	return g / g.sum()
+        # Returns a normalized 2D gauss kernel array for convolutions
+        size = int(size)
+        if not sizey:
+          sizey = size
+        else:
+          sizey = int(sizey)
+        x, y = np.mgrid[-size:size+1, -sizey:sizey+1]
+        g = np.exp(-(x**2/float(size)+y**2/float(sizey)))
+        return g / g.sum()
 
 ## FROM COOKBOOK http://www.scipy.org/Cookbook/SignalSmooth
 def blur_image(im, n, ny=None) :
-	# blurs the image by convolving with a gaussian kernel of typical size n. 
-	# The optional keyword argument ny allows for a different size in the y direction.
-    	g = gauss_kern(n, sizey=ny)
-	try:
+        # blurs the image by convolving with a gaussian kernel of typical size n. 
+        # The optional keyword argument ny allows for a different size in the y direction.
+        g = gauss_kern(n, sizey=ny)
+        try:
           import scipy.signal as sp_signal
-	  improc = sp_signal.convolve(im, g, mode='same')
-	except:
-	  print "blur_image needs scipy. please add scipy lib." ; exit()
-    	return improc
+          improc = sp_signal.convolve(im, g, mode='same')
+        except:
+          print("blur_image needs scipy. please add scipy lib.") ; exit()
+        return improc
 
 ## FROM COOKBOOK http://www.scipy.org/Cookbook/SignalSmooth
 def smooth1d(vec,window=11,window_type='hanning'):
@@ -261,18 +261,21 @@ def smooth1d(vec,window=11,window_type='hanning'):
     """
     y = None ; w = None ; s = None ; x = None
     if True in np.isnan(vec):
-        print "!! ERROR !! Smooth is a disaster with missing values. This will be fixed."
+        print("!! ERROR !! Smooth is a disaster with missing values. This will be fixed.")
         exit()    
     x = np.array(vec)
     if x.ndim != 1:
-        raise ValueError, "smooth only accepts 1 dimension arrays."
+        raise ValueError
+        raise NameError("smooth only accepts 1 dimension arrays.")
     if x.size < window:
-        print x.size,window
-        raise ValueError, "Input vector needs to be bigger than window size."
+        print(x.size,window)
+        raise ValueError
+        raise NameError("Input vector needs to be bigger than window size.")
     if window<3:
         return x
     if not window_type in ['flat', 'hanning', 'hamming', 'bartlett', 'blackman']:
-        raise ValueError, "Window is on of 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'"
+        raise ValueError
+        raise NameError("Window is on of 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'")
     s=np.r_[x[window-1:0:-1],x,x[-1:-window:-1]]
     #print(len(s))
     if window == 'flat': #moving average
@@ -412,7 +415,7 @@ def dxdy(lon,lat,coeff=None,lonlat=False):
   elif lon.ndim == 2 and lat.ndim == 2:
     lar,phr = la,ph
   else:
-    print "ppcompute. there is a problem with coordinates rank. stop."
+    print("ppcompute. there is a problem with coordinates rank. stop.")
     exit()
   # compute normalized gradients for lat/lon grid
   # -- cartesian differential coordinates
