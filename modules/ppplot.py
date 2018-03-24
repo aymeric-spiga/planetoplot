@@ -279,7 +279,7 @@ def calculate_bounds(field,vmin=None,vmax=None,sigma=None):
 
 # a function to solve the problem with blank bounds !
 # -------------------------------
-def bounds(what_I_plot,zevmin,zevmax,miss=9e+35):
+def bounds(what_I_plot,zevmin,zevmax,miss=9e+10):
     cond = (not np.isnan(zevmin)) or (not np.isnan(zevmax))
     if cond:
       small_enough = 1.e-7
