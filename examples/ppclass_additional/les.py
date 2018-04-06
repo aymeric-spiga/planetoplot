@@ -7,7 +7,7 @@ from ppcompute import smooth2diter
 ## options
 from optparse import OptionParser ### TBR by argparse
 parser = OptionParser()
-parser.usage = "les.py netCDF_file(s)"
+parser.usage = "les.py netCDF_file(s)" #les.py becomes a commandline applicable to a netcdf file
 (opt,files) = parser.parse_args()
 
 ## constants
@@ -21,6 +21,7 @@ R = 192.
 foo1,foo2,foo3,z,t = pp(file=files[0],var="T",x=0,y=0).getfd()
 nz,nt = z.size,t.size
 nf = len(files)
+print nf
 ntt = nt*nf
 
 ## arrays for time series
@@ -49,7 +50,7 @@ for ff in files:
   indt = indt + 1
  
   for zz in range(nz):
- 
+    #print tt, indt
     tprime = t[tt,zz,:,:]
     tmean[indt,zz] = np.mean(tprime)
     tprime = tprime - tmean[indt,zz]
@@ -67,8 +68,9 @@ for ff in files:
   ## method 1: potential temperature profile
   diff = np.abs(tmean[indt,2:]-tmean[indt,1])
   wheremin = np.argmin(diff) + 2
-  pblh1[indt] = np.mean(geop[tt,wheremin,:,:]) / grav
-
+  print indt, tt
+  pblh1[indt] = np.mean(geop[tt,wheremin,:,:]) / grav #Height of the geopotential of the boundary layer
+ 
   ###########
   ## method 2: minimum of vertical eddy heat flux
   wheremin = np.argmin(vehfmean[indt,:]) 
@@ -100,11 +102,11 @@ for val in pblh:
   file1.write("%8.3f\n"%(val))
 file1.close()
 
-pl = ppplot.plot1d()
+pl = ppplot.plot1d() # plot of the boundary layer height time evolution
 pl.f = pblh
 pl.makeshow()
 
-pl = ppplot.plot2d()
+pl = ppplot.plot2d() # shade of the vertical eddy heat flux time evolution
 pl.f = vehfmean
 pl.y = altitude
 pl.makeshow()
