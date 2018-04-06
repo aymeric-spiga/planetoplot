@@ -842,11 +842,11 @@ class plot2d(plot):
             self.mapmode = False
         # set dummy xy axis if not defined
         if self.x is None: 
-            self.x = np.array(range(self.f.shape[0]))
+            self.x = np.array(range(self.f.shape[1]))
             self.mapmode = False
             print "!! WARNING !! dummy coordinates on x axis"
         if self.y is None: 
-            self.y = np.array(range(self.f.shape[1]))
+            self.y = np.array(range(self.f.shape[0]))
             self.mapmode = False
             print "!! WARNING !! dummy coordinates on y axis"
         # check sizes
