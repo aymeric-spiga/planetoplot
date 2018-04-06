@@ -11,15 +11,21 @@ import math  as m
 
 ## first a useful function to find settings in a folder in PYTHONPATH
 def findset(whereset,string="planetoplot"):
-    # ... set a default whereset if it was set to None
-    # ... default is in the planetoplot folder
-    if whereset is None:
+    # ... can set a local set of settings in .settings
+    cwd = os.getcwd()
+    islocal = os.path.isdir(cwd+"/.settings")
+    if islocal:
+      whereset = cwd+"/.settings"
+    else:
+      # ... set a default whereset if it was set to None
+      # ... default is in the planetoplot folder
+      if whereset is None:
         for path in os.environ['PYTHONPATH'].split(os.pathsep):
             if string in path: whereset = path + "/../settings/"
         if whereset is None:
-            print "!! ERROR !! "+ string + " not in $PYTHONPATH"
-            print "--> either put it in $PYTHONPATH or change whereset"
-            exit()
+            print "!! WARNING !! "+ string + " not in $PYTHONPATH"
+            print "--> set to current directory instead"
+            whereset = "./"
     # ... if the last / is missing put it
     if whereset[-1] != "/": whereset = whereset + "/"
     return whereset
@@ -59,19 +65,19 @@ def mean(field,axis=None):
         else: 
            if type(field).__name__=='MaskedArray':
               field.set_fill_value(np.NaN)
-              zout=np.ma.array(field).mean(axis=axis)
+              zout=np.ma.array(field).mean(axis=axis,dtype=np.float64)
               if axis is not None:
                  zout.set_fill_value(np.NaN)
                  return zout.filled()
               else:return zout
            elif (np.isnan(np.sum(field)) and (type(field).__name__ not in 'MaskedArray')):
-              zout=np.ma.masked_invalid(field).mean(axis=axis)
+              zout=np.ma.masked_invalid(field).mean(axis=axis,dtype=np.float64)
               if axis is not None:
                  zout.set_fill_value([np.NaN])
                  return zout.filled()
               else:return zout
            else: 
-              return np.array(field).mean(axis=axis)
+              return np.array(field).mean(axis=axis,dtype=np.float64)
 
 ## compute sum
 ## author AS + AC
@@ -117,9 +123,13 @@ def meanbin(y,x,bins):
 ## compute perturbation to mean
 ## -- the whole dimension must exist!
 ## author AS
-def perturbation(field,axis=None):
+def perturbation(field,axis=None,mm=None):
     # calculate mean (averaged dim is reduced)
-    mm = mean(field,axis=axis)
+    if mm is None:
+      mm = mean(field,axis=axis)
+    else:
+      if mm.ndim != 3: print "input mean must be a 3-dim array" ; exit() 
+      else: print "mean to compute pert is provided!"
     # include back the reduced dim
     if field.ndim == 4:
       if axis == 0:   mm = mm[np.newaxis,:,:,:]
@@ -193,7 +203,7 @@ def blur_image(im, n, ny=None) :
     	return improc
 
 ## FROM COOKBOOK http://www.scipy.org/Cookbook/SignalSmooth
-def smooth1d(x,window=11,window_type='hanning'):
+def smooth1d(vec,window=11,window_type='hanning'):
     """smooth the data using a window with requested size.
     This method is based on the convolution of a scaled window with the signal.
     The signal is prepared by introducing reflected copies of the signal 
@@ -215,13 +225,15 @@ def smooth1d(x,window=11,window_type='hanning'):
     scipy.signal.lfilter
     TODO: the window parameter could be the window itself if an array instead of a string   
     """
-    if True in np.isnan(x):
+    y = None ; w = None ; s = None ; x = None
+    if True in np.isnan(vec):
         print "!! ERROR !! Smooth is a disaster with missing values. This will be fixed."
         exit()    
-    x = np.array(x)
+    x = np.array(vec)
     if x.ndim != 1:
         raise ValueError, "smooth only accepts 1 dimension arrays."
     if x.size < window:
+        print x.size,window
         raise ValueError, "Input vector needs to be bigger than window size."
     if window<3:
         return x

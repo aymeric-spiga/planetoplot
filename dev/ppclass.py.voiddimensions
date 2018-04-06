@@ -1,0 +1,19 @@
+diff --git a/modules/ppclass.py b/modules/ppclass.py
+index c1f9a66..7da837d 100644
+--- a/modules/ppclass.py
++++ b/modules/ppclass.py
+@@ -1485,6 +1485,14 @@ class onerequest():
+ 	       		if (self.field_x[0,j+1]-self.field_x[0,j] < 0.):
+ 				self.field_x[:,j+1]=self.field_x[:,j+1]+360.
+                self.field_y = self.field_y[0,:,:]
++          # 3. treat the specific case of a void dimension (caused by averaging with nctools)
++          elif "mean" in self.field_x.cell_methods: 
++              self.dim_x = 1
++              self.field_x = np.array(range(self.dim_x)) 
++              self.name_x = "x grid points"
++              self.kind3d = "tzy"
++              #self.method_x = "fixed"
++              [self.field_x,self.field_y] = np.meshgrid(self.field_x,self.field_y)
+           # if xy axis are apparently undefined, set 2D grid points axis.
+           if "grid points" not in self.name_x:
+             if (self.dim_x > 1) \
