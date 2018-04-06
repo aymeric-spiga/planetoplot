@@ -949,6 +949,7 @@ class plot2d(plot):
             if self.modx is not None:
                 ax = labelmodulo(ax,self.modx)
         else:
+            ax = mpl.gca()
             ## A 2D MAP USING PROJECTIONS (basemap)
             #######################################
             mpl.xlabel("") ; mpl.ylabel("")
@@ -1137,12 +1138,22 @@ class plot2d(plot):
                 # make vector key.
                 #keyh = 1.025 ; keyv = 1.05 # upper right corner over colorbar
                 keyh = 0.97 ; keyv = 1.06
-                keyh = 0.97 ; keyv = 1.11
+                #keyh = 0.97 ; keyv = 1.11
                 #keyh = -0.03 ; keyv = 1.08 # upper left corner
                 p = mpl.quiverkey(q,keyh,keyv,\
                                   self.wscale,str(int(self.wscale)),\
-                                  fontproperties={'size': 'small'},\
-                                  color='black',labelpos='S',labelsep = 0.07)
+                                  fontproperties={'size': ft*1.25},\
+                                  color="black",labelpos='S',labelsep = 0.07)
+                #redefine bounds
+                x1, x2 = ax.get_xbound()
+                if self.xmin is not None: x1 = self.xmin
+                if self.xmax is not None: x2 = self.xmax
+                ax.set_xbound(lower=x1,upper=x2)
+                y1, y2 = ax.get_ybound()
+                if self.ymin is not None: y1 = self.ymin
+                if self.ymax is not None: y2 = self.ymax
+                ax.set_ybound(lower=y1,upper=y2)
+
         ############################################################################################
         ### TEXT. ANYWHERE. add_text.txt should be present with lines x ; y ; text ; color
         ############################################################################################
