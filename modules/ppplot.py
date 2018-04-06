@@ -42,12 +42,14 @@ cline = 0.55
 #cline = 0.8
 # (vectors)
 widthvec = 0.002
-reducevec = 30.
+reducevec = 20.
 # (colorbar)
 zeorientation="vertical"
 zefrac = 0.05
 # (save figures)
 pad_inches_value=0.25
+pad_inches_value=0.4
+#pad_inches_value=0.55
 ###############################################
 
 
