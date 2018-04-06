@@ -1030,6 +1030,9 @@ class plot2d(plot):
                 # labels
                 mertab = np.r_[-360.:360.:15.]
                 partab = np.r_[-90.:90.:5.]
+                format = '%.0f'
+                # set lon_0
+                if self.blon is not None: lon_0 = self.blon
             # ... unsupported projections
             else:
                 print "!! ERROR !! unsupported projection. supported: "+\
