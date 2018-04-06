@@ -879,6 +879,9 @@ class plot2d(plot):
             # set levels for contour lines
             if self.clev is None:
               zevminc, zevmaxc = calculate_bounds(self.c)
+              #zevminc = np.min(self.c[np.isfinite(self.c)])
+              #zevmaxc = np.max(self.c[np.isfinite(self.c)])
+              #print zevminc, zevmaxc
               what_I_contour = bounds(self.c,zevminc,zevmaxc)
               ticks = self.div + 1
               self.clev = np.linspace(zevminc,zevmaxc,ticks)
