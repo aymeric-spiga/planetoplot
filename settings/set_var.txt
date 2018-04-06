@@ -28,7 +28,7 @@ THERMAL_INERTIA ; %.0f ; jet ; Thermal inertia ; tiu
 ALBEDO ; %.2f ; Greys_r ; Albedo ; dimless
 TAU ; %.1f ; YlOrBr_r ; Opacity ; dimless
 TAU_DUST ; %.1f ; Oranges_r ; Dust opacity ; dimless
-QDUST ; %.6f ; Oranges_r ; Dust mass mixing ratio ; kg/kg
+QDUST ; %.2e ; Oranges ; Dust mass mixing ratio ; kg/kg
 CCNQ ; %.2e ; YlOrBr ; Cloud condensation nuclei ; kg/kg
 CCNN ; %.2e ; YlOrBr ; Cloud condensation nuclei density ; dimless
 QH2O ; %.2e ; PuBu ; Water vapor mixing ratio ; kg/kg
@@ -36,6 +36,7 @@ MTOT ; %.1e ; spectral ; Column vapor ; pr. $\mu$m
 ICETOT ; %.1e ; YlGnBu_r ; Column ice ; pr. $\mu$m
 TAU_ICE ; %.2f ; Blues ; Ice cloud opacity ; dimless
 TAUICE ; %.2f ; Blues ; Ice cloud opacity ; dimless
+RICE ; %.1e ; spectral ; Radius of cloud particles ; m
 VMR_ICE ; %.0f ; Blues ; Ice volume mix. rat. ; ppm
 VMR_H2OICE ; %.0f ; PuBu ; Ice volume mix. rat. ; dimless
 VMR_H2OVAP ; %.0f ; PuBu ; Vapor volume mix. rat. ; dimless
