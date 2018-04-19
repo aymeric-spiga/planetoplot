@@ -23,7 +23,7 @@ import ppcompute
 # http://matplotlib.org/users/customizing.html
 # -------------------------------
 mpl.rcParams['font.family'] = "serif"
-mpl.rcParams['axes.color_cycle'] = "b,r,g,k"
+#mpl.rcParams['axes.color_cycle'] = "b,r,g,k" # is deprecated in subsequent versions
 mpl.rcParams['contour.negative_linestyle'] = "dashed" # ou "solid"
 mpl.rcParams['verbose.level'] = "silent"
 mpl.rcParams['lines.linewidth'] = 1.5
