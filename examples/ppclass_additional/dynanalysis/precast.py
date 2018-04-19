@@ -68,8 +68,11 @@ def interpolate(targetp1d,sourcep3d,fieldsource3d,spline=False):
     if not spline:
       fieldtarget3d[ttt,:,nnn] = np.interp(coordtarget1d,xs,ys,left=np.nan,right=np.nan)
     else:
-      tck = interpolate.splrep(xs, ys, s=0)
-      fieldtarget3d[ttt,:,nnn] = interpolate.splev(coordtarget1d, tck, der=0)
+      #tck = interpolate.splrep(xs, ys, s=0)
+      #fieldtarget3d[ttt,:,nnn] = interpolate.splev(coordtarget1d, tck, der=0)
+      kk = "linear" #"cubic" #"quadratic"
+      ff = interpolate.interp1d(xs, ys, kind=kk, bounds_error=False)
+      fieldtarget3d[ttt,:,nnn] = ff(coordtarget1d)
   return fieldtarget3d
 
 ####################################################
