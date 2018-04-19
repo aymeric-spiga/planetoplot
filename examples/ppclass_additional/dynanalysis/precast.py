@@ -166,6 +166,21 @@ def getp_fromapbp(fileAP):
   #return ppcompute.mean(p,axis=3)
 
 ####################################################
+def correctnearzero(field):
+  # ... e.g. for values very near zero in the neutral troposphere (stability)
+  # ... filter out to avoid e.g. infinite values when dividing by this term
+  # ... we use the near-zero slightly negative values
+  # ... to learn where to discard near-zero values (set to NaN)
+  negvalue = np.min(field[np.isfinite(field)])
+  val = 2.
+  removed = -val*negvalue
+  w = np.where(np.abs(field) <= removed)
+  field[w] = np.nan
+  print "absolute values below this value are set to NaN", removed
+  return field
+
+
+####################################################
 ####################################################
 ####################################################
 ####################################################
@@ -407,6 +422,9 @@ if not short:
    interm = temp[ttt,:,:]
    dTdz,dummy = np.gradient(interm,pseudoz,latrad,edge_order=2)  
    N2[ttt,:,:] = (myp.R/myp.H())*( dTdz + ((myp.R/myp.cp)*interm/myp.H()) )
+   # ... this term is very near zero in the neutral troposphere
+   # ... so this needs to be filtered out, not to get infinite values
+   N2[ttt,:,:] = correctnearzero(N2[ttt,:,:])
    # baroclinic effective beta (see Holton 2004 sections 8.4.2 equations 8.46 and 8.49)
    interm = u[ttt,:,:]
    for i in range(2):
@@ -414,12 +432,7 @@ if not short:
      if i==0: 
         ushear[ttt,:,:] = interm
         interm = f*f*rho[ttt,:,:]*interm/N2[ttt,:,:]
-   # (remove parts of baroclinic effective beta corresponding to neutral conditions)
-   interm2 = N2[ttt,:,:]
-   w = np.where(np.abs(interm2) < 5.e-6)
-   interm2 = effbeta_bt[ttt,:,:] - (interm/rho[ttt,:,:])
-   interm2[w] = np.nan
-   effbeta_bc[ttt,:,:] = interm2
+   effbeta_bc[ttt,:,:] = effbeta_bt[ttt,:,:] - (interm/rho[ttt,:,:])
    # recompute static stability from tpot for outputs
    interm = tpot[ttt,:,:]
    dTdz,dummy = np.gradient(interm,pseudoz,latrad,edge_order=2)
@@ -458,7 +471,14 @@ if not short:
    ####################################
    # (equation 2.2) psi function
    rcp = myp.R / myp.cp
-   psi = - vptp[ttt,:,:] / ( (rcp*temp[ttt,:,:]/targetp3d[ttt,:,:]) - (dt_dp) ) 
+   # ... formula for psi is divided by a stability term
+   stabterm = (rcp*temp[ttt,:,:]/targetp3d[ttt,:,:]) - (dt_dp)
+   # ... this term is very near zero in the neutral troposphere
+   # ... so this needs to be filtered out, not to get infinite values
+   stabterm = correctnearzero(stabterm)
+   # ... finally we calculate psi
+   psi[ttt,:,:] = - vptp[ttt,:,:] / stabterm 
+   ####################################
    # (equation 2.1) EP flux (phi)
    Fphi[ttt,:,:] = acosphi2d * ( - vpup[ttt,:,:] + psi[ttt,:,:]*du_dp ) 
    # (equation 2.1) EP flux (p)
