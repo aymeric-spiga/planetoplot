@@ -317,7 +317,7 @@ etape("coordinates",time0)
   # hence dm = rho dV = - r^2 cosphi dlambda dphi dp / g
 dlat = np.abs(latrad[1]-latrad[0])
 dlon = 2*np.pi
-dp = np.gradient(targetp3d,axis=1)
+dp = np.gradient(targetp3d,axis=1,edge_order=2)
 dm = - myp.a*acosphi2d * dlon * dlat * dp/myp.g # mass for each considered grid mesh #should have glat!
 wangmomperumass = myp.wangmom(u=u,lat=lat2d) # wind angular momentum
 angmomperumass = myp.angmom(u=u,lat=lat2d)
@@ -374,7 +374,7 @@ if not short:
  if not is_omega:
  # derivatives of streamfunction --> velocity (notably omega)
   for ttt in range(nt):
-    dpsim_dphi,dpsim_dp = ppcompute.deriv2d(psim[ttt,:,:],latrad,targetp1d)/alph
+    dpsim_dp,dpsim_dphi = np.gradient(psim[ttt,:,:],targetp1d,latrad,edge_order=2)/alph  
     # meridional: v = 1/term dPSIM/dp
     vphi = dpsim_dp
     # vertical: omega = (-1/a) 1/term dPSIM/dphi
@@ -401,16 +401,16 @@ if not short:
    # barotropic effective beta (Rayleigh-Kuo criterion)
    interm = u[ttt,:,:]
    for i in range(2): # d2u/dy2
-     interm,dummy = ppcompute.deriv2d(interm*cosphi2d,latrad,targetp1d) / acosphi2d
+     dummy,interm = np.gradient(interm*cosphi2d,targetp1d,latrad,edge_order=2) / acosphi2d
    effbeta_bt[ttt,:,:] = beta - interm
    # static stability (according to Holton 2004 equation 8.45)
    interm = temp[ttt,:,:]
-   dummy,dTdz = ppcompute.deriv2d(interm,latrad,pseudoz)
+   dTdz,dummy = np.gradient(interm,pseudoz,latrad,edge_order=2)  
    N2[ttt,:,:] = (myp.R/myp.H())*( dTdz + ((myp.R/myp.cp)*interm/myp.H()) )
    # baroclinic effective beta (see Holton 2004 sections 8.4.2 equations 8.46 and 8.49)
    interm = u[ttt,:,:]
    for i in range(2):
-     dummy,interm = ppcompute.deriv2d(interm,latrad,pseudoz)
+     interm,dummy = np.gradient(interm,pseudoz,latrad,edge_order=2) 
      if i==0: 
         ushear[ttt,:,:] = interm
         interm = f*f*rho[ttt,:,:]*interm/N2[ttt,:,:]
@@ -422,7 +422,7 @@ if not short:
    effbeta_bc[ttt,:,:] = interm2
    # recompute static stability from tpot for outputs
    interm = tpot[ttt,:,:]
-   dummy,dTdz = ppcompute.deriv2d(interm,latrad,pseudoz)
+   dTdz,dummy = np.gradient(interm,pseudoz,latrad,edge_order=2)
    N2[ttt,:,:] = (myp.g/interm)*dTdz
    ### TEST
    #interm = u[ttt,:,:]
@@ -447,31 +447,33 @@ if not short:
  accrmcv = np.zeros((nt,nz,nlat))
  acceddh = np.zeros((nt,nz,nlat))
  dudt = np.zeros((nt,nz,nlat))
+ psi = np.zeros((nt,nz,nlat))
  for ttt in range(nt):
    # (Del Genio et al. 2007) eddy to mean conversion: product emt with du/dy
-   du_dy,dummy = ppcompute.deriv2d(u[ttt,:,:]*cosphi2d,latrad,targetp1d) / acosphi2d
+   dummy,du_dy = np.gradient(u[ttt,:,:]*cosphi2d,targetp1d,latrad,edge_order=2) / acosphi2d 
    EtoM[ttt,:,:] = vpup[ttt,:,:]*du_dy #emt[ttt,:,:]*du_dy
    # vertical derivatives with pressure
-   dummy,dt_dp = ppcompute.deriv2d(temp[ttt,:,:],latrad,targetp1d)
-   dummy,du_dp = ppcompute.deriv2d(u[ttt,:,:],latrad,targetp1d)
+   dt_dp,dummy = np.gradient(temp[ttt,:,:],targetp1d,latrad,edge_order=2) 
+   du_dp,dummy = np.gradient(u[ttt,:,:],targetp1d,latrad,edge_order=2) 
+   ####################################
    # (equation 2.2) psi function
    rcp = myp.R / myp.cp
    psi = - vptp[ttt,:,:] / ( (rcp*temp[ttt,:,:]/targetp3d[ttt,:,:]) - (dt_dp) ) 
    # (equation 2.1) EP flux (phi)
-   Fphi[ttt,:,:] = acosphi2d * ( - vpup[ttt,:,:] + psi*du_dp ) 
+   Fphi[ttt,:,:] = acosphi2d * ( - vpup[ttt,:,:] + psi[ttt,:,:]*du_dp ) 
    # (equation 2.1) EP flux (p)
    if is_omega:
      verteddy = - opup[ttt,:,:]
    else:
      verteddy = 0. # often a acceptable approximation
-   Fp[ttt,:,:] = - acosphi2d * ( verteddy + psi * (du_dy - f) )   
+   Fp[ttt,:,:] = - acosphi2d * ( verteddy + psi[ttt,:,:] * (du_dy - f) )   
    # (equation 2.3) divergence of EP flux
-   divFphi[ttt,:,:],dummy = ppcompute.deriv2d(Fphi[ttt,:,:]*cosphi2d,latrad,targetp1d) / acosphi2d
-   dummy,divFp[ttt,:,:] = ppcompute.deriv2d(Fp[ttt,:,:],latrad,targetp1d)
+   dummy,divFphi[ttt,:,:] = np.gradient(Fphi[ttt,:,:]*cosphi2d,targetp1d,latrad,edge_order=2) / acosphi2d  
+   divFp[ttt,:,:],dummy = np.gradient(Fp[ttt,:,:],targetp1d,latrad,edge_order=2) 
    # (equation 2.6) residual mean meridional circulation
-   dummy,dpsi_dp = ppcompute.deriv2d(psi,latrad,targetp1d)
+   dpsi_dp,dummy = np.gradient(psi[ttt,:,:],targetp1d,latrad,edge_order=2)  
    vstar[ttt,:,:] = v[ttt,:,:] - dpsi_dp
-   dpsi_dy,dummy = ppcompute.deriv2d(psi*cosphi2d,latrad,targetp1d) / acosphi2d
+   dummy,dpsi_dy = np.gradient(psi[ttt,:,:]*cosphi2d,targetp1d,latrad,edge_order=2) / acosphi2d
    omegastar[ttt,:,:] = omega[ttt,:,:] + dpsi_dy
    # (equation 2.7) equivalent acceleration on horizontal (eddies)
    edddudt[ttt,:,:] = divFphi[ttt,:,:] / acosphi2d
@@ -480,9 +482,9 @@ if not short:
    # (equation 2.5) classical (not transformed) Eulerian-mean equations
    accrmch[ttt,:,:] = - (du_dy - f)*v[ttt,:,:]
    accrmcv[ttt,:,:] = - du_dp*omega[ttt,:,:]
-   ddd,dummy = ppcompute.deriv2d(vpup[ttt,:,:]*cosphi2d*cosphi2d,latrad,targetp1d) 
+   dummy,ddd = np.gradient(vpup[ttt,:,:]*cosphi2d*cosphi2d,targetp1d,latrad,edge_order=2)  
    if is_omega:
-     dummy,ddd2 = ppcompute.deriv2d(opup[ttt,:,:],latrad,targetp1d)
+     ddd2,dummy = np.gradient(opup[ttt,:,:],targetp1d,latrad,edge_order=2)  
    else:
      ddd2 = 0.
    acceddh[ttt,:,:] = - ddd2 - ddd / acosphi2d / cosphi2d
@@ -569,7 +571,8 @@ if not short:
   addvar(outfile,nam4,'accrmcv',accrmcv)
   addvar(outfile,nam4,'acceddh',acceddh)
   addvar(outfile,nam4,'dudt',dudt)
-
+##
+  addvar(outfile,nam4,'psi',psi)
 
 
 
