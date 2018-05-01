@@ -24,7 +24,8 @@ pluto ; http://www.boulder.swri.edu/~buie/pluto/pluto_all.png
 triton ; http://laps.noaa.gov/albers/sos/neptune/triton/triton_rgb_cyl_www.jpg
 titan ; http://laps.noaa.gov/albers/sos/saturn/titan/titan_rgb_cyl_www.jpg
 titanuni ; http://maps.jpl.nasa.gov/pix/sat6fss1.jpg
-venus ; http://laps.noaa.gov/albers/sos/venus/venus4/venus4_rgb_cyl_www.jpg
+venus_magellan ; http://stevealbers.net/albers/sos/venus/venus4/venus4_rgb_cyl_www.jpg
+venus_topo ; http://stevealbers.net/albers/sos/venus/venus_shaded.jpg
 cosmic ; http://laps.noaa.gov/albers/sos/universe/wmap/wmap_rgb_cyl_www.jpg
 coast ; dummy
 sea ; dummy
