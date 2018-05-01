@@ -602,8 +602,6 @@ if not short:
   addvar(outfile,nam4,'accrmcv',accrmcv)
   addvar(outfile,nam4,'acceddh',acceddh)
   addvar(outfile,nam4,'dudt',dudt)
-##
-  addvar(outfile,nam4,'psi',psi)
 
 
 
