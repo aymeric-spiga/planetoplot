@@ -442,6 +442,7 @@ if not short:
  # *** see Andrews et al. JAS 83
  Fphi = np.zeros((nt,nz,nlat)) # EP flux H
  Fp = np.zeros((nt,nz,nlat)) # EP flux V
+ psi = np.zeros((nt,nz,nlat))
  divFphi = np.zeros((nt,nz,nlat)) # meridional divergence of EP flux
  divFp = np.zeros((nt,nz,nlat)) # vertical divergence of EP flux (usually small)
  EtoM = np.zeros((nt,nz,nlat)) # conversion from eddy to mean
@@ -462,22 +463,22 @@ if not short:
    dummy,du_dp = ppcompute.deriv2d(u[ttt,:,:],latrad,targetp1d)
    # (equation 2.2) psi function
    rcp = myp.R / myp.cp
-   psi = - vptp[ttt,:,:] / ( (rcp*temp[ttt,:,:]/targetp3d[ttt,:,:]) - (dt_dp) ) 
+   psi[ttt,:,:] = - vptp[ttt,:,:] / ( (rcp*temp[ttt,:,:]/targetp3d[ttt,:,:]) - (dt_dp) ) 
    # (equation 2.1) EP flux (phi)
-   Fphi[ttt,:,:] = acosphi2d * ( - vpup[ttt,:,:] + psi*du_dp ) 
+   Fphi[ttt,:,:] = acosphi2d * ( - vpup[ttt,:,:] + psi[ttt,:,:]*du_dp ) 
    # (equation 2.1) EP flux (p)
    if is_omega:
      verteddy = - opup[ttt,:,:]
    else:
      verteddy = 0. # often a acceptable approximation
-   Fp[ttt,:,:] = - acosphi2d * ( verteddy + psi * (du_dy - f) )   
+   Fp[ttt,:,:] = - acosphi2d * ( verteddy + psi[ttt,:,:] * (du_dy - f) )   
    # (equation 2.3) divergence of EP flux
    divFphi[ttt,:,:],dummy = ppcompute.deriv2d(Fphi[ttt,:,:]*cosphi2d,latrad,targetp1d) / acosphi2d
    dummy,divFp[ttt,:,:] = ppcompute.deriv2d(Fp[ttt,:,:],latrad,targetp1d)
    # (equation 2.6) residual mean meridional circulation
-   dummy,dpsi_dp = ppcompute.deriv2d(psi,latrad,targetp1d)
+   dummy,dpsi_dp = ppcompute.deriv2d(psi[ttt,:,:],latrad,targetp1d)
    vstar[ttt,:,:] = v[ttt,:,:] - dpsi_dp
-   dpsi_dy,dummy = ppcompute.deriv2d(psi*cosphi2d,latrad,targetp1d) / acosphi2d
+   dpsi_dy,dummy = ppcompute.deriv2d(psi[ttt,:,:]*cosphi2d,latrad,targetp1d) / acosphi2d
    omegastar[ttt,:,:] = omega[ttt,:,:] + dpsi_dy
    # (equation 2.7) equivalent acceleration on horizontal (eddies)
    edddudt[ttt,:,:] = divFphi[ttt,:,:] / acosphi2d
@@ -560,6 +561,7 @@ if not short:
   addvar(outfile,nam4,'effbeta_bt',effbeta_bt)
   addvar(outfile,nam4,'effbeta_bc',effbeta_bc)
   addvar(outfile,nam4,'ushear',ushear)
+  addvar(outfile,nam4,'psi',psi)
   addvar(outfile,nam4,'Fphi',Fphi)
   addvar(outfile,nam4,'divFphi',divFphi)
   addvar(outfile,nam4,'divFp',divFp)
