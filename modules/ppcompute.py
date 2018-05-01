@@ -345,7 +345,7 @@ def deriv1d(field,coord=None):
   ## dfdx = deriv(f,x)
   df = np.gradient(field)
   if coord is not None:
-    dx = np.gradient(coord)
+    dx = np.gradient(coord,edge_order=2)
     return df/dx
   else:
     return df
@@ -376,16 +376,23 @@ def dxdy(lon,lat,coeff=None,lonlat=False):
     exit()
   # compute normalized gradients for lat/lon grid
   # -- cartesian differential coordinates
-  dump,dx = np.gradient(lar)
-  dy,dump = np.gradient(phr)
+  dump,dx = np.gradient(lar,edge_order=2)
+  dy,dump = np.gradient(phr,edge_order=2)
   # treat the particular case of lon/lat
   if lonlat:
     dx = dx*np.cos(phr)
   return dx,dy
  
 def deriv2d(u,coordx,coordy,coeff=None,lonlat=False,fac=1.):
+  ###
+  ### equivalent to  
+  ###   x,y = np.meshgrid(coordx,coordy)
+  ###   dx,dy = dxdy(coordx,coordy)
+  ###   du_dy,du_dx = np.gradient(u,dy,dx,edge_order=2)
+  ### though slightly more flexible
+  ###
   # compute gradients -- with normalized coordinates
-  du_y,du_x = np.gradient(u)
+  du_y,du_x = np.gradient(u,edge_order=2)
   # compute cartesian increments
   dx,dy = dxdy(coordx,coordy,coeff=coeff,lonlat=lonlat)
   # eventually compute cartesian derivatives
