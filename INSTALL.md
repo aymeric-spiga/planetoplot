@@ -36,7 +36,7 @@ A suite of pre-packaged `python` librairies such as [Anaconda](https://store.con
 The full `anaconda` suite is free of charge and easy to install
 
  1. Go to [this website](https://store.continuum.io/cshop/anaconda/)
- 2. Install `anaconda` on your system
+ 2. Install `anaconda` on your system (Python 2.7 version)
  3. Add the `anaconda` `bin` directory to your `PATH` environment variable
  4. Add `basemap` and `netCDF4` with the shell command `conda install basemap pil netCDF4`
 
@@ -55,9 +55,17 @@ conda install netCDF4
 ~~~
 (If needed, install the optional packages)
 ~~~
-conda install basemap
+conda install -c conda-forge basemap
 conda install pil
 conda install scipy
+~~~
+
+Here is a summary of conda commands using a dedicated environment for planetoplot
+~~~
+conda create -n planetoplot python=2.7
+source activate planetoplot
+conda install numpy matplotlib netcdf4
+conda install -c conda-forge basemap
 ~~~
 
 ### Possibility 3: install directly librairies to the built-in `python` in your OS 
