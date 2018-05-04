@@ -1058,7 +1058,7 @@ class pp():
             # ... (and we have to be careful with not doing things several times)
             if pl.superpose:
                 if self.n == 0: 
-                    self.fig.add_subplot(1,1,1,axisbg=pl.axisbg) # define one subplot (still needed for user-defined font sizes)
+                    self.fig.add_subplot(1,1,1) #,axisbg=pl.axisbg) # define one subplot (still needed for user-defined font sizes)
                     sav = pl.xlabel,pl.ylabel,\
                           pl.xcoeff,pl.ycoeff,\
                           pl.nxticks,pl.nyticks,\
@@ -1089,7 +1089,7 @@ class pp():
                         pl.ymin = prev_plot.ymin ; pl.ymax = prev_plot.ymax
                         pl.title = prev_plot.title ; pl.swaplab = prev_plot.swaplab
             else:
-                self.fig.add_subplot(self.subv,self.subh,self.n+1,axisbg=pl.axisbg)
+                self.fig.add_subplot(self.subv,self.subh,self.n+1) #,axisbg=pl.axisbg)
             if self.verbose: print "**** Done subplot %i / %i " %( self.n+1,self.howmanyplots ) 
             # finally make the plot
             pl.fig = self.fig
