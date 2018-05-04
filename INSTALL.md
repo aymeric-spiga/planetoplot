@@ -44,8 +44,8 @@ The full `anaconda` suite is free of charge and easy to install
 
 The only drawback of `anaconda` is that you download a pretty huge amount of librairies. To make the installation lighter -- should you ever want to -- use the `miniconda` software
 
- 1. Go to [this website](http://repo.continuum.io/miniconda)
- 2. Download the appropriate `miniconda` install script (do not choose `miniconda3`)
+ 1. Go to [this website](https://conda.io/miniconda.html)
+ 2. Download the appropriate `miniconda` install script (Python 2.7 version)
  3. Install `miniconda` by executing this script
  4. Install the necessary packages using the `conda install` command
 ~~~
