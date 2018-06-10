@@ -951,7 +951,7 @@ class plot2d(plot):
             if self.ymin is not None: self.ax.set_ybound(lower=self.ymin)
             if self.ymax is not None: self.ax.set_ybound(upper=self.ymax)
             # use back attributes to set a background
-            if self.back is not None: self.ax.set_axis_bgcolor(self.back)
+            if self.back is not None: self.ax.set_facecolor(self.back)
             # set the number of ticks
             if not self.logx:
                 self.ax.xaxis.set_major_locator(mtick.MaxNLocator(self.nxticks))
