@@ -1113,7 +1113,11 @@ class plot2d(plot):
             if not self.mapmode: orientation=zeorientation ; frac = 0.15 ; pad = 0.04 ; lu = 0.5
             elif self.proj in ['moll']: orientation="horizontal" ; frac = 0.08 ; pad = 0.03 ; lu = 1.0
             elif self.proj in ['robin']: orientation="horizontal" ; frac = 0.07 ; pad = 0.1 ; lu = 1.0
-            elif self.proj in ['cyl']: orientation="vertical" ; frac = 0.023 ; pad = 0.03 ; lu = 0.5
+            elif self.proj in ['cyl']:
+              if np.abs(self.ymin) > 60.:
+               orientation="vertical" ; frac = 0.023 ; pad = 0.03 ; lu = 0.5
+              else:
+               orientation="horizontal" ; frac = 0.04 ; pad = 0.05 ; lu = 1.0
             else: orientation = zeorientation ; frac = zefrac ; pad = 0.03 ; lu = 0.5
             if self.cbticks is None:
                 self.cbticks = min([ticks/2+1,21])
@@ -1165,6 +1169,9 @@ class plot2d(plot):
                 keyh = 0.97 ; keyv = 1.06
                 #keyh = 0.97 ; keyv = 1.11
                 #keyh = -0.03 ; keyv = 1.08 # upper left corner
+
+                if orientation=="horizontal": keyh = 0.95 ; keyv = -0.30
+
                 p = self.ax.quiverkey(q,keyh,keyv,\
                                   self.wscale,str(int(self.wscale)),\
                                   fontproperties={'size': ft*1.25},\
