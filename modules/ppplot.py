@@ -912,6 +912,7 @@ class plot2d(plot):
         ### MAIN PLOT
         ### NB: contour lines are done before contour shades otherwise colorar error
         ############################################################################################
+	ft = int(mpl.rcParams['font.size']*3./4.)
         if not self.mapmode:
             ## A SIMPLE 2D PLOT
             ###################
@@ -1177,14 +1178,14 @@ class plot2d(plot):
                                   fontproperties={'size': ft*1.25},\
                                   color="black",labelpos='S',labelsep = 0.07)
                 #redefine bounds
-                x1, x2 = ax.get_xbound()
+                x1, x2 = self.ax.get_xbound()
                 if self.xmin is not None: x1 = self.xmin
                 if self.xmax is not None: x2 = self.xmax
-                ax.set_xbound(lower=x1,upper=x2)
-                y1, y2 = ax.get_ybound()
+                self.ax.set_xbound(lower=x1,upper=x2)
+                y1, y2 = self.ax.get_ybound()
                 if self.ymin is not None: y1 = self.ymin
                 if self.ymax is not None: y2 = self.ymax
-                ax.set_ybound(lower=y1,upper=y2)
+                self.ax.set_ybound(lower=y1,upper=y2)
 
         ############################################################################################
         ### TEXT. ANYWHERE. add_text.txt should be present with lines x ; y ; text ; color
