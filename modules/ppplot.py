@@ -1115,8 +1115,10 @@ class plot2d(plot):
             elif self.proj in ['moll']: orientation="horizontal" ; frac = 0.08 ; pad = 0.03 ; lu = 1.0
             elif self.proj in ['robin']: orientation="horizontal" ; frac = 0.07 ; pad = 0.1 ; lu = 1.0
             elif self.proj in ['cyl']:
-              if np.abs(self.ymin) > 60.:
-               orientation="vertical" ; frac = 0.023 ; pad = 0.03 ; lu = 0.5
+              if self.ymin is None: damin = 999.
+              else: damin = np.abs(self.ymin)
+              if damin > 60.:
+                orientation="vertical" ; frac = 0.023 ; pad = 0.03 ; lu = 0.5
               else:
                orientation="horizontal" ; frac = 0.04 ; pad = 0.05 ; lu = 1.0
             else: orientation = zeorientation ; frac = zefrac ; pad = 0.03 ; lu = 0.5
