@@ -1197,7 +1197,7 @@ class pp():
             else:
                 self.p[iii].swaplab = False
             ##
-            if opt.void:
+            if opt.void or not opt.showcb:
                 self.p[iii].showcb = False
             else:
                 self.p[iii].showcb = True
