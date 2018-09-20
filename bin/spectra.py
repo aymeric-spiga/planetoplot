@@ -238,8 +238,6 @@ fifi.close()
 print(open(txtfile, "r").read())
 
 ## COMPUTE FREQUENCY/PERIOD AXIS
-lowerperiod = 2.5*opt.dt # Nyquist rate + 1
-higherperiod = opt.dt*float(nt-1)/2. # half size of sample
 if not opt.period:
   # frequency: longitude degree per UNIT
   spect = 360.*spect
