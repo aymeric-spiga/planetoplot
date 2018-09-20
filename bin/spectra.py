@@ -315,7 +315,6 @@ if (opt.reldis):
     p.y = 1./(spect)
 
 
-  import matplotlib.pyplot as plt
 
   ## COMPUTE dispersion relationship for all modes
   p.colorbar = "viridis"
