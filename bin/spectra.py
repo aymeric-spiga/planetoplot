@@ -119,18 +119,25 @@ nx,nt = tab.shape
 
 ### TREAT PROBLEM of EVEN NUMBER OF LONGITUDES (which is a problem with fftshift) 
 ### ... ADD A MIRROR POINT IN THE END
+#if (nx % 2 == 0):
+#  tab2 = np.zeros([nx+1,nt])
+#  tab2[0:nx-1,:] = tab[0:nx-1,:]
+#  tab2[nx,:] = tab[0,:]
+#  tab = tab2
+#  nx = nx + 1
 if (nx % 2 == 0):
-  tab2 = np.zeros([nx+1,nt])
-  tab2[0:nx-1,:] = tab[0:nx-1,:]
-  tab2[nx,:] = tab[0,:]
+  tab2 = np.zeros([nx-1,nt])
+  tab2[0:nx-2,:] = tab[0:nx-2,:]
   tab = tab2
-  nx = nx + 1
-     
+  nx = nx - 1     
+
 ## SAMPLE SPACES
 # data points each dx planet --> result in zonal wavenumber
 dx = 1./nx
 # data points each opt.dt time units --> result in (time unit)^-1
-lowerperiod = 3.*opt.dt # Nyquist rate + 1
+lowerperiod = 4.*opt.dt # Nyquist rate
+if opt.ymax is not None: 
+  lowerperiod = 360./opt.ymax
 higherperiod = opt.dt*float(nt-1)/2. # half size of sample
 
 ## PERFORM 2D FFT
@@ -171,12 +178,21 @@ limxmin = -limxmax
 if opt.xmin is None: opt.xmin = limxmin
 if opt.xmax is None: opt.xmax = limxmax
 
-## RETAIN ONLY POSITIVE FREQUENCIES
-## -- (and remove period=sample_size)
+### RETAIN ONLY POSITIVE FREQUENCIES
+### -- (and remove period=sample_size)
 mm = min(spect[spect>0])
 w = spect > mm
 spect = spect[w]
-spec = spec[:,w]
+#spec = spec[:,w] #before
+### have to collect all power (complex --> real)
+### ... avoid spectral leakage
+### 90 deg per day semble etre la limite...
+spec = spec[:,w] + spec[::-1,w[::-1]]
+# https://gist.github.com/endolith/236567
+# https://calebmadrigal.com/fourier-transform-notes/
+# https://dsp.stackexchange.com/questions/3466/amplitude-of-the-signal-in-frequency-domain-different-from-time-domain
+# https://dsp.stackexchange.com/questions/4825/why-is-the-fft-mirrored
+# https://electronics.stackexchange.com/questions/12407/what-is-the-relation-between-fft-length-and-frequency-resolution
 
 ## SEARCH FOR DOMINANT MODES
 # -- initialize output
