@@ -1176,7 +1176,7 @@ class plot2d(plot):
                 if orientation=="horizontal": keyh = 0.95 ; keyv = -0.30
 
                 p = self.ax.quiverkey(q,keyh,keyv,\
-                                  self.wscale,str(int(self.wscale)),\
+                                  self.wscale,str(int(self.wscale))+' m/s',\
                                   fontproperties={'size': ft*1.25},\
                                   color="black",labelpos='S',labelsep = 0.07)
                 #redefine bounds
