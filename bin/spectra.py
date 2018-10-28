@@ -35,6 +35,7 @@ parser.add_option('-d','--dt',action='store',dest='dt',type="float",default=1.,h
 parser.add_option('-o','--output',action='store',dest='output',type='string',default=None,help="name of png output (gui if None)")
 parser.add_option('-k','--kind',action='store',dest='kind',type='string',default="local",help="kind of diagnostic: 'local' at lat [D], 'sym' or 'antisym' at +/- lat")
 parser.add_option('-e','--height',action='store',dest='height',type='float',default=10.,help="equivalent height [m, default: 10m]")
+parser.add_option('--savef',action='store',dest='savef',type="string",default="png",help="choose save format of outputs")
 parser.add_option('--reldis',action='store_true',dest='reldis',default=False,help="add dispersion relationship")
 parser.add_option('--log',action='store_true',dest='log',default=False,help="set log field")
 parser.add_option('--period',action='store_true',dest='period',default=False,help="show period (in UNIT) instead of frequency")
@@ -350,7 +351,7 @@ if (opt.reldis):
 ### SHOW or SAVE PLOT
 if not opt.noplot:
   if opt.output is None: ppplot.show()
-  else: ppplot.save(mode="png",filename=opt.output)
+  else: ppplot.save(mode=opt.savef,filename=opt.output)
 
 ####################################
 # save a .sh file with the command #
