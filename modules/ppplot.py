@@ -351,7 +351,7 @@ def save(mode=None,filename=None,folder="./",includedate=False,res=150,custom=Fa
                   name = name + "_" + "%03d" % (ttt)
           name = name +"."+mode
           ## save file
-          print "**** Saving file in "+mode+" format... Please wait."
+          #print "**** Saving file in "+mode+" format... Please wait."
           if not custom:
               # ... regular plots
               mpl.savefig(name,dpi=res,pad_inches=pad_inches_value,bbox_inches='tight')
