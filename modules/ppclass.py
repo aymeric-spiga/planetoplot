@@ -188,6 +188,7 @@ class pp():
                       vmin=None,vmax=None,\
                       div=None,\
                       colorbar=None,\
+                      cbticks=None,\
                       linestyle=None,\
                       marker=None,\
                       color=None,\
@@ -202,6 +203,7 @@ class pp():
                       nopickle=False,\
                       trans=None,back=None,\
                       showcb=None,\
+                      clev=None,\
                       logy=None,\
                       title=None):
         self.request = None
@@ -262,6 +264,7 @@ class pp():
         self.vmin = vmin ; self.vmax = vmax
         self.div = div
         self.colorbar = colorbar
+        self.cbticks = cbticks
         self.linestyle = linestyle
         self.marker = marker
         self.color = color
@@ -273,6 +276,7 @@ class pp():
         self.fmt = fmt
         self.trans = trans ; self.back = back
         self.showcb = showcb
+        self.clev = clev
         self.logy = logy
 
     # print status
@@ -324,6 +328,7 @@ class pp():
             self.ymin = other.ymin ; self.ymax = other.ymax
             self.div = other.div
             self.colorbar = other.colorbar
+            self.cbticks = other.cbticks
             self.linestyle = other.linestyle
             self.marker = other.marker
             self.color = other.color
@@ -341,6 +346,7 @@ class pp():
             self.fmt = other.fmt
             self.trans = other.trans ; self.back = other.back
             self.showcb = other.showcb
+            self.clev = other.clev
             self.logy = other.logy
             self.svx = other.svx ; self.svy = other.svy
         else:
@@ -933,6 +939,7 @@ class pp():
                     if self.xmax is not None: plobj.xmax = self.xmax
                     if self.ymin is not None: plobj.ymin = self.ymin
                     if self.ymax is not None: plobj.ymax = self.ymax
+		    if self.cbticks is not None: plobj.cbticks = self.cbticks
                     # -- 1D specific
                     if dp == 1:
                         if self.linestyle is not None: plobj.linestyle = self.linestyle
@@ -945,6 +952,7 @@ class pp():
                         if self.vmax is not None: plobj.vmax = self.vmax
                         if self.trans is not None: plobj.trans = self.trans
 			if self.back is not None: plobj.back = self.back
+			if self.clev is not None: plobj.clev = self.clev
                     # finally append plot object
                     self.p.append(plobj)
                     count = count + 1
@@ -1263,6 +1271,11 @@ class pp():
             try: self.p[iii].back = opt.back[iii]
             except: 
                 try: self.p[iii].back = opt.back[0]
+                except: pass
+            ####
+            try: self.p[iii].clev = opt.clev[iii]
+            except: 
+                try: self.p[iii].clev = opt.clev[0]
                 except: pass
             ###
             try: self.p[iii].area = opt.area[iii]
