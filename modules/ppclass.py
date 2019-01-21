@@ -204,6 +204,8 @@ class pp():
                       trans=None,back=None,\
                       showcb=None,\
                       clev=None,\
+                      cfmt=None,\
+                      clab=False,\
                       logy=None,\
                       title=None):
         self.request = None
@@ -277,6 +279,8 @@ class pp():
         self.trans = trans ; self.back = back
         self.showcb = showcb
         self.clev = clev
+        self.clab = clab
+        self.cfmt = cfmt
         self.logy = logy
 
     # print status
@@ -347,6 +351,8 @@ class pp():
             self.trans = other.trans ; self.back = other.back
             self.showcb = other.showcb
             self.clev = other.clev
+            self.cfmt = other.cfmt
+            self.clab = other.clab
             self.logy = other.logy
             self.svx = other.svx ; self.svy = other.svy
         else:
@@ -953,6 +959,9 @@ class pp():
                         if self.trans is not None: plobj.trans = self.trans
 			if self.back is not None: plobj.back = self.back
 			if self.clev is not None: plobj.clev = self.clev
+			if self.cfmt is not None: plobj.cfmt = self.cfmt
+                        if self.clab is not None: plobj.clab = self.clab
+
                     # finally append plot object
                     self.p.append(plobj)
                     count = count + 1
@@ -1276,6 +1285,16 @@ class pp():
             try: self.p[iii].clev = opt.clev[iii]
             except: 
                 try: self.p[iii].clev = opt.clev[0]
+                except: pass
+            ####
+            try: self.p[iii].cfmt = opt.cfmt[iii]
+            except: 
+                try: self.p[iii].cfmt = opt.cfmt[0]
+                except: pass
+            ###
+            try: self.p[iii].clab = opt.clab[iii]
+            except:
+                try: self.p[iii].clab = opt.clab[0]
                 except: pass
             ###
             try: self.p[iii].area = opt.area[iii]
