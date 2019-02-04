@@ -188,6 +188,7 @@ class pp():
                       vmin=None,vmax=None,\
                       div=None,\
                       colorbar=None,\
+                      cbticks=None,\
                       linestyle=None,\
                       marker=None,\
                       color=None,\
@@ -202,6 +203,9 @@ class pp():
                       nopickle=False,\
                       trans=None,back=None,\
                       showcb=None,\
+                      clev=None,\
+                      cfmt=None,\
+                      clab=False,\
                       logy=None,\
                       title=None):
         self.request = None
@@ -262,6 +266,7 @@ class pp():
         self.vmin = vmin ; self.vmax = vmax
         self.div = div
         self.colorbar = colorbar
+        self.cbticks = cbticks
         self.linestyle = linestyle
         self.marker = marker
         self.color = color
@@ -273,6 +278,9 @@ class pp():
         self.fmt = fmt
         self.trans = trans ; self.back = back
         self.showcb = showcb
+        self.clev = clev
+        self.clab = clab
+        self.cfmt = cfmt
         self.logy = logy
 
     # print status
@@ -324,6 +332,7 @@ class pp():
             self.ymin = other.ymin ; self.ymax = other.ymax
             self.div = other.div
             self.colorbar = other.colorbar
+            self.cbticks = other.cbticks
             self.linestyle = other.linestyle
             self.marker = other.marker
             self.color = other.color
@@ -341,6 +350,9 @@ class pp():
             self.fmt = other.fmt
             self.trans = other.trans ; self.back = other.back
             self.showcb = other.showcb
+            self.clev = other.clev
+            self.cfmt = other.cfmt
+            self.clab = other.clab
             self.logy = other.logy
             self.svx = other.svx ; self.svy = other.svy
         else:
@@ -933,6 +945,7 @@ class pp():
                     if self.xmax is not None: plobj.xmax = self.xmax
                     if self.ymin is not None: plobj.ymin = self.ymin
                     if self.ymax is not None: plobj.ymax = self.ymax
+		    if self.cbticks is not None: plobj.cbticks = self.cbticks
                     # -- 1D specific
                     if dp == 1:
                         if self.linestyle is not None: plobj.linestyle = self.linestyle
@@ -945,6 +958,10 @@ class pp():
                         if self.vmax is not None: plobj.vmax = self.vmax
                         if self.trans is not None: plobj.trans = self.trans
 			if self.back is not None: plobj.back = self.back
+			if self.clev is not None: plobj.clev = self.clev
+			if self.cfmt is not None: plobj.cfmt = self.cfmt
+                        if self.clab is not None: plobj.clab = self.clab
+
                     # finally append plot object
                     self.p.append(plobj)
                     count = count + 1
@@ -1058,7 +1075,7 @@ class pp():
             # ... (and we have to be careful with not doing things several times)
             if pl.superpose:
                 if self.n == 0: 
-                    self.fig.add_subplot(1,1,1,axisbg=pl.axisbg) # define one subplot (still needed for user-defined font sizes)
+                    self.fig.add_subplot(1,1,1) #,axisbg=pl.axisbg) # define one subplot (still needed for user-defined font sizes)
                     sav = pl.xlabel,pl.ylabel,\
                           pl.xcoeff,pl.ycoeff,\
                           pl.nxticks,pl.nyticks,\
@@ -1089,9 +1106,10 @@ class pp():
                         pl.ymin = prev_plot.ymin ; pl.ymax = prev_plot.ymax
                         pl.title = prev_plot.title ; pl.swaplab = prev_plot.swaplab
             else:
-                self.fig.add_subplot(self.subv,self.subh,self.n+1,axisbg=pl.axisbg)
+                self.fig.add_subplot(self.subv,self.subh,self.n+1) #,axisbg=pl.axisbg)
             if self.verbose: print "**** Done subplot %i / %i " %( self.n+1,self.howmanyplots ) 
             # finally make the plot
+            pl.fig = self.fig
             pl.make()
             # possibly print results in a text file
             if self.savtxt:
@@ -1105,7 +1123,7 @@ class pp():
         # ... added a fix (customplot=True) for the label problem in basemap
         if not self.quiet: print "**** PPCLASS. Done step: makeplot"
         if (self.n == self.howmanyplots):
-            ppplot.save(mode=self.out,filename=self.filename,folder=self.folder,custom=self.customplot,includedate=self.includedate,res=self.res)
+            ppplot.save(mode=self.out,filename=self.filename,folder=self.folder,custom=self.customplot,includedate=self.includedate,res=self.res,fig=self.fig)
             mpl.close()
         # SAVE A PICKLE FILE WITH THE self.p ARRAY OF OBJECTS
         if not self.nopickle:
@@ -1196,7 +1214,7 @@ class pp():
             else:
                 self.p[iii].swaplab = False
             ##
-            if opt.void:
+            if opt.void or not opt.showcb:
                 self.p[iii].showcb = False
             else:
                 self.p[iii].showcb = True
@@ -1262,6 +1280,21 @@ class pp():
             try: self.p[iii].back = opt.back[iii]
             except: 
                 try: self.p[iii].back = opt.back[0]
+                except: pass
+            ####
+            try: self.p[iii].clev = opt.clev[iii]
+            except: 
+                try: self.p[iii].clev = opt.clev[0]
+                except: pass
+            ####
+            try: self.p[iii].cfmt = opt.cfmt[iii]
+            except: 
+                try: self.p[iii].cfmt = opt.cfmt[0]
+                except: pass
+            ###
+            try: self.p[iii].clab = opt.clab[iii]
+            except:
+                try: self.p[iii].clab = opt.clab[0]
                 except: pass
             ###
             try: self.p[iii].area = opt.area[iii]

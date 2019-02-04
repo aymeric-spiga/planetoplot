@@ -33,11 +33,14 @@ parser.add_option('-z','--vert',action='store',dest='z',type="string",default="0
 parser.add_option('-u','--unit',action='store',dest='unit',type='string',default="time unit",help="time unit (spectra in UNIT^-1, default: time unit)")
 parser.add_option('-d','--dt',action='store',dest='dt',type="float",default=1.,help="in FILE, one data point each time UNIT (default: 1)")
 parser.add_option('-o','--output',action='store',dest='output',type='string',default=None,help="name of png output (gui if None)")
+parser.add_option('-k','--kind',action='store',dest='kind',type='string',default="local",help="kind of diagnostic: 'local' at lat [D], 'sym' or 'antisym' at +/- lat")
+parser.add_option('-e','--height',action='store',dest='height',type='float',default=10.,help="equivalent height [m, default: 10m]")
 parser.add_option('--reldis',action='store_true',dest='reldis',default=False,help="add dispersion relationship")
 parser.add_option('--log',action='store_true',dest='log',default=False,help="set log field")
 parser.add_option('--period',action='store_true',dest='period',default=False,help="show period (in UNIT) instead of frequency")
 parser.add_option('--ndom',action='store',dest='ndom',type="int",default=10,help="print info for the NDOM dominant modes (default:10)")
 parser.add_option('--noplot',action='store_true',dest='noplot',default=False,help="do not plot anything, just output dominant modes")
+parser.add_option('--nutab',action='store',dest='nutab',type="int",default=1,help="dispersion relation to include (0,1,2 ; default:1)")
 
 ## get planetoplot-like options
 parser = ppplot.opt(parser) # common options for plots
@@ -65,10 +68,12 @@ if opt.xlabel is None:
 if opt.title is None: 
   opt.title = "2D Zonal-Time FFT for "+opt.var
 #
-if (opt.reldis): 
-  opt.title = opt.title + " + RW / KW dispersion relations"
-else: 
+if opt.kind == "local":
   opt.title = opt.title + " at latitude "+str(opt.y)
+elif opt.kind == "sym":
+  opt.title = opt.title + " symmetric, lat +/-"+str(opt.y)
+elif opt.kind == "antisym":
+  opt.title = opt.title + " antisymmetric, lat +/-"+str(opt.y)
 
 ## hardwired settings for this script
 opt.div = 50
@@ -94,13 +99,17 @@ if opt.ymin is None:
 
 ## FIELD
 vb = False
-tab,x,y,z,t = pp(file=infile,var=opt.var,y=opt.y,z=opt.z,verbose=vb).getfd() # pert_x ne change rien
-
-## symm / anti-symm components, see Wheeler 1999
-#tabtropN = pp(file=infile,var=opt.var,y=+5.,z=opt.z,verbose=vb).getf()
-#tabtropS = pp(file=infile,var=opt.var,y=-5.,z=opt.z,verbose=vb).getf()
-#tab = 0.5*tabtropN + 0.5*tabtropS # symmetric
-##tab = 0.5*tabtropN - 0.5*tabtropS # antisymmetric
+if opt.kind == "local":
+   tab,x,y,z,t = pp(file=infile,var=opt.var,y=opt.y,z=opt.z,verbose=vb).getfd() # pert_x ne change rien
+else:
+   # symm / anti-symm components, see Wheeler & Kiladis 1999
+   dalat = np.abs(np.float(opt.y))
+   tabtropN,x,y,z,t = pp(file=infile,var=opt.var,y=+dalat,z=opt.z,verbose=vb).getfd()
+   tabtropS         = pp(file=infile,var=opt.var,y=-dalat,z=opt.z,verbose=vb).getf()
+   if opt.kind == "sym":
+      tab = 0.5*tabtropN + 0.5*tabtropS # symmetric
+   elif opt.kind == "antisym":
+      tab = 0.5*tabtropN - 0.5*tabtropS # antisymmetric
 
 ## MAKE X=LON Y=TIME
 tab = np.transpose(tab)
@@ -110,18 +119,25 @@ nx,nt = tab.shape
 
 ### TREAT PROBLEM of EVEN NUMBER OF LONGITUDES (which is a problem with fftshift) 
 ### ... ADD A MIRROR POINT IN THE END
+#if (nx % 2 == 0):
+#  tab2 = np.zeros([nx+1,nt])
+#  tab2[0:nx-1,:] = tab[0:nx-1,:]
+#  tab2[nx,:] = tab[0,:]
+#  tab = tab2
+#  nx = nx + 1
 if (nx % 2 == 0):
-  tab2 = np.zeros([nx+1,nt])
-  tab2[0:nx-1,:] = tab[0:nx-1,:]
-  tab2[nx,:] = tab[0,:]
+  tab2 = np.zeros([nx-1,nt])
+  tab2[0:nx-2,:] = tab[0:nx-2,:]
   tab = tab2
-  nx = nx + 1
-     
+  nx = nx - 1     
+
 ## SAMPLE SPACES
 # data points each dx planet --> result in zonal wavenumber
 dx = 1./nx
 # data points each opt.dt time units --> result in (time unit)^-1
-lowerperiod = 3.*opt.dt # Nyquist rate + 1
+lowerperiod = 4.*opt.dt # Nyquist rate
+if opt.ymax is not None: 
+  lowerperiod = 360./opt.ymax
 higherperiod = opt.dt*float(nt-1)/2. # half size of sample
 
 ## PERFORM 2D FFT
@@ -162,12 +178,21 @@ limxmin = -limxmax
 if opt.xmin is None: opt.xmin = limxmin
 if opt.xmax is None: opt.xmax = limxmax
 
-## RETAIN ONLY POSITIVE FREQUENCIES
-## -- (and remove period=sample_size)
+### RETAIN ONLY POSITIVE FREQUENCIES
+### -- (and remove period=sample_size)
 mm = min(spect[spect>0])
 w = spect > mm
 spect = spect[w]
-spec = spec[:,w]
+#spec = spec[:,w] #before
+### have to collect all power (complex --> real)
+### ... avoid spectral leakage
+### 90 deg per day semble etre la limite...
+spec = spec[:,w] + spec[::-1,w[::-1]]
+# https://gist.github.com/endolith/236567
+# https://calebmadrigal.com/fourier-transform-notes/
+# https://dsp.stackexchange.com/questions/3466/amplitude-of-the-signal-in-frequency-domain-different-from-time-domain
+# https://dsp.stackexchange.com/questions/4825/why-is-the-fft-mirrored
+# https://electronics.stackexchange.com/questions/12407/what-is-the-relation-between-fft-length-and-frequency-resolution
 
 ## SEARCH FOR DOMINANT MODES
 # -- initialize output
@@ -176,13 +201,15 @@ if opt.output is not None:
 else:
   txtfile = "spectra.txt"
 fifi = open(txtfile, "w")
+fifi.write(opt.title+"\n")
 fifi.write("---------------------------------------\n")
-fifi.write("%2s %4s %8s %8s %8s\n" % ("n","WN","dg/"+opt.unit,opt.unit,"log(A)"))
-fifi.write("---------------------------------------\n")
+fifi.write("%4s & %8s & %8s & %8s \\\\ \hline \n" % ("$s$","$\sigma \, (^{\circ}$/"+opt.unit+")","period ("+opt.unit+")","log(SP)"))
+#fifi.write("---------------------------------------\n")
 # -- initialize while loop
 search = np.empty_like(spec) ; search[:,:] = spec[:,:]
 zelab = search > 0 # (all elements)
 itit = 1 
+spowermax = -9999.
 # -- while loop
 while itit <= opt.ndom:
   # -- find dominant mode
@@ -190,15 +217,20 @@ while itit <= opt.ndom:
   dominant_wn = specx[ij[0]]
   dominant_fq = spect[ij[1]]
   spower = search[ij]
+  # -- break if one order of magnitude difference in power
+  if spower < spowermax/10.:
+    break
   if (1./dominant_fq) < lowerperiod: reliable = "x"
   else: reliable = "o"
   # -- print result
   if reliable == "o":
-    fifi.write("%2i %4.0f %8.1f %8.1f %8.1f %4s\n" % (itit,dominant_wn,360.*dominant_fq,1./dominant_fq,np.log10(spower),reliable))
+    fifi.write("%+4.0f & %8.1f & %8.0f & %8.1f \\\\ \n" % (dominant_wn,360.*dominant_fq,1./dominant_fq,np.log10(spower)))
+    search[ij[0],:] = -9999. # remove wavenumber found (otherwise loop could find other maxima for this wn)
+    if spower > spowermax: spowermax = spower
   # -- iterate
   zelab = search < spower # remove maximum found
-  search[ij[0],:] = -9999. # remove wavenumber found (otherwise loop could find other maxima for this wn)
   itit += 1
+
 # -- close output
 fifi.write("---------------------------------------\n")
 fifi.close()
@@ -206,8 +238,6 @@ fifi.close()
 print(open(txtfile, "r").read())
 
 ## COMPUTE FREQUENCY/PERIOD AXIS
-lowerperiod = 2.5*opt.dt # Nyquist rate + 1
-higherperiod = opt.dt*float(nt-1)/2. # half size of sample
 if not opt.period:
   # frequency: longitude degree per UNIT
   spect = 360.*spect
@@ -244,35 +274,41 @@ if (opt.reldis):
   mypl = planets.Saturn
   #mypl = planets.Jupiter
 
-  ####################################
-  lz = 60000. # vue dans la simu?
-  lz = 2.*mypl.H() # a kind of generic choice
-  ####################################
-  nutab = [+1,+2,+3]
-  nutab = [+1,+2,+3,+4,+5]
-  nutab = [-3,-2,-1,+1,+2,+3]
+  #####################################
   #nutab = [-5,-4,-3,-2,-1,0,+1,+2,+3,+4,+5]
   #nutab = [-2,-1,0,+1,+2]
   nutab = [-1,0,+1]
-  #lz = 3000.
-  ####################################
-  #T0=pp(file=opt.file,var="temp",y=opt.y,z=opt.z,x=0,t="0,10000").getf()
-  ##--environ 120K, OK.
-  ###################################
-  n2tab = []
-  #n2tab.append(0.3e-5) # SL nat2011
-  n2tab.append(1.0e-5) # LL grl2008
-  #n2tab.append(mypl.N2()) # simple
-  #n2tab.append(mypl.N2(dTdz=-0.7e-3)) # proche LL
-  ####################################
-  hache = 100.
-  #hache = 10.
-  #hache = 1.
+  #nutab = [-1,+1]
+  #####################################
+
+  if opt.nutab == 0: nutab = [0]
+  elif opt.nutab == 1: nutab = [-1,+1]
+  elif opt.nutab == 2: nutab = [-2,-1,0,+1,+2]
+
+  hache = opt.height
+
+  hachetab = [hache]
+  hachetab = [1000.,2000.,5000.,10000.,20000.,50000.]
+  hachetab = [5000.,10000.,20000.,50000.]
+
+  for hache in hachetab:
+    term1 = 1./(4.*(mypl.H()**2))
+    #T0=pp(file=opt.file,var="temp",y=opt.y,z=opt.z,x=0,t="0,10000").getf() ##--environ 120K, OK.
+    term2 = mypl.N2() / (mypl.g*hache)
+    #0.3e-5 SL nat2011 // 1.0e-5 LL grl2008 // avec dTdz=-0.7e-3 # proche LL
+    m = np.sqrt(term2-term1)
+    lz = 2.*np.pi / m
+    c = np.sqrt(mypl.g*hache)
+    print "EQUIVALENT HEIGHT", hache
+    print "vertical wavelength [km] ", lz / 1000.
+    print "phase speed KW [m/s] ", c
+    print "equat Rossby rad [deg] ", np.sqrt(c/mypl.beta()) / 1e6
+
 
   # ensure number of points 
   # -- is enough for smooth lines
   # -- is not too high for efficiency
-  n = 100
+  n = 500
   specx = np.linspace(limxmin,limxmax,2*n)
   spect = np.linspace(spect.min(),spect.max(),n)
   spect = spect / 360. # convert back from deglon/unit to cycle/unit
@@ -292,15 +328,22 @@ if (opt.reldis):
     # period: UNIT
     p.y = 1./(spect)
 
+
+
   ## COMPUTE dispersion relationship for all modes
+  p.colorbar = "viridis"
   for nnn in nutab:
-   for n2n2 in n2tab:
-     if nnn == 0: p.ccol = "cyan"
-     elif nnn > 0: p.ccol = "magenta"
-     else: p.ccol = "red"
-     #p.c = mypl.dispeqw(s,sigma,nu=nnn,lz=lz,N2=n2n2)
-     p.c = mypl.dispeqw(s,sigma,nu=nnn,h=hache)
+#   if nnn == 0: p.ccol = "cyan"
+#   elif nnn > 0: p.ccol = "magenta"
+#   else: p.ccol = "red"
+   for hhh in hachetab:
+     if hhh == hachetab[0]: p.ccol = "blue" 
+     if hhh == hachetab[1]: p.ccol = "purple"
+     if hhh == hachetab[2]: p.ccol = "magenta"
+     if hhh == hachetab[3]: p.ccol = "red"
+     p.c = mypl.dispeqw(s,sigma,nu=nnn,h=hhh)
      p.make()
+
 
 ### SHOW or SAVE PLOT
 if not opt.noplot:

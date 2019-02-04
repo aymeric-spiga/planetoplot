@@ -128,6 +128,7 @@ user.folder = opt.folder
 user.out = opt.out
 user.proj = opt.proj
 user.res = opt.res
+user.showcb = opt.showcb
 # define plot
 user.defineplot()
 # user-defined plot settings
