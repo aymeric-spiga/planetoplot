@@ -1766,7 +1766,7 @@ class onerequest():
             for iy in range(self.dim_y):
               idx = np.argmin( np.abs( self.field_x[iy,:] - dalistx[indx][0] ) )
               # if comp is requested we select only indexes which yield values between requested min and max
-              storeval = (self.method_y == "comp") and (self.field_y[iy,idx] > dalisty[indy][0]) and (self.field_y[iy,idx] < dalisty[indy][1])
+              storeval = (self.method_y == "comp") and (self.field_y[iy,idx] >= dalisty[indy][0]) and (self.field_y[iy,idx] <= dalisty[indy][1])
               storeval = storeval or (self.method_y == "free")
               if storeval:
                   if idx not in self.index_x:  self.index_x.append(idx)
@@ -1781,7 +1781,7 @@ class onerequest():
             for ix in range(self.dim_x):
               idy = np.argmin( np.abs( self.field_y[:,ix] - dalisty[indy][0] ) )
               # if comp is requested we select only indexes which yield values between requested min and max
-              storeval = (self.method_x == "comp") and (self.field_x[idy,ix] > dalistx[indx][0]) and (self.field_x[idy,ix] < dalistx[indx][1])
+              storeval = (self.method_x == "comp") and (self.field_x[idy,ix] >= dalistx[indx][0]) and (self.field_x[idy,ix] <= dalistx[indx][1])
               storeval = storeval or (self.method_x == "free")
               if storeval:
                   if idy not in self.index_y:  self.index_y.append(idy)
