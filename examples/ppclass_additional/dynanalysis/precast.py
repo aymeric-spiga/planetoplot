@@ -8,7 +8,7 @@ import planets
 import time
 
 ####################################################
-fileAP="Xhistins_tmp.nc" 
+fileAP="Xhistins_5.nc" 
 outfile = "precast.nc"
 ####################################################
 vartemp = "temperature"
@@ -580,6 +580,7 @@ if not short:
   addvar(outfile,nam4,'amt_mmc',amt_mmc)
   addvar(outfile,nam4,'vpup',vpup)
   addvar(outfile,nam4,'vptp',vptp)
+  addvar(outfile,nam4,'opup',opup)
   addvar(outfile,nam4,'eke',eke)
   addvar(outfile,nam4,'tpot',tpot)
   addvar(outfile,nam4,'N2',N2)
