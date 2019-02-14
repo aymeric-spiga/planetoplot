@@ -14,7 +14,7 @@ outfile = "precast.nc"
 vartemp = "temperature"
 ispressure = False
 ####################################################
-p_upper,p_lower,nlev = 1e2,3.5e5,50 # whole atm
+p_upper,p_lower,nlev = 1.e-1,3.5e5,130 # whole atm
 targetp1d = np.logspace(np.log10(p_lower),np.log10(p_upper),nlev)
 #####################################################
 #myp = planets.Saturn
@@ -210,7 +210,7 @@ elif method == 2:
 if tpot_alternate:
  tpot = myp.tpot(temp,press,p0=targetp1d[0]+1.) 
 #if 0 == 1:
-#  ISR=pp(file=fileAP,var="ISR",x=charx).getf() ; print "... ... done: ISR"
+ISR=pp(file=fileAP,var="ISR",x=charx).getf() ; print "... ... done: ISR"
 #  OLR=pp(file=fileAP,var="OLR",x=charx).getf() ; print "... ... done: OLR"
 if not short:
  if method == 2:
@@ -466,6 +466,7 @@ if not short:
  omegastar = np.zeros((nt,nz,nlat)) # residual mean vertical circulation
  rmcdudt = np.zeros((nt,nz,nlat)) # equivalent acceleration (meridional circulation)
  edddudt = np.zeros((nt,nz,nlat)) # equivalent acceleration (eddies, div EP flux)
+ eddaccv = np.zeros((nt,nz,nlat)) # equivalent acceleration (eddies, div EP flux)
  accrmch = np.zeros((nt,nz,nlat))
  accrmcv = np.zeros((nt,nz,nlat))
  acceddh = np.zeros((nt,nz,nlat))
@@ -507,6 +508,7 @@ if not short:
    omegastar[ttt,:,:] = omega[ttt,:,:] + dpsi_dy
    # (equation 2.7) equivalent acceleration on horizontal (eddies)
    edddudt[ttt,:,:] = divFphi[ttt,:,:] / acosphi2d
+   eddaccv[ttt,:,:] = divFp[ttt,:,:] / acosphi2d
    # (equation 2.7) equivalent acceleration (residual meridional circulation)
    rmcdudt[ttt,:,:] = - ((du_dy - f) * vstar[ttt,:,:]) - (du_dp*omegastar[ttt,:,:])
    # (equation 2.5) classical (not transformed) Eulerian-mean equations
@@ -597,6 +599,7 @@ if not short:
   addvar(outfile,nam4,'omegastar',omegastar)
   addvar(outfile,nam4,'rmcdudt',rmcdudt)
   addvar(outfile,nam4,'edddudt',edddudt)
+  addvar(outfile,nam4,'eddaccv',eddaccv)
   #addvar(outfile,nam4,'ratio',ratio)
   addvar(outfile,nam4,'psim',psim)
   addvar(outfile,nam4,'accrmch',accrmch)
@@ -607,10 +610,10 @@ if not short:
 
 
 #####################################################
-if 0 == 1:
-  print "... adding 2D variables !"
-  namdim2d = (nam4[0],nam4[2],nam4[3])
-  addvar(outfile,namdim2d,'ISR',ISR)
-  addvar(outfile,namdim2d,'OLR',OLR)
+#if 0 == 1:
+print "... adding 2D variables !"
+namdim2d = (nam4[0],nam4[2],nam4[3])
+addvar(outfile,namdim2d,'ISR',ISR)
+#addvar(outfile,namdim2d,'OLR',OLR)
 
 etape("",time0)
