@@ -164,6 +164,7 @@ class pp():
                       svx=None,\
                       svy=None,\
                       compute="mean",\
+                      window=None,\
                       kind3d="tyx",\
                       useindex="0000",\
                       verbose=False,\
@@ -237,6 +238,7 @@ class pp():
         self.svx = svx
         self.svy = svy
         self.compute = compute
+        self.window = window
         self.kind3d = kind3d
         self.useindex = useindex
         self.verbose = verbose
@@ -312,6 +314,7 @@ class pp():
             self.sx = other.sx ; self.sy = other.sy
             self.sz = other.sz ; self.st = other.st
             self.compute = other.compute
+            self.window = other.window
             self.kind3d = other.kind3d
             self.useindex = other.useindex
             self.verbose = other.verbose
@@ -665,6 +668,8 @@ class pp():
               obj.sz = self.sz ; obj.st = self.st
               # indicate the computation method
               obj.compute = self.compute
+              # indicate the computation window
+              obj.window = self.window
               # indicate the kind of 3D fields
               obj.kind3d = self.kind3d
               # use inde or not
@@ -1417,6 +1422,7 @@ class onerequest():
         self.verbose = True
         self.swap_axes = False ; self.invert_axes = False
         self.compute = None
+        self.window = None
         self.changetime = None
         self.sx = 1 ; self.sy = 1 ; self.sz = 1 ; self.st = 1
         self.missing = '!! missing value: I am not set, damned !!'
@@ -2031,6 +2037,22 @@ class onerequest():
         elif "_y" in self.compute: zeaxis = 2
         elif "_z" in self.compute: zeaxis = 1
         elif "_t" in self.compute: zeaxis = 0
+        if   "rollingmean" in self.compute: 
+           if self.window is not None:
+             nnn = self.window
+             if   "_x" in self.compute: 
+                ## TBD: 2d coordinates
+                self.field, self.field_x = ppcompute.rollingmean(self.field,self.field_x,axis=zeaxis,n=nnn)
+             elif "_y" in self.compute:
+                ## TBD: 2d coordinates
+                self.field, self.field_y = ppcompute.rollingmean(self.field,self.field_y,axis=zeaxis,n=nnn)
+             elif "_z" in self.compute:
+                self.field, self.field_z = ppcompute.rollingmean(self.field,self.field_z,axis=zeaxis,n=nnn)
+             elif "_t" in self.compute:
+                self.field, self.field_t = ppcompute.rollingmean(self.field,self.field_t,axis=zeaxis,n=nnn)
+           else:
+             print "!! ERROR !! You missed setting window computation" ; exit()
+
         if   "pert" in self.compute: 
            self.field = ppcompute.perturbation(self.field,axis=zeaxis,mm=mm)
         elif "diff" in self.compute:
