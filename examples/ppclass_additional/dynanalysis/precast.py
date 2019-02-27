@@ -237,8 +237,9 @@ if not short:
      vpvp=ppcompute.mean(starv4D*starv4D,axis=3) ; etape("vpvp",time0)
      if is_omega:
        staro4D=pp(file=fileAP,var="omega",compute="pert_x",x=charx).getf() ; etape("staro4D",time0)
-       opup=ppcompute.mean(staro4D*staru4D,axis=3) ; etape("opup",time0) ; del staro4D
-     del staru4D ; del starv4D ; del start4D
+       opup=ppcompute.mean(staro4D*staru4D,axis=3) ; etape("opup",time0)
+       optp=ppcompute.mean(staro4D*start4D,axis=3) ; etape("optp",time0)
+     del staru4D ; del starv4D ; del start4D ; del staro4D
 
 ####################################################
 print "... interpolating !"
@@ -256,6 +257,7 @@ if method == 1:
     if is_omega:
       o = interpolate(targetp1d,press,o,spline=use_spline) ; etape("omega",time0)
       opup = interpolate(targetp1d,press,opup,spline=use_spline) ; etape("opup",time0)
+      optp = interpolate(targetp1d,press,optp,spline=use_spline) ; etape("optp",time0)
     eke = interpolate(targetp1d,press,0.5*(vpvp + upup),spline=use_spline) ; etape("eke",time0)
 elif method == 2:
   u = interpolate4(targetp1d,press,u,spline=use_spline)
@@ -458,21 +460,41 @@ if not short:
  # *** see Andrews et al. JAS 83
  Fphi = np.zeros((nt,nz,nlat)) # EP flux H
  Fp = np.zeros((nt,nz,nlat)) # EP flux V
+ Tphi = np.zeros((nt,nz,nlat)) # meridional divergence of thermal flux
+ Tphi_TEM = np.zeros((nt,nz,nlat)) # meridional divergence of thermal flux
+ Tp = np.zeros((nt,nz,nlat)) # vertical divergence of thermal flux
  psi = np.zeros((nt,nz,nlat))
  divFphi = np.zeros((nt,nz,nlat)) # meridional divergence of EP flux
  divFp = np.zeros((nt,nz,nlat)) # vertical divergence of EP flux (usually small)
  EtoM = np.zeros((nt,nz,nlat)) # conversion from eddy to mean
  vstar = np.zeros((nt,nz,nlat)) # residual mean meridional circulation
  omegastar = np.zeros((nt,nz,nlat)) # residual mean vertical circulation
- rmcdudt = np.zeros((nt,nz,nlat)) # equivalent acceleration (meridional circulation)
- edddudt = np.zeros((nt,nz,nlat)) # equivalent acceleration (eddies, div EP flux)
- eddaccv = np.zeros((nt,nz,nlat)) # equivalent acceleration (eddies, div EP flux)
- accrmch = np.zeros((nt,nz,nlat))
- accrmcv = np.zeros((nt,nz,nlat))
- acceddh = np.zeros((nt,nz,nlat))
- dudt = np.zeros((nt,nz,nlat))
- psi = np.zeros((nt,nz,nlat))
+
+ accrmc_TEM = np.zeros((nt,nz,nlat)) # total acceleration by residual mean circulation in Transformed Eulerian-mean formalism
+ accrmch_TEM = np.zeros((nt,nz,nlat)) # horizontal acceleration by residual mean circulation in Transformed Eulerian-mean formalism
+ accrmcv_TEM = np.zeros((nt,nz,nlat)) # vertical acceleration by residual mean circulation in Transformed Eulerian-mean formalism
+ accedd_TEM = np.zeros((nt,nz,nlat)) # total eddies acceleration in Transformed Eulerian-mean formalism
+ acceddh_TEM = np.zeros((nt,nz,nlat)) # horizontal eddies acceleration in Transformed Eulerian-mean formalism
+ acceddv_TEM = np.zeros((nt,nz,nlat)) # vertical eddies acceleration in Transformed Eulerian-mean formalism
+# dudt_TEM = np.zeros((nt,nz,nlat)) # Total acceleration in Transformed Eulerian-mean formalism
+ temprmc_TEM = np.zeros((nt,nz,nlat)) # Total thermal flux by the residual mean circulation in Transformed Eulerian-mean formalism
+ temprmch_TEM = np.zeros((nt,nz,nlat)) # Horizontal thermal flux by the residual mean circulation in Transformed Eulerian-mean formalism
+ temprmcv_TEM = np.zeros((nt,nz,nlat)) # Vertical thermal flux by the residual mean circulation in Transformed Eulerian-mean formalism
+ tempedd_TEM = np.zeros((nt,nz,nlat)) # Total thermal flux by eddies in Transformed Eulerian-mean formalism
+ tempeddh_TEM = np.zeros((nt,nz,nlat)) # Horizontal thermal flux by eddies in Transformed Eulerian-mean formalism
+ tempeddv_TEM = np.zeros((nt,nz,nlat)) # Vertical thermal flux by eddies in Transformed Eulerian-mean formalism
+# dTdt_TEM = np.zeros((nt,nz,nlat)) # total thermal evolution in Transformed Eulerian-mean formalism
+
+ accrmch_CEM = np.zeros((nt,nz,nlat)) # horizontal acceleration by residual mean circulation in Classical Eulerian-mean formalism
+ accrmcv_CEM = np.zeros((nt,nz,nlat)) # vertical acceleration by residual mean circulation in Classical Eulerian-mean formalism
+ acceddh_CEM = np.zeros((nt,nz,nlat)) # horizontal acceleration by eddies in Classical Eulerian-mean formalism
+ dudt_CEM = np.zeros((nt,nz,nlat)) # total acceleration in Classical Eulerian-mean formalism
+ dTdt_CEM = np.zeros((nt,nz,nlat)) # total thermal evolution in Classical Eulerian-mean formalism
+ temprmc_CEM = np.zeros((nt,nz,nlat)) # thermal flux transported by residual mean circulation in Classical Eulerian-mean formalism
+ tempedd_CEM = np.zeros((nt,nz,nlat)) # thermal flux transported by eddy circulation
+
  for ttt in range(nt):
+   dummy,dt_dy = np.gradient(temp[ttt,:,:],targetp1d,latrad,edge_order=2)
    # (Del Genio et al. 2007) eddy to mean conversion: product emt with du/dy
    dummy,du_dy = np.gradient(u[ttt,:,:]*cosphi2d,targetp1d,latrad,edge_order=2) / acosphi2d 
    EtoM[ttt,:,:] = vpup[ttt,:,:]*du_dy #emt[ttt,:,:]*du_dy
@@ -506,21 +528,44 @@ if not short:
    vstar[ttt,:,:] = v[ttt,:,:] - dpsi_dp
    dummy,dpsi_dy = np.gradient(psi[ttt,:,:]*cosphi2d,targetp1d,latrad,edge_order=2) / acosphi2d
    omegastar[ttt,:,:] = omega[ttt,:,:] + dpsi_dy
+   # (F. Lott lessons) divergence of turbulent thermal flux
+   dummy,Tphi[ttt,:,:] = np.gradient(vptp[ttt,:,:]*acosphi2d,targetp1d,latrad,edge_order=2) / acosphi2d
+   dummy,Tphi_TEM[ttt,:,:] = np.gradient(vptp[ttt,:,:]*dt_dy/(myp.a * dt_dp),targetp1d,latrad,edge_order=2)
+   Tp[ttt,:,:],dummy = np.gradient(optp[ttt,:,:],targetp1d,latrad,edge_order=2)
+
    # (equation 2.7) equivalent acceleration on horizontal (eddies)
-   edddudt[ttt,:,:] = divFphi[ttt,:,:] / acosphi2d
-   eddaccv[ttt,:,:] = divFp[ttt,:,:] / acosphi2d
+   acceddh_TEM[ttt,:,:] = divFphi[ttt,:,:] / acosphi2d
+   acceddv_TEM[ttt,:,:] = divFp[ttt,:,:] / acosphi2d
+   accedd_TEM[ttt,:,:] = (divFphi[ttt,:,:] + divFp[ttt,:,:]) / acosphi2d
    # (equation 2.7) equivalent acceleration (residual meridional circulation)
-   rmcdudt[ttt,:,:] = - ((du_dy - f) * vstar[ttt,:,:]) - (du_dp*omegastar[ttt,:,:])
-   # (equation 2.5) classical (not transformed) Eulerian-mean equations
-   accrmch[ttt,:,:] = - (du_dy - f)*v[ttt,:,:]
-   accrmcv[ttt,:,:] = - du_dp*omega[ttt,:,:]
+   accrmch_TEM[ttt,:,:] = - ((du_dy - f) * vstar[ttt,:,:])
+   accrmcv_TEM[ttt,:,:] = - (du_dp*omegastar[ttt,:,:])
+   accrmc_TEM[ttt,:,:] = - ((du_dy - f) * vstar[ttt,:,:]) - (du_dp*omegastar[ttt,:,:])
+   # (F. Lott lessons, chap 3) Transformed Eulerian-mean for thermodynamics equation
+   temprmch_TEM[ttt,:,:] = - ((dt_dy / myp.a)*v[ttt,:,:])
+   temprmcv_TEM[ttt,:,:] = - (dt_dp*omega[ttt,:,:])
+   temprmc_TEM[ttt,:,:] = - ((dt_dy / myp.a)*vstar[ttt,:,:]) - (dt_dp*omegastar[ttt,:,:]) 
+
+   tempeddh_TEM[ttt,:,:] = - Tphi_TEM[ttt,:,:]
+   tempeddv_TEM[ttt,:,:] = - Tp[ttt,:,:] 
+   tempedd_TEM[ttt,:,:] = - Tphi_TEM[ttt,:,:] -Tp [ttt,:,:]
+
+   # (equation 2.5) classical (not transformed) Eulerian-mean for zonal momentum equation
+   accrmch_CEM[ttt,:,:] = - (du_dy - f)*v[ttt,:,:]
+   accrmcv_CEM[ttt,:,:] = - du_dp*omega[ttt,:,:]
    dummy,ddd = np.gradient(vpup[ttt,:,:]*cosphi2d*cosphi2d,targetp1d,latrad,edge_order=2)  
    if is_omega:
      ddd2,dummy = np.gradient(opup[ttt,:,:],targetp1d,latrad,edge_order=2)  
    else:
      ddd2 = 0.
-   acceddh[ttt,:,:] = - ddd2 - ddd / acosphi2d / cosphi2d
-   dudt[ttt,:,:] = accrmch[ttt,:,:] + accrmcv[ttt,:,:] + acceddh[ttt,:,:]
+   acceddh_CEM[ttt,:,:] = - ddd2 - ddd / acosphi2d / cosphi2d
+   dudt_CEM[ttt,:,:] = accrmch_CEM[ttt,:,:] + accrmcv_CEM[ttt,:,:] + acceddh_CEM[ttt,:,:]
+   # (F. Lott lessons, chap 3) classical Eulerian-mean for thermodynamics equation
+   temprmc_CEM[ttt,:,:] = - ((dt_dy / myp.a)*v[ttt,:,:]) - (dt_dp*omega[ttt,:,:])
+   tempedd_CEM[ttt,:,:] = - Tphi[ttt,:,:] -Tp[ttt,:,:]
+   dTdt_CEM[ttt,:,:] = temprmc_CEM[ttt,:,:] + tempedd_CEM[ttt,:,:]
+
+
  etape("EP flux",time0)
 
 ## pole problem
@@ -583,6 +628,7 @@ if not short:
   addvar(outfile,nam4,'vpup',vpup)
   addvar(outfile,nam4,'vptp',vptp)
   addvar(outfile,nam4,'opup',opup)
+  addvar(outfile,nam4,'optp',optp)
   addvar(outfile,nam4,'eke',eke)
   addvar(outfile,nam4,'tpot',tpot)
   addvar(outfile,nam4,'N2',N2)
@@ -597,15 +643,29 @@ if not short:
   addvar(outfile,nam4,'EtoM',EtoM)
   addvar(outfile,nam4,'omegamean',omega)
   addvar(outfile,nam4,'omegastar',omegastar)
-  addvar(outfile,nam4,'rmcdudt',rmcdudt)
-  addvar(outfile,nam4,'edddudt',edddudt)
-  addvar(outfile,nam4,'eddaccv',eddaccv)
+  # outputs for transformed Eulerian-mean formalism
+  addvar(outfile,nam4,'accrmc_TEM',accrmc_TEM)
+  addvar(outfile,nam4,'accrmch_TEM',accrmch_TEM)
+  addvar(outfile,nam4,'accrmcv_TEM',accrmcv_TEM)
+  addvar(outfile,nam4,'accedd_TEM',accedd_TEM)
+  addvar(outfile,nam4,'acceddh_TEM',acceddh_TEM)
+  addvar(outfile,nam4,'acceddv_TEM',acceddv_TEM)
+  addvar(outfile,nam4,'tempedd_TEM',tempedd_TEM)
+  addvar(outfile,nam4,'tempeddh_TEM',tempeddh_TEM)
+  addvar(outfile,nam4,'tempeddv_TEM',tempeddv_TEM)
+  addvar(outfile,nam4,'temprmc_TEM',temprmc_TEM)
+  addvar(outfile,nam4,'temprmch_TEM',temprmch_TEM)
+  addvar(outfile,nam4,'temprmcv_TEM',temprmcv_TEM)
   #addvar(outfile,nam4,'ratio',ratio)
   addvar(outfile,nam4,'psim',psim)
-  addvar(outfile,nam4,'accrmch',accrmch)
-  addvar(outfile,nam4,'accrmcv',accrmcv)
-  addvar(outfile,nam4,'acceddh',acceddh)
-  addvar(outfile,nam4,'dudt',dudt)
+  # outputs for classical Eulerian-mean formalism
+  addvar(outfile,nam4,'accrmch_CEM',accrmch_CEM)
+  addvar(outfile,nam4,'accrmcv_CEM',accrmcv_CEM)
+  addvar(outfile,nam4,'acceddh_CEM',acceddh_CEM)
+  addvar(outfile,nam4,'dudt_CEM',dudt_CEM)
+  addvar(outfile,nam4,'temprmc_CEM',temprmc_CEM)
+  addvar(outfile,nam4,'tempedd_CEM',tempedd_CEM)
+  addvar(outfile,nam4,'dTdt_CEM',dTdt_CEM)
 
 
 
