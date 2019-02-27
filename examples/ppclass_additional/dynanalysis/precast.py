@@ -237,9 +237,9 @@ if not short:
      vpvp=ppcompute.mean(starv4D*starv4D,axis=3) ; etape("vpvp",time0)
      if is_omega:
        staro4D=pp(file=fileAP,var="omega",compute="pert_x",x=charx).getf() ; etape("staro4D",time0)
-       opup=ppcompute.mean(staro4D*staru4D,axis=3) ; etape("opup",time0) ; del staro4D
+       opup=ppcompute.mean(staro4D*staru4D,axis=3) ; etape("opup",time0)
        optp=ppcompute.mean(staro4D*start4D,axis=3) ; etape("optp",time0)
-     del staru4D ; del starv4D ; del start4D
+     del staru4D ; del starv4D ; del start4D ; del staro4D
 
 ####################################################
 print "... interpolating !"
