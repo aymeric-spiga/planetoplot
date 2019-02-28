@@ -530,7 +530,7 @@ if not short:
    omegastar[ttt,:,:] = omega[ttt,:,:] + dpsi_dy
    # (F. Lott lessons) divergence of turbulent thermal flux
    dummy,Tphi[ttt,:,:] = np.gradient(vptp[ttt,:,:]*acosphi2d,targetp1d,latrad,edge_order=2) / acosphi2d
-   dummy,Tphi_TEM[ttt,:,:] = np.gradient(vptp[ttt,:,:]*dt_dy/(myp.a * dt_dp),targetp1d,latrad,edge_order=2)
+   Tphi_TEM[ttt,:,:],dummy = np.gradient(vptp[ttt,:,:]*dt_dy/(myp.a*stabterm),targetp1d,latrad,edge_order=2)
    Tp[ttt,:,:],dummy = np.gradient(optp[ttt,:,:],targetp1d,latrad,edge_order=2)
 
    # (equation 2.7) equivalent acceleration on horizontal (eddies)
@@ -548,7 +548,7 @@ if not short:
 
    tempeddh_TEM[ttt,:,:] = - Tphi_TEM[ttt,:,:]
    tempeddv_TEM[ttt,:,:] = - Tp[ttt,:,:]
-   tempedd_TEM[ttt,:,:] = - Tphi_TEM[ttt,:,:] -Tp [ttt,:,:]
+   tempedd_TEM[ttt,:,:] = - Tphi_TEM[ttt,:,:] - Tp [ttt,:,:]
 
    # (equation 2.5) classical (not transformed) Eulerian-mean for zonal momentum equation
    accrmch_CEM[ttt,:,:] = - (du_dy - f)*v[ttt,:,:]
@@ -562,7 +562,7 @@ if not short:
    dudt_CEM[ttt,:,:] = accrmch_CEM[ttt,:,:] + accrmcv_CEM[ttt,:,:] + acceddh_CEM[ttt,:,:]
    # (F. Lott lessons, chap 3) classical Eulerian-mean for thermodynamics equation
    temprmc_CEM[ttt,:,:] = - ((dt_dy / myp.a)*v[ttt,:,:]) - (dt_dp*omega[ttt,:,:])
-   tempedd_CEM[ttt,:,:] = - Tphi[ttt,:,:] -Tp[ttt,:,:]
+   tempedd_CEM[ttt,:,:] = - Tphi[ttt,:,:] - Tp[ttt,:,:]
    dTdt_CEM[ttt,:,:] = temprmc_CEM[ttt,:,:] + tempedd_CEM[ttt,:,:]
 
 
