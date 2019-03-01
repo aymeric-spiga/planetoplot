@@ -542,8 +542,8 @@ if not short:
    accrmcv_TEM[ttt,:,:] = - (du_dp*omegastar[ttt,:,:])
    accrmc_TEM[ttt,:,:] = - ((du_dy - f) * vstar[ttt,:,:]) - (du_dp*omegastar[ttt,:,:])
    # (F. Lott lessons, chap 3) Transformed Eulerian-mean for thermodynamics equation
-   temprmch_TEM[ttt,:,:] = - ((dt_dy / myp.a)*v[ttt,:,:])
-   temprmcv_TEM[ttt,:,:] = - (dt_dp*omega[ttt,:,:])
+   temprmch_TEM[ttt,:,:] = - ((dt_dy / myp.a)*vstar[ttt,:,:])
+   temprmcv_TEM[ttt,:,:] = - (dt_dp*omegastar[ttt,:,:])
    temprmc_TEM[ttt,:,:] = - ((dt_dy / myp.a)*vstar[ttt,:,:]) - (dt_dp*omegastar[ttt,:,:])
 
    tempeddh_TEM[ttt,:,:] = - Tphi_TEM[ttt,:,:]
