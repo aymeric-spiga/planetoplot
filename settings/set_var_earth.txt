@@ -102,3 +102,5 @@ WAPE ; %.5f ; hot ; Wake Available Potential Energy ; J kg$^{-1}$
 ZMAX_TH ; %.1f ; spectral ; PBL depth ; km
 SLP ; %d ; RdBu_r ; Sea-level pressure ; Pa
 PSOL ; %d ; jet ; Surface pressure ; Pa
+ALB1 ; %.2f ; hot ; Surface VIS albedo ; dimless
+ALB2 ; %.2f ; hot ; Surface NIR albedo ; dimless
