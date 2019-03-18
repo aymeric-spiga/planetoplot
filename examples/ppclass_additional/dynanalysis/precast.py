@@ -536,7 +536,7 @@ if not short:
    dummy,dpsi_dy = np.gradient(psi[ttt,:,:]*cosphi2d,targetp1d,latrad,edge_order=2) / acosphi2d
    omegastar[ttt,:,:] = omega[ttt,:,:] + dpsi_dy
    # (F. Lott lessons) divergence of turbulent thermal flux
-   dummy,Tphi[ttt,:,:] = np.gradient(vptp[ttt,:,:]*acosphi2d,targetp1d,latrad,edge_order=2) / acosphi2d
+   dummy,Tphi[ttt,:,:] = np.gradient(vptp[ttt,:,:]*cosphi2d,targetp1d,latrad,edge_order=2) / acosphi2d
    Tphi_TEM[ttt,:,:],dummy = np.gradient(vptp[ttt,:,:]*dt_dy/(myp.a*stabterm),targetp1d,latrad,edge_order=2)
    Tp[ttt,:,:],dummy = np.gradient(optp[ttt,:,:],targetp1d,latrad,edge_order=2)
 
