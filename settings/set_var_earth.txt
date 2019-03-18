@@ -100,3 +100,5 @@ TSOL ;%.1F; YlOrBr ; Surface Temperature ; K
 WAKE_H ; %.0f ; spectral ; Mean wake depth h$_{w}$ ; m
 WAPE ; %.5f ; hot ; Wake Available Potential Energy ; J kg$^{-1}$
 ZMAX_TH ; %.1f ; spectral ; PBL depth ; km
+SLP ; %d ; RdBu_r ; Sea-level pressure ; Pa
+PSOL ; %d ; jet ; Surface pressure ; Pa
