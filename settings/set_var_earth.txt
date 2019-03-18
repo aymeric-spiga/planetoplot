@@ -105,3 +105,5 @@ PSOL ; %d ; jet ; Surface pressure ; Pa
 ALB1 ; %.2f ; hot ; Surface VIS albedo ; dimless
 ALB2 ; %.2f ; hot ; Surface NIR albedo ; dimless
 PHIS ; %d ; gist_earth ; Surface geop ; m m s$^{-2}$
+VITU ; %.1f ; jet ; Zonal wind ; m s$^{-1}$
+VITV ; %.1f ; jet ; Meridional wind ; m s$^{-1}$
