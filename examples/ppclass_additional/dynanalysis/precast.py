@@ -658,11 +658,17 @@ if not short:
   addvar(outfile,nam4,'divFphi',divFphi)
   addvar(outfile,nam4,'divFp',divFp)
   addvar(outfile,nam4,'vstar',vstar)
+  addvar(outfile,nam4,'Fp',Fp)
   addvar(outfile,nam4,'EtoM',EtoM)
   addvar(outfile,nam4,'omegamean',omega)
   addvar(outfile,nam4,'omegastar',omegastar)
   #addvar(outfile,nam4,'ratio',ratio)
   addvar(outfile,nam4,'psim',psim)
+  # outputs for gradients of u and gradients of T
+#  addvar(outfile,nam4,'du_dy',du_dy)
+#  addvar(outfile,nam4,'du_dp',du_dp)
+#  addvar(outfile,nam4,'dt_dy',dt_dy)
+#  addvar(outfile,nam4,'dt_dp',dt_dp)
   # outputs for transformed Eulerian-mean formalism
   addvar(outfile,nam4,'accrmc_TEM',accrmc_TEM)
   addvar(outfile,nam4,'accrmch_TEM',accrmch_TEM)
