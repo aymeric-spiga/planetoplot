@@ -795,6 +795,7 @@ class plot2d(plot):
                  vmax=None,\
                  showcb=True,\
                  wscale=None,\
+                 rescalevec=None,\
                  svx=3,\
                  svy=3,\
                  leftcorrect=False,\
@@ -822,6 +823,7 @@ class plot2d(plot):
         self.sigma = sigma
         self.showcb = showcb
         self.wscale = wscale
+        self.rescalevec = rescalevec
         self.svx = svx
         self.svy = svy
         self.leftcorrect = leftcorrect
@@ -1153,6 +1155,10 @@ class plot2d(plot):
                 else:
                    vecx,vecy = self.vx,self.vy 
                    if x.ndim < 2 and y.ndim < 2: x,y = np.meshgrid(x,y)
+                   if self.rescalevec:
+                     vecx = self.vx/ppcompute.mean((np.sqrt(self.vx*self.vx+self.vy*self.vy)))
+                     vecy = self.vy/ppcompute.mean((np.sqrt(self.vx*self.vx+self.vy*self.vy)))
+
                 # reference vector is scaled
                 if self.wscale is None:
                     self.wscale = ppcompute.mean(np.sqrt(self.vx*self.vx+self.vy*self.vy))

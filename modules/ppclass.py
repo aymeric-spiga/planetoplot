@@ -186,6 +186,7 @@ class pp():
                       blat=None,\
                       blon=None,\
                       wscale=None,\
+                      rescalevec=False,\
                       vmin=None,vmax=None,\
                       div=None,\
                       colorbar=None,\
@@ -265,6 +266,7 @@ class pp():
         self.proj = proj
         self.blat = blat ; self.blon = blon
         self.wscale = wscale
+        self.rescalevec = rescalevec
         self.vmin = vmin ; self.vmax = vmax
         self.div = div
         self.colorbar = colorbar
@@ -330,6 +332,7 @@ class pp():
             self.proj = other.proj
             self.blat = other.blat ; self.blon = other.blon
             self.wscale = other.wscale
+            self.rescalevec = other.rescalevec
             self.vmin = other.vmin ; self.vmax = other.vmax
             self.xmin = other.xmin ; self.xmax = other.xmax
             self.ymin = other.ymin ; self.ymax = other.ymax
@@ -926,6 +929,7 @@ class pp():
                         plobj.blat = self.blat
                         plobj.blon = self.blon
                         plobj.wscale = self.wscale
+                        plobj.rescalevec = self.rescalevec
                         # -- light grey background for missing values
                         if type(plobj.f).__name__ in 'MaskedArray': plobj.axisbg = '0.75'
                         # -- define if it is a map or a plot
@@ -1345,6 +1349,11 @@ class pp():
             try: self.p[iii].wscale = opt.wscale[iii]
             except:
                 try: self.p[iii].wscale = opt.wscale[0]
+                except: pass
+            ###
+            try: self.p[iii].rescalevec = opt.rescalevec[iii]
+            except:
+                try: self.p[iii].rescalevec = opt.rescalevec[0]
                 except: pass
             ###
             try: self.p[iii].xmin = opt.xmin[iii]
