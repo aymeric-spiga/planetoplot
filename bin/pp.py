@@ -59,6 +59,10 @@ parser.add_option('--sx',action='store',dest='sx',type="int",default=1,help="Loa
 parser.add_option('--sy',action='store',dest='sy',type="int",default=1,help="Load data every sy grid points over y dimension")
 parser.add_option('--sz',action='store',dest='sz',type="int",default=1,help="Load data every sz grid points over z dimension")
 parser.add_option('--st',action='store',dest='st',type="int",default=1,help="Load data every st grid points over t dimension")
+parser.add_option('--namex',action='store',dest='name_x',type="string",default=None,help="Choice of x axis")
+parser.add_option('--namey',action='store',dest='name_y',type="string",default=None,help="Choice of y axis")
+parser.add_option('--namez',action='store',dest='name_z',type="string",default=None,help="Choice of z axis")
+parser.add_option('--namet',action='store',dest='name_t',type="string",default=None,help="Choice of t axis")
 parser.add_option('--useindex',action='store',dest="useindex",type="string",default="0000",help="Use index for arrays and not values of dimensions 1/0 as tzyx")
 parser.add_option('--kind3d',action='store',dest='kind3d',type="string",default="tyx",help="dimensions if rank<4: tzy, tyx (default)")
 # plot options --> upper case. see ppplot.
@@ -109,6 +113,8 @@ user.changetime = opt.changetime
 user.useindex = opt.useindex
 user.sx = opt.sx ; user.sy = opt.sy
 user.sz = opt.sz ; user.st = opt.st
+user.name_x = opt.name_x ; user.name_y = opt.name_y
+user.name_z = opt.name_z ; user.name_t = opt.name_t
 user.svx = opt.svx ; user.svy = opt.svy
 user.savtxt = opt.savtxt
 user.kind3d = opt.kind3d

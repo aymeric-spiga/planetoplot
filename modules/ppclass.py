@@ -159,6 +159,8 @@ class pp():
     def __init__(self,file=None,var="notset",\
                       filegoal=None,vargoal=None,\
                       x=None,y=None,z=None,t=None,\
+                      name_x=None,name_y=None,\
+                      name_z=None,name_t=None,\
                       sx=1,sy=1,\
                       sz=1,st=1,\
                       svx=None,\
@@ -234,6 +236,8 @@ class pp():
         self.vargoal = vargoal
         self.x = x ; self.y = y   ## if None, free dimension
         self.z = z ; self.t = t   ## if None, free dimension
+        self.name_x = name_x ; self.name_y = name_y
+        self.name_z = name_z ; self.name_t = name_t
         self.sx = sx ; self.sy = sy
         self.sz = sz ; self.st = st
         self.svx = svx
@@ -313,6 +317,8 @@ class pp():
             self.vargoal = other.vargoal
             self.x = other.x ; self.y = other.y   ## if None, free dimension
             self.z = other.z ; self.t = other.t   ## if None, free dimension
+            self.name_x = other.name_x ; self.name_y = other.name_y
+            self.name_z = other.name_z ; self.name_t = other.name_t
             self.sx = other.sx ; self.sy = other.sy
             self.sz = other.sz ; self.st = other.st
             self.compute = other.compute
@@ -682,12 +688,15 @@ class pp():
               ### get dimensions from file
               obj.getdimsize()
               ### treat x,y dimensions with index
+              obj.name_x = self.name_x ; obj.name_y = self.name_y
               obj.getdimhor()
               obj.getindexhori(dalistx=sx,dalisty=sy,indx=x,indy=y)
               ### treat z dimension with index
+              obj.name_z = self.name_z
               obj.getdimz()
               obj.getindexvert(dalist=sz,ind=z)
               ### treat t dimension with index
+              obj.name_t = self.name_t
               obj.getdimt()
               obj.changetime = self.changetime
               obj.performtimechange()
@@ -1498,24 +1507,38 @@ class onerequest():
               self.dim_x = shape[3] ; self.dim_y = shape[2] ; self.dim_z = shape[1] ; self.dim_t = shape[0]
     ##
     def getdimhor(self):
-          # LONGITUDE. Try preset fields. If not present set grid points axis.
-          self.name_x = "nothing"
-          if self.useindex[3] == "0":
-           for c in glob_listx:
-            if c in self.f.variables.keys():
-             self.name_x = c
-          if self.name_x == "nothing":
+          # LONGITUDE. If not defined by user, try preset fields. If still not present set grid points axis.
+          # Check user-defined
+          if self.name_x is not None:
+              if self.name_x not in self.f.variables.keys():
+                print "!! WARNING !! Unknown user-defined name_x. Trying preset values..."
+                self.name_x=None
+          # If failed try preset
+          if self.name_x is None:
+            if self.useindex[3] == "0":
+             for c in glob_listx:
+              if c in self.f.variables.keys():
+               self.name_x = c
+          # If failed set grid points
+          if self.name_x is None:
             self.field_x = np.array(range(self.dim_x))
             self.name_x = "x grid points"
           else:
             self.field_x = self.f.variables[self.name_x]
-          # LATITUDE. Try preset fields. If not present set grid points axis.
-          self.name_y = "nothing"
-          if self.useindex[2] == "0":
-           for c in glob_listy:
-            if c in self.f.variables.keys():
-             self.name_y = c
-          if self.name_y == "nothing":
+          # LATITUDE. If not defined by user, try preset fields. If still not present set grid points axis.
+          # Check user-defined
+          if self.name_y is not None:
+              if self.name_y not in self.f.variables.keys():
+                print "!! WARNING !! Unknown user-defined name_y. Trying preset values..."
+                self.name_y=None
+          # If failed try preset
+          if self.name_y is None:
+            if self.useindex[2] == "0":
+             for c in glob_listy:
+              if c in self.f.variables.keys():
+               self.name_y = c
+          # If failed set grid points
+          if self.name_y is None:
             self.field_y = np.array(range(self.dim_y))
             self.name_y = "y grid points"
           else:
@@ -1550,14 +1573,20 @@ class onerequest():
                if self.verbose: print "**** OK. y axis %4.0f values [%5.1f,%5.1f]" % (self.dim_y,self.field_y.min(),self.field_y.max())
     ##
     def getdimz(self):
-          # ALTITUDE. Try preset fields. If not present set grid points axis.
-          # WARNING: how do we do if several are available? the last one is chosen.
-          self.name_z = "nothing"
-          if self.useindex[1] == "0":
-           for c in glob_listz:
-            if c in self.f.variables.keys():
-             self.name_z = c
-          if self.name_z == "nothing":
+          # ALTITUDE. If not defined by user try preset fields. If still not present set grid points axis.
+          # Check user-defined
+          if self.name_z is not None:
+              if self.name_z not in self.f.variables.keys():
+                print "!! WARNING !! Unknown user-defined name_z. Trying preset values..."
+                self.name_z=None
+          # If failed try preset
+          if self.name_z is None:
+            if self.useindex[1] == "0":
+             for c in glob_listz:
+              if c in self.f.variables.keys():
+               self.name_z = c
+          # If failed set grid points
+          if self.name_z is None:
             self.field_z = np.array(range(self.dim_z))
             self.name_z = "z grid points"
           else:
@@ -1583,15 +1612,20 @@ class onerequest():
                if self.verbose: print "**** OK. z axis %4.0f values [%5.1f,%5.1f]" % (self.dim_z,self.field_z.min(),self.field_z.max())
     ##
     def getdimt(self):
-          # TIME. Try preset fields.
-          self.name_t = "nothing"
-          if self.useindex[0] == "0":
-           for c in glob_listt:
-            if c in self.f.variables.keys():
-             self.name_t = c
-             if self.verbose: print "**** OK. Found time variable: ",c
+          # TIME. If not defined by user try preset fields. If still not present set grid points axis.
+          # Check user-defined
+          if self.name_t is not None:
+              if self.name_t not in self.f.variables.keys():
+                print "!! WARNING !! Unknown user-defined name_t. Trying preset values..."
+                self.name_t=None
+          # If failed try preset
+          if self.name_t is None:
+            if self.useindex[0] == "0":
+             for c in glob_listt:
+              if c in self.f.variables.keys():
+               self.name_t = c
+               if self.verbose: print "**** OK. Found time variable: ",c
           try:
-            # speed up: only get first value, last one.
             self.tabtime = self.f.variables[self.name_t]
             # (consider the case where tabtime is not dim 1)
             # (time is most often the first dimension)
