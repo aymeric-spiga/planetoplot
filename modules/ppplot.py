@@ -1156,8 +1156,8 @@ class plot2d(plot):
                    vecx,vecy = self.vx,self.vy 
                    if x.ndim < 2 and y.ndim < 2: x,y = np.meshgrid(x,y)
                    if self.rescalevec:
-                     vecx = self.vx/ppcompute.mean((np.sqrt(self.vx*self.vx+self.vy*self.vy)))
-                     vecy = self.vy/ppcompute.mean((np.sqrt(self.vx*self.vx+self.vy*self.vy)))
+                     vecx = self.vx/ppcompute.mean(self.vx)
+                     vecy = self.vy/ppcompute.mean(self.vy)
 
                 # reference vector is scaled
                 if self.wscale is None:
