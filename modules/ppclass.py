@@ -2095,7 +2095,7 @@ class onerequest():
                 self.field, self.field_t = ppcompute.rollingmean(self.field,self.field_t,axis=zeaxis,n=nnn)
            else:
              print "!! ERROR !! You missed setting window computation" ; exit()
-
+ 
         if   "pert" in self.compute: 
            self.field = ppcompute.perturbation(self.field,axis=zeaxis,mm=mm)
         elif "diff" in self.compute:
