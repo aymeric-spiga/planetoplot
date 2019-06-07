@@ -364,6 +364,8 @@ if not short:
  rho = targetp3d / (myp.R*temp) # density
  emt = rho*vpup # eddy momentum transport
  amt_mmc = v*wangmom # angular momentum transport by mean meridional circulation
+ mpvpperumass = myp.angmom(u=vpup,lat=lat2d) # contributions from transients waves in the total meridional transport
+ mpvp = dm * mpvpperumass /1.e25
  #if not tpot_alternate:
  #  tpot = myp.tpot(temp,targetp3d,p0=targetp1d[0]+1.) # potential temperature
  ## meridional heat flux?rho*vptp
@@ -461,6 +463,8 @@ if not short:
  # *** see Andrews et al. JAS 83
  Fphi = np.zeros((nt,nz,nlat)) # EP flux H
  Fp = np.zeros((nt,nz,nlat)) # EP flux V
+ Fphi_simp = np.zeros((nt,nz,nlat)) # EP flux H simplified
+ Fp_simp = np.zeros((nt,nz,nlat)) # EP flux HV simplified
  Tphi = np.zeros((nt,nz,nlat)) # meridional divergence of thermal flux
  Tphi_TEM = np.zeros((nt,nz,nlat)) # meridional divergence of thermal flux
  Tp = np.zeros((nt,nz,nlat)) # vertical divergence of thermal flux
@@ -522,12 +526,16 @@ if not short:
    ####################################
    # (equation 2.1) EP flux (phi)
    Fphi[ttt,:,:] = acosphi2d * ( - vpup[ttt,:,:] + psi[ttt,:,:]*du_dp ) 
+   # EP flux (phi) simplified to make an EP flux diagram (see Vallis pp 582 Second Ed.)
+   Fphi_simp[ttt,:,:] = - cosphi2d * vpup[ttt,:,:] 
    # (equation 2.1) EP flux (p)
    if is_omega:
      verteddy = - opup[ttt,:,:]
    else:
      verteddy = 0. # often a acceptable approximation
    Fp[ttt,:,:] = - acosphi2d * ( verteddy + psi[ttt,:,:] * (du_dy - f) )   
+   # EP flux (p) simplified to make an EP flux diagram (see Vallis pp 582 Second Ed.)
+   Fp_simp[ttt,:,:] = cosphi2d * psi[ttt,:,:] * f  
    # (equation 2.3) divergence of EP flux
    dummy,divFphi[ttt,:,:] = np.gradient(Fphi[ttt,:,:]*cosphi2d,targetp1d,latrad,edge_order=2) / acosphi2d  
    divFp[ttt,:,:],dummy = np.gradient(Fp[ttt,:,:],targetp1d,latrad,edge_order=2) 
@@ -641,6 +649,7 @@ addvar(outfile,nam4,'u',u)
 addvar(outfile,nam4,vartemp,temp)
 addvar(outfile,nam4,'angmom',angmom)
 addvar(outfile,nam4,'wangmom',wangmom)
+addvar(outfile,nam4,'mpvp',mpvp)
 addvar(outfile,nam4,'superindex',superindex)
 if not short:
   addvar(outfile,nam4,'amt_mmc',amt_mmc)
@@ -660,6 +669,8 @@ if not short:
   addvar(outfile,nam4,'divFp',divFp)
   addvar(outfile,nam4,'vstar',vstar)
   addvar(outfile,nam4,'Fp',Fp)
+  addvar(outfile,nam4,'Fphi_simp',Fp)
+  addvar(outfile,nam4,'Fp_simp',Fp)
   addvar(outfile,nam4,'EtoM',EtoM)
   addvar(outfile,nam4,'omegamean',omega)
   addvar(outfile,nam4,'omegastar',omegastar)
