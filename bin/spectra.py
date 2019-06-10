@@ -42,6 +42,10 @@ parser.add_option('--period',action='store_true',dest='period',default=False,hel
 parser.add_option('--ndom',action='store',dest='ndom',type="int",default=10,help="print info for the NDOM dominant modes (default:10)")
 parser.add_option('--noplot',action='store_true',dest='noplot',default=False,help="do not plot anything, just output dominant modes")
 parser.add_option('--nutab',action='store',dest='nutab',type="int",default=1,help="dispersion relation to include (0,1,2 ; default:1)")
+parser.add_option('--tmin',action='store',dest='tmin',default=None,type="float",help="minimum value on time axis")
+parser.add_option('--tmax',action='store',dest='tmax',default=None,type="float",help="maximum value on time axis")
+parser.add_option('--zonalwind',action='store',dest='zonalwind',default=None,type="float",help="zonal wind to compute intrinsic frequency (default is None)")
+
 
 ## get planetoplot-like options
 parser = ppplot.opt(parser) # common options for plots
@@ -94,6 +98,29 @@ if opt.ymin is None:
  else:
   opt.ymin = 2.*opt.dt # minimum possible period
 
+## function for Doppler shift
+if opt.zonalwind is not None:
+    print "ASSUMING ZONAL WIND:",opt.zonalwind
+    import planets
+    mypl = planets.Saturn
+    # transform u in degree per day
+    # 2*pi*radius/360 m <> 1 deg
+    m_per_deg = 2.*np.pi*mypl.a / 360.
+    s_per_day = mypl.day
+    utransform = opt.zonalwind * s_per_day / m_per_deg
+    ####
+    def intrinsic(sigma,s):
+        sigmahat = sigma - np.sign(s)*utransform
+        if np.sign(sigmahat) == -1:
+            print "reversal !",sigma,sigmahat
+            shat = -s
+            sigmahat = -sigmahat
+        else:
+            shat = s
+        return sigmahat,shat
+else:
+    utransform = None
+
 ##############################
 ## SPECTRA FROM SIMULATIONS ##
 ##############################
@@ -111,6 +138,12 @@ else:
       tab = 0.5*tabtropN + 0.5*tabtropS # symmetric
    elif opt.kind == "antisym":
       tab = 0.5*tabtropN - 0.5*tabtropS # antisymmetric
+
+## MIN and MAX VALUE on TIME
+if opt.tmin is not None and opt.tmax is not None:
+    ind = (t >= opt.tmin)*(t <= opt.tmax)
+    tab = tab[ind]
+    print t[ind]
 
 ## MAKE X=LON Y=TIME
 tab = np.transpose(tab)
@@ -204,7 +237,10 @@ else:
 fifi = open(txtfile, "w")
 fifi.write(opt.title+"\n")
 fifi.write("---------------------------------------\n")
-fifi.write("%4s & %8s & %8s & %8s \\\\ \hline \n" % ("$s$","$\sigma \, (^{\circ}$/"+opt.unit+")","period ("+opt.unit+")","log(SP)"))
+if opt.zonalwind is not None:
+    fifi.write("%4s & %8s & %8s & %8s \\\\ \hline \n" % ("$s$","$\hat{sigma} \, (^{\circ}$/"+opt.unit+")","intr. period ("+opt.unit+")","log(SP)"))
+else:
+    fifi.write("%4s & %8s & %8s & %8s \\\\ \hline \n" % ("$s$",     "$\sigma \, (^{\circ}$/"+opt.unit+")",      "period ("+opt.unit+")","log(SP)"))
 #fifi.write("---------------------------------------\n")
 # -- initialize while loop
 search = np.empty_like(spec) ; search[:,:] = spec[:,:]
@@ -218,14 +254,25 @@ while itit <= opt.ndom:
   dominant_wn = specx[ij[0]]
   dominant_fq = spect[ij[1]]
   spower = search[ij]
-  # -- break if one order of magnitude difference in power
-  if spower < spowermax/10.:
+  # -- break if a given orders of magnitude difference in power
+  if spower < spowermax/100.:
     break
   if (1./dominant_fq) < lowerperiod: reliable = "x"
   else: reliable = "o"
   # -- print result
   if reliable == "o":
-    fifi.write("%+4.0f & %8.1f & %8.0f & %8.1f \\\\ \n" % (dominant_wn,360.*dominant_fq,1./dominant_fq,np.log10(spower)))
+
+    # -- correct by zonalwind if needed
+    if opt.zonalwind is not None:
+        dominant_fq_int, dominant_wn_int = intrinsic(360.*dominant_fq,dominant_wn)
+        dominant_fq_int = dominant_fq_int/360.
+        if (1./dominant_fq_int) > higherperiod: # pour les stationnaires
+            reliable = "x"
+        else:
+            fifi.write("%+4.0f & %8.1f & %8.1f & %8.1f \\\\ \n" % (dominant_wn_int,360.*dominant_fq_int,1./dominant_fq_int,np.log10(spower)))
+    else:
+        fifi.write("%+4.0f & %8.1f & %8.1f & %8.1f \\\\ \n" % (dominant_wn    ,360.*dominant_fq    ,1./dominant_fq    ,np.log10(spower)))
+
     search[ij[0],:] = -9999. # remove wavenumber found (otherwise loop could find other maxima for this wn)
     if spower > spowermax: spowermax = spower
   # -- iterate
@@ -256,7 +303,8 @@ else:
 if not opt.noplot:
   p = ppplot.plot2d()
   p.transopt(opt) # transfer plot options
-  p.f = spec
+  #p.f = spec/np.max(spec)
+  p.f = spec/1e6
   p.x = specx
   p.y = spect
   p.make()
