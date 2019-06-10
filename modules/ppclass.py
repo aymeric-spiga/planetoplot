@@ -13,6 +13,11 @@ import pickle
 # added librairies
 import numpy as np
 import netCDF4
+#####
+## if backend pb
+#import matplotlib
+#matplotlib.use('TkAgg')
+#####
 import matplotlib.pyplot as mpl
 # personal librairies
 import ppplot

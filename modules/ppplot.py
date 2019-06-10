@@ -8,6 +8,11 @@
 import time as timelib
 # added librairies
 import numpy as np
+#####
+## if backend pb
+#import matplotlib
+#matplotlib.use('TkAgg')
+#####
 import matplotlib.pyplot as mpl
 from matplotlib.cm import get_cmap
 import matplotlib.ticker as mtick
