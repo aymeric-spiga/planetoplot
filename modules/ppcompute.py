@@ -120,6 +120,28 @@ def meanbin(y,x,bins):
     meanvalues = np.array(meanvalues)
     return meanvalues
 
+## compute rolling mean
+## author DB
+## --
+## sfield,scoord = rollingmean(field,coord)
+## --
+def rollingmean(field,coord,axis=None,n=None):
+    ret = np.cumsum(field, axis=axis, dtype=float)
+    rec = np.cumsum(coord, dtype=float)
+    rec[n:] = rec[n:] - rec[:-n]
+    if axis == 0:
+       ret[n:,:,:,:] = ret[n:,:,:,:] - ret[:-n,:,:,:]
+       return ret[n:,:,:,:] / n, rec[n:] / n
+    if axis == 1:
+       ret[:,n:,:,:] = ret[:,n:,:,:] - ret[:,:-n,:,:]
+       return ret[:,n:,:,:] / n, rec[n:] / n
+    if axis == 2:
+       ret[:,:,n:,:] = ret[:,:,n:,:] - ret[:,:,:-n,:]
+       return ret[:,:,n:,:] / n, rec[n:] / n
+    if axis == 3:
+       ret[:,:,:,n:] = ret[:,:,:,n:] - ret[:,:,:,:-n]
+       return ret[:,:,:,n:] / n, rec[n:] / n
+
 ## compute perturbation to mean
 ## -- the whole dimension must exist!
 ## author AS
