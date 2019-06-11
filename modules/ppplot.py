@@ -932,8 +932,8 @@ class plot2d(plot):
             # make shaded and line contours
             if self.c is not None: 
                 objC = self.ax.contour(x, y, what_I_contour, \
-                            self.clev, colors = self.ccol, linewidths = cline)
-                ft = int(mpl.rcParams['font.size']*0.55)
+                            self.clev, colors = self.ccol) #, linewidths = cline)
+                ft = int(mpl.rcParams['font.size']*0.85)
                 if self.clab:
                   self.ax.clabel(objC, inline=1, fontsize=ft,\
                              inline_spacing=1,fmt=self.cfmt)
@@ -1108,7 +1108,7 @@ class plot2d(plot):
             if self.c is not None: 
                 #zelevelsc = np.arange(900.,1100.,5.)
                 objC2 = m.contour(x, y, what_I_contour, \
-                            self.clev, colors = self.ccol, linewidths = cline)
+                            self.clev, colors = self.ccol) #, linewidths = cline)
                 #mpl.clabel(objC2, inline=1, fontsize=10,manual=True,fmt='-%2.0f$^{\circ}$C',colors='r')
                 #mpl.clabel(objC2, inline=0, fontsize=8, fmt='%.0f',colors='r', inline_spacing=0) 
             cont = m.contourf(x, y, what_I_plot, zelevels, cmap = palette, alpha = self.trans, antialiased=True)
