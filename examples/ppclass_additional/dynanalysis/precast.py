@@ -210,7 +210,7 @@ elif method == 2:
 if tpot_alternate:
  tpot = myp.tpot(temp,press,p0=targetp1d[0]+1.) 
 #if 0 == 1:
-ISR=pp(file=fileAP,var="ISR",x=charx).getf() ; print "... ... done: ISR"
+#  ISR=pp(file=fileAP,var="ISR",x=charx).getf() ; print "... ... done: ISR"
 #  OLR=pp(file=fileAP,var="OLR",x=charx).getf() ; print "... ... done: OLR"
 if not short:
  if method == 2:
@@ -351,16 +351,17 @@ wangmom = dm * wangmomperumass / 1.e25
 superindex = myp.superrot(u=u,lat=lat2d)
 etape("angular momentum",time0)
 
+# *** BASIC DIAGNOSTICS ***
+if not tpot_alternate:
+    tpot = myp.tpot(temp,targetp3d,p0=targetp1d[0]+1.) # potential temperature
+else:
+    temp = myp.invtpot(tpot,targetp3d,p0=targetp1d[0]+1.)
+
 ##########################
 ## EXTENDED DIAGNOSTICS ##
 ##########################
 if not short:
 
- # *** BASIC DIAGNOSTICS ***
- if not tpot_alternate:
-   tpot = myp.tpot(temp,targetp3d,p0=targetp1d[0]+1.) # potential temperature
- else:
-   temp = myp.invtpot(tpot,targetp3d,p0=targetp1d[0]+1.)
  rho = targetp3d / (myp.R*temp) # density
  emt = rho*vpup # eddy momentum transport
  amt_mmc = v*wangmom # angular momentum transport by mean meridional circulation
@@ -547,7 +548,8 @@ if not short:
    # (F. Lott lessons) divergence of turbulent thermal flux
    dummy,Tphi[ttt,:,:] = np.gradient(vptp[ttt,:,:]*cosphi2d,targetp1d,latrad,edge_order=2) / acosphi2d
    Tphi_TEM[ttt,:,:],dummy = np.gradient(vptp[ttt,:,:]*dt_dy/(myp.a*stabterm),targetp1d,latrad,edge_order=2)
-   Tp[ttt,:,:],dummy = np.gradient(optp[ttt,:,:],targetp1d,latrad,edge_order=2)
+   if is_omega:
+       Tp[ttt,:,:],dummy = np.gradient(optp[ttt,:,:],targetp1d,latrad,edge_order=2)
 
    # (equation 2.7) Transformed Eulerian-mean for zonal momentum equation (eddies)
    acceddh_TEM[ttt,:,:] = divFphi[ttt,:,:] / acosphi2d
@@ -655,8 +657,9 @@ if not short:
   addvar(outfile,nam4,'amt_mmc',amt_mmc)
   addvar(outfile,nam4,'vpup',vpup)
   addvar(outfile,nam4,'vptp',vptp)
-  addvar(outfile,nam4,'opup',opup)
-  addvar(outfile,nam4,'optp',optp)
+  if is_omega:
+      addvar(outfile,nam4,'opup',opup)
+      addvar(outfile,nam4,'optp',optp)
   addvar(outfile,nam4,'eke',eke)
   addvar(outfile,nam4,'tpot',tpot)
   addvar(outfile,nam4,'N2',N2)
@@ -708,9 +711,9 @@ if not short:
 
 #####################################################
 #if 0 == 1:
-print "... adding 2D variables !"
-namdim2d = (nam4[0],nam4[2],nam4[3])
-addvar(outfile,namdim2d,'ISR',ISR)
+#print "... adding 2D variables !"
+#namdim2d = (nam4[0],nam4[2],nam4[3])
+#addvar(outfile,namdim2d,'ISR',ISR)
 #addvar(outfile,namdim2d,'OLR',OLR)
 
 etape("",time0)
