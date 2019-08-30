@@ -184,6 +184,10 @@ def quickplot(field):
 def changefont(num):
     mpl.rcParams['font.size'] = num
 
+# a function to change markersize
+def changemarkersize(num):
+    mpl.rcParams['lines.markersize'] = num
+
 # continuity with matplotlib
 def close():
     mpl.close()
