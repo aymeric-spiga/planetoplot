@@ -681,7 +681,7 @@ class plot1d(plot):
         # make the 1D plot
         # either request linestyle or let matplotlib decide
         if self.linestyle is not None and self.color is not None:
-            self.ax.plot(x,y,self.color+self.linestyle,marker=self.marker,label=self.legend)
+            self.ax.plot(x,y,color=self.color,linestyle=self.linestyle,marker=self.marker,label=self.legend)
         elif self.color is not None:
             self.ax.plot(x,y,color=self.color,marker=self.marker,label=self.legend)
         elif self.linestyle is not None:
