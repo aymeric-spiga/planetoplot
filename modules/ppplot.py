@@ -205,7 +205,7 @@ def rainbow(cb="jet",num=8):
     ax._get_lines.set_color_cycle([pal(i) for i in np.linspace(0,0.9,num)])
 
 # a function to define nice minor ticks for log plots
-def special_log(x, pos,tab=[2,3,5,7]):
+def special_log(x, pos,tab=[2,3,5]):
     norm = ppcompute.get_norm(x)
     out = int(x/norm)
     if out in tab:
