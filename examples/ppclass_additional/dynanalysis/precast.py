@@ -651,10 +651,10 @@ addvar(outfile,nam4,'u',u)
 addvar(outfile,nam4,vartemp,temp)
 addvar(outfile,nam4,'angmom',angmom)
 addvar(outfile,nam4,'wangmom',wangmom)
-addvar(outfile,nam4,'mpvp',mpvp)
 addvar(outfile,nam4,'superindex',superindex)
 if not short:
   addvar(outfile,nam4,'amt_mmc',amt_mmc)
+  addvar(outfile,nam4,'mpvp',mpvp)
   addvar(outfile,nam4,'vpup',vpup)
   addvar(outfile,nam4,'vptp',vptp)
   if is_omega:
