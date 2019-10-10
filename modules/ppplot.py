@@ -1119,6 +1119,9 @@ class plot2d(plot):
                 #zelevelsc = np.arange(900.,1100.,5.)
                 objC2 = m.contour(x, y, what_I_contour, \
                             self.clev, colors = self.ccol) #, linewidths = cline)
+                if self.clab:
+                    self.ax.clabel(objC2, inline=1, fontsize=ft,\
+                                    inline_spacing=1,fmt=self.cfmt)
                 #mpl.clabel(objC2, inline=1, fontsize=10,manual=True,fmt='-%2.0f$^{\circ}$C',colors='r')
                 #mpl.clabel(objC2, inline=0, fontsize=8, fmt='%.0f',colors='r', inline_spacing=0) 
             cont = m.contourf(x, y, what_I_plot, zelevels, cmap = palette, alpha = self.trans, antialiased=True)
