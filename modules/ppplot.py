@@ -804,6 +804,7 @@ class plot2d(plot):
                  vmax=None,\
                  showcb=True,\
                  wscale=None,\
+                 vlev=None,\
                  rescalevec=None,\
                  svx=3,\
                  svy=3,\
@@ -832,6 +833,7 @@ class plot2d(plot):
         self.sigma = sigma
         self.showcb = showcb
         self.wscale = wscale
+        self.vlev = vlev
         self.rescalevec = rescalevec
         self.svx = svx
         self.svy = svy
@@ -897,7 +899,10 @@ class plot2d(plot):
         what_I_plot = bounds(self.f,zevmin,zevmax)
         # define contour field levels. define color palette
         ticks = self.div + 1
-        zelevels = np.linspace(zevmin,zevmax,ticks)
+        if self.vlev is None:
+          zelevels = np.linspace(zevmin,zevmax,ticks)
+        else:
+          zelevels = self.vlev
         palette = get_cmap(name=self.colorbar)
         # do the same thing for possible contourline entries
         if self.c is not None:
@@ -943,7 +948,8 @@ class plot2d(plot):
                              inline_spacing=1,fmt=self.cfmt)
             cont = self.ax.contourf(x, y, \
                          self.f, \
-                         zelevels, cmap=palette)
+                         zelevels, cmap=palette, \
+                         norm=mpl.cm.colors.BoundaryNorm(zelevels,palette.N))
             #mpl.pcolor(x,y,\
             #             self.f, \
             #             cmap=palette)
@@ -1138,10 +1144,19 @@ class plot2d(plot):
             zelevpal = np.linspace(zevmin,zevmax,num=self.cbticks)
             ## colorbar corresponding to contour object cont
             ## -- TBD: one colorbar for an entire figure with different subplots
+            if self.vlev is None:
+              if self.cbticks is None:
+                self.cbticks = min([ticks/2+1,21])
+              zelevpal = np.linspace(zevmin,zevmax,num=self.cbticks)
+              spacingval = 'proportional'
+            else:
+              zelevpal = self.vlev
+              self.cbticks = len(zelevpal)
+              spacingval = 'uniform'
             zecb = mpl.colorbar(cont,fraction=frac,pad=pad,\
                                 format=self.fmt,orientation=orientation,\
                                 ticks=zelevpal,\
-                                extend='neither',spacing='proportional')
+                                extend='neither',spacing=spacingval)
             if zeorientation == "horizontal": zecb.ax.set_xlabel(self.title) ; self.title = ""
             # colorbar title --> units
             if self.units not in ["dimless",""]:
