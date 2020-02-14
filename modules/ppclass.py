@@ -13,6 +13,11 @@ import pickle
 # added librairies
 import numpy as np
 import netCDF4
+#####
+## if backend pb
+#import matplotlib
+#matplotlib.use('TkAgg')
+#####
 import matplotlib.pyplot as mpl
 # personal librairies
 import ppplot
@@ -159,11 +164,14 @@ class pp():
     def __init__(self,file=None,var="notset",\
                       filegoal=None,vargoal=None,\
                       x=None,y=None,z=None,t=None,\
+                      name_x=None,name_y=None,\
+                      name_z=None,name_t=None,\
                       sx=1,sy=1,\
                       sz=1,st=1,\
                       svx=None,\
                       svy=None,\
                       compute="mean",\
+                      window=None,\
                       kind3d="tyx",\
                       useindex="0000",\
                       verbose=False,\
@@ -185,9 +193,11 @@ class pp():
                       blat=None,\
                       blon=None,\
                       wscale=None,\
+                      rescalevec=False,\
                       vmin=None,vmax=None,\
                       div=None,\
                       colorbar=None,\
+                      cbticks=None,\
                       linestyle=None,\
                       marker=None,\
                       color=None,\
@@ -202,6 +212,9 @@ class pp():
                       nopickle=False,\
                       trans=None,back=None,\
                       showcb=None,\
+                      clev=None,\
+                      cfmt=None,\
+                      clab=False,\
                       logy=None,\
                       title=None):
         self.request = None
@@ -228,11 +241,14 @@ class pp():
         self.vargoal = vargoal
         self.x = x ; self.y = y   ## if None, free dimension
         self.z = z ; self.t = t   ## if None, free dimension
+        self.name_x = name_x ; self.name_y = name_y
+        self.name_z = name_z ; self.name_t = name_t
         self.sx = sx ; self.sy = sy
         self.sz = sz ; self.st = st
         self.svx = svx
         self.svy = svy
         self.compute = compute
+        self.window = window
         self.kind3d = kind3d
         self.useindex = useindex
         self.verbose = verbose
@@ -259,9 +275,11 @@ class pp():
         self.proj = proj
         self.blat = blat ; self.blon = blon
         self.wscale = wscale
+        self.rescalevec = rescalevec
         self.vmin = vmin ; self.vmax = vmax
         self.div = div
         self.colorbar = colorbar
+        self.cbticks = cbticks
         self.linestyle = linestyle
         self.marker = marker
         self.color = color
@@ -273,6 +291,9 @@ class pp():
         self.fmt = fmt
         self.trans = trans ; self.back = back
         self.showcb = showcb
+        self.clev = clev
+        self.clab = clab
+        self.cfmt = cfmt
         self.logy = logy
 
     # print status
@@ -301,9 +322,12 @@ class pp():
             self.vargoal = other.vargoal
             self.x = other.x ; self.y = other.y   ## if None, free dimension
             self.z = other.z ; self.t = other.t   ## if None, free dimension
+            self.name_x = other.name_x ; self.name_y = other.name_y
+            self.name_z = other.name_z ; self.name_t = other.name_t
             self.sx = other.sx ; self.sy = other.sy
             self.sz = other.sz ; self.st = other.st
             self.compute = other.compute
+            self.window = other.window
             self.kind3d = other.kind3d
             self.useindex = other.useindex
             self.verbose = other.verbose
@@ -319,11 +343,13 @@ class pp():
             self.proj = other.proj
             self.blat = other.blat ; self.blon = other.blon
             self.wscale = other.wscale
+            self.rescalevec = other.rescalevec
             self.vmin = other.vmin ; self.vmax = other.vmax
             self.xmin = other.xmin ; self.xmax = other.xmax
             self.ymin = other.ymin ; self.ymax = other.ymax
             self.div = other.div
             self.colorbar = other.colorbar
+            self.cbticks = other.cbticks
             self.linestyle = other.linestyle
             self.marker = other.marker
             self.color = other.color
@@ -341,6 +367,9 @@ class pp():
             self.fmt = other.fmt
             self.trans = other.trans ; self.back = other.back
             self.showcb = other.showcb
+            self.clev = other.clev
+            self.cfmt = other.cfmt
+            self.clab = other.clab
             self.logy = other.logy
             self.svx = other.svx ; self.svy = other.svy
         else:
@@ -653,6 +682,8 @@ class pp():
               obj.sz = self.sz ; obj.st = self.st
               # indicate the computation method
               obj.compute = self.compute
+              # indicate the computation window
+              obj.window = self.window
               # indicate the kind of 3D fields
               obj.kind3d = self.kind3d
               # use inde or not
@@ -662,12 +693,15 @@ class pp():
               ### get dimensions from file
               obj.getdimsize()
               ### treat x,y dimensions with index
+              obj.name_x = self.name_x ; obj.name_y = self.name_y
               obj.getdimhor()
               obj.getindexhori(dalistx=sx,dalisty=sy,indx=x,indy=y)
               ### treat z dimension with index
+              obj.name_z = self.name_z
               obj.getdimz()
               obj.getindexvert(dalist=sz,ind=z)
               ### treat t dimension with index
+              obj.name_t = self.name_t
               obj.getdimt()
               obj.changetime = self.changetime
               obj.performtimechange()
@@ -909,6 +943,7 @@ class pp():
                         plobj.blat = self.blat
                         plobj.blon = self.blon
                         plobj.wscale = self.wscale
+                        plobj.rescalevec = self.rescalevec
                         # -- light grey background for missing values
                         if type(plobj.f).__name__ in 'MaskedArray': plobj.axisbg = '0.75'
                         # -- define if it is a map or a plot
@@ -933,6 +968,7 @@ class pp():
                     if self.xmax is not None: plobj.xmax = self.xmax
                     if self.ymin is not None: plobj.ymin = self.ymin
                     if self.ymax is not None: plobj.ymax = self.ymax
+		    if self.cbticks is not None: plobj.cbticks = self.cbticks
                     # -- 1D specific
                     if dp == 1:
                         if self.linestyle is not None: plobj.linestyle = self.linestyle
@@ -945,6 +981,10 @@ class pp():
                         if self.vmax is not None: plobj.vmax = self.vmax
                         if self.trans is not None: plobj.trans = self.trans
 			if self.back is not None: plobj.back = self.back
+			if self.clev is not None: plobj.clev = self.clev
+			if self.cfmt is not None: plobj.cfmt = self.cfmt
+                        if self.clab is not None: plobj.clab = self.clab
+
                     # finally append plot object
                     self.p.append(plobj)
                     count = count + 1
@@ -1197,7 +1237,7 @@ class pp():
             else:
                 self.p[iii].swaplab = False
             ##
-            if opt.void:
+            if opt.void or not opt.showcb:
                 self.p[iii].showcb = False
             else:
                 self.p[iii].showcb = True
@@ -1264,6 +1304,21 @@ class pp():
             except: 
                 try: self.p[iii].back = opt.back[0]
                 except: pass
+            ####
+            try: self.p[iii].clev = opt.clev[iii]
+            except: 
+                try: self.p[iii].clev = opt.clev[0]
+                except: pass
+            ####
+            try: self.p[iii].cfmt = opt.cfmt[iii]
+            except: 
+                try: self.p[iii].cfmt = opt.cfmt[0]
+                except: pass
+            ###
+            try: self.p[iii].clab = opt.clab[iii]
+            except:
+                try: self.p[iii].clab = opt.clab[0]
+                except: pass
             ###
             try: self.p[iii].area = opt.area[iii]
             except: 
@@ -1308,6 +1363,11 @@ class pp():
             try: self.p[iii].wscale = opt.wscale[iii]
             except:
                 try: self.p[iii].wscale = opt.wscale[0]
+                except: pass
+            ###
+            try: self.p[iii].rescalevec = opt.rescalevec[iii]
+            except:
+                try: self.p[iii].rescalevec = opt.rescalevec[0]
                 except: pass
             ###
             try: self.p[iii].xmin = opt.xmin[iii]
@@ -1385,6 +1445,7 @@ class onerequest():
         self.verbose = True
         self.swap_axes = False ; self.invert_axes = False
         self.compute = None
+        self.window = None
         self.changetime = None
         self.sx = 1 ; self.sy = 1 ; self.sz = 1 ; self.st = 1
         self.missing = '!! missing value: I am not set, damned !!'
@@ -1451,24 +1512,38 @@ class onerequest():
               self.dim_x = shape[3] ; self.dim_y = shape[2] ; self.dim_z = shape[1] ; self.dim_t = shape[0]
     ##
     def getdimhor(self):
-          # LONGITUDE. Try preset fields. If not present set grid points axis.
-          self.name_x = "nothing"
-          if self.useindex[3] == "0":
-           for c in glob_listx:
-            if c in self.f.variables.keys():
-             self.name_x = c
-          if self.name_x == "nothing":
+          # LONGITUDE. If not defined by user, try preset fields. If still not present set grid points axis.
+          # Check user-defined
+          if self.name_x is not None:
+              if self.name_x not in self.f.variables.keys():
+                print "!! WARNING !! Unknown user-defined name_x. Trying preset values..."
+                self.name_x=None
+          # If failed try preset
+          if self.name_x is None:
+            if self.useindex[3] == "0":
+             for c in glob_listx:
+              if c in self.f.variables.keys():
+               self.name_x = c
+          # If failed set grid points
+          if self.name_x is None:
             self.field_x = np.array(range(self.dim_x))
             self.name_x = "x grid points"
           else:
             self.field_x = self.f.variables[self.name_x]
-          # LATITUDE. Try preset fields. If not present set grid points axis.
-          self.name_y = "nothing"
-          if self.useindex[2] == "0":
-           for c in glob_listy:
-            if c in self.f.variables.keys():
-             self.name_y = c
-          if self.name_y == "nothing":
+          # LATITUDE. If not defined by user, try preset fields. If still not present set grid points axis.
+          # Check user-defined
+          if self.name_y is not None:
+              if self.name_y not in self.f.variables.keys():
+                print "!! WARNING !! Unknown user-defined name_y. Trying preset values..."
+                self.name_y=None
+          # If failed try preset
+          if self.name_y is None:
+            if self.useindex[2] == "0":
+             for c in glob_listy:
+              if c in self.f.variables.keys():
+               self.name_y = c
+          # If failed set grid points
+          if self.name_y is None:
             self.field_y = np.array(range(self.dim_y))
             self.name_y = "y grid points"
           else:
@@ -1503,14 +1578,20 @@ class onerequest():
                if self.verbose: print "**** OK. y axis %4.0f values [%5.1f,%5.1f]" % (self.dim_y,self.field_y.min(),self.field_y.max())
     ##
     def getdimz(self):
-          # ALTITUDE. Try preset fields. If not present set grid points axis.
-          # WARNING: how do we do if several are available? the last one is chosen.
-          self.name_z = "nothing"
-          if self.useindex[1] == "0":
-           for c in glob_listz:
-            if c in self.f.variables.keys():
-             self.name_z = c
-          if self.name_z == "nothing":
+          # ALTITUDE. If not defined by user try preset fields. If still not present set grid points axis.
+          # Check user-defined
+          if self.name_z is not None:
+              if self.name_z not in self.f.variables.keys():
+                print "!! WARNING !! Unknown user-defined name_z. Trying preset values..."
+                self.name_z=None
+          # If failed try preset
+          if self.name_z is None:
+            if self.useindex[1] == "0":
+             for c in glob_listz:
+              if c in self.f.variables.keys():
+               self.name_z = c
+          # If failed set grid points
+          if self.name_z is None:
             self.field_z = np.array(range(self.dim_z))
             self.name_z = "z grid points"
           else:
@@ -1536,15 +1617,20 @@ class onerequest():
                if self.verbose: print "**** OK. z axis %4.0f values [%5.1f,%5.1f]" % (self.dim_z,self.field_z.min(),self.field_z.max())
     ##
     def getdimt(self):
-          # TIME. Try preset fields.
-          self.name_t = "nothing"
-          if self.useindex[0] == "0":
-           for c in glob_listt:
-            if c in self.f.variables.keys():
-             self.name_t = c
-             if self.verbose: print "**** OK. Found time variable: ",c
+          # TIME. If not defined by user try preset fields. If still not present set grid points axis.
+          # Check user-defined
+          if self.name_t is not None:
+              if self.name_t not in self.f.variables.keys():
+                print "!! WARNING !! Unknown user-defined name_t. Trying preset values..."
+                self.name_t=None
+          # If failed try preset
+          if self.name_t is None:
+            if self.useindex[0] == "0":
+             for c in glob_listt:
+              if c in self.f.variables.keys():
+               self.name_t = c
+               if self.verbose: print "**** OK. Found time variable: ",c
           try:
-            # speed up: only get first value, last one.
             self.tabtime = self.f.variables[self.name_t]
             # (consider the case where tabtime is not dim 1)
             # (time is most often the first dimension)
@@ -1767,7 +1853,7 @@ class onerequest():
             for iy in range(self.dim_y):
               idx = np.argmin( np.abs( self.field_x[iy,:] - dalistx[indx][0] ) )
               # if comp is requested we select only indexes which yield values between requested min and max
-              storeval = (self.method_y == "comp") and (self.field_y[iy,idx] > dalisty[indy][0]) and (self.field_y[iy,idx] < dalisty[indy][1])
+              storeval = (self.method_y == "comp") and (self.field_y[iy,idx] >= dalisty[indy][0]) and (self.field_y[iy,idx] <= dalisty[indy][1])
               storeval = storeval or (self.method_y == "free")
               if storeval:
                   if idx not in self.index_x:  self.index_x.append(idx)
@@ -1782,7 +1868,7 @@ class onerequest():
             for ix in range(self.dim_x):
               idy = np.argmin( np.abs( self.field_y[:,ix] - dalisty[indy][0] ) )
               # if comp is requested we select only indexes which yield values between requested min and max
-              storeval = (self.method_x == "comp") and (self.field_x[idy,ix] > dalistx[indx][0]) and (self.field_x[idy,ix] < dalistx[indx][1])
+              storeval = (self.method_x == "comp") and (self.field_x[idy,ix] >= dalistx[indx][0]) and (self.field_x[idy,ix] <= dalistx[indx][1])
               storeval = storeval or (self.method_x == "free")
               if storeval:
                   if idy not in self.index_y:  self.index_y.append(idy)
@@ -1999,6 +2085,22 @@ class onerequest():
         elif "_y" in self.compute: zeaxis = 2
         elif "_z" in self.compute: zeaxis = 1
         elif "_t" in self.compute: zeaxis = 0
+        if   "rollingmean" in self.compute: 
+           if self.window is not None:
+             nnn = self.window
+             if   "_x" in self.compute: 
+                ## TBD: 2d coordinates
+                self.field, self.field_x = ppcompute.rollingmean(self.field,self.field_x,axis=zeaxis,n=nnn)
+             elif "_y" in self.compute:
+                ## TBD: 2d coordinates
+                self.field, self.field_y = ppcompute.rollingmean(self.field,self.field_y,axis=zeaxis,n=nnn)
+             elif "_z" in self.compute:
+                self.field, self.field_z = ppcompute.rollingmean(self.field,self.field_z,axis=zeaxis,n=nnn)
+             elif "_t" in self.compute:
+                self.field, self.field_t = ppcompute.rollingmean(self.field,self.field_t,axis=zeaxis,n=nnn)
+           else:
+             print "!! ERROR !! You missed setting window computation" ; exit()
+ 
         if   "pert" in self.compute: 
            self.field = ppcompute.perturbation(self.field,axis=zeaxis,mm=mm)
         elif "diff" in self.compute:

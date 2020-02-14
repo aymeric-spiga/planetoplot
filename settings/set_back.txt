@@ -17,7 +17,8 @@ nice ; http://www.lmd.jussieu.fr/~aslmd/maps/earthmap1k.jpg
 clouds ; http://www.johnstonsarchive.net/spaceart/marswcloudmap.jpg
 jupiter ; http://www.mmedia.is/~bjj/data/jupiter_css/jupiter_css.jpg
 jupiter_voy ; http://www.mmedia.is/~bjj/data/jupiter/jupiter_vgr2.jpg
-blue ; http://eoimages.gsfc.nasa.gov/ve/2430/land_ocean_ice_2048.jpg
+blue ; https://earthobservatory.nasa.gov/ContentFeature/BlueMarble/Images/land_shallow_topo_2048.jpg
+blue_sep ; https://eoimages.gsfc.nasa.gov/images/imagerecords/74000/74443/world.topo.200409.3x5400x2700.jpg
 blueclouds ; http://eoimages.gsfc.nasa.gov/ve/2431/land_ocean_ice_cloud_2048.jpg
 justclouds ; http://eoimages.gsfc.nasa.gov/ve/2432/cloud_combined_2048.jpg
 pluto ; http://www.boulder.swri.edu/~buie/pluto/pluto_all.png

@@ -54,6 +54,11 @@ conda install matplotlib
 conda install netCDF4
 ~~~
 (If needed, install the optional packages)
+
+- `basemap` for map projections
+- `pillow` for background image (warpimage in `basemap`)
+- `scipy` for scientific computations
+
 ~~~
 conda install -c conda-forge basemap
 conda install pil
@@ -66,6 +71,7 @@ conda create -n planetoplot python=2.7
 source activate planetoplot
 conda install numpy matplotlib netcdf4
 conda install -c conda-forge basemap
+conda install pillow
 ~~~
 
 ### Possibility 3: install directly librairies to the built-in `python` in your OS 
