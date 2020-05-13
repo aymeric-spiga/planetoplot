@@ -32,14 +32,14 @@ computemass = False
 #zzz = 8
 ###############
 
-print "get full fields --> q"
+print("get full fields --> q")
 verb = False
 u4D,longit,latit,pniv,time=pp(file=fileAP,var="u",verbose=verb,z=zzz).getfd()
 v4D=pp(file=fileAP,var="v",verbose=verb,z=zzz).getf()
-print "   -- got shape",u4D.shape
+print("   -- got shape",u4D.shape)
 lat=latit[:,0] # for further use
 
-print "get axis characteristics"
+print("get axis characteristics")
 timeaxis = (time.size > 1)
 if pniv.size == 1: 
   vertaxis = False
@@ -48,28 +48,28 @@ elif zzz is None:
 else:
   vertaxis = True
 
-print "get zonal anomaly fields --> q*=q-[q]"
+print("get zonal anomaly fields --> q*=q-[q]")
 staru4D=pp(file=fileAP,var="u",verbose=verb,compute="pert_x",z=zzz).getf()
 starv4D=pp(file=fileAP,var="v",verbose=verb,compute="pert_x",z=zzz).getf()
-print "   -- got shape",staru4D.shape
+print("   -- got shape",staru4D.shape)
 
-print "get temporal anomaly fields --> q'=q-qbar"
+print("get temporal anomaly fields --> q'=q-qbar")
 if timeaxis:
   primu4D=pp(file=fileAP,var="u",verbose=verb,compute="pert_t",z=zzz).getf()
   primv4D=pp(file=fileAP,var="v",verbose=verb,compute="pert_t",z=zzz).getf()
-  print "   -- got shape",primu4D.shape
+  print("   -- got shape",primu4D.shape)
 else:
   primu4D=staru4D
   primv4D=starv4D
-  print "   -- no time axis: ASSUMING q' ~ q*"
+  print("   -- no time axis: ASSUMING q' ~ q*")
 
-print "get temporal+zonal mean fields --> [qbar]"
+print("get temporal+zonal mean fields --> [qbar]")
 meanu2D=pp(file=fileAP,var="u",verbose=verb,t="0,1e15",x="-180,180",z=zzz).getf()
 meanv2D=pp(file=fileAP,var="v",verbose=verb,t="0,1e15",x="-180,180",z=zzz).getf()
 if computemass:
   meant2D=pp(file=fileAP,var="temp",verbose=verb,t="0,1e15",x="-180,180",z=zzz).getf()
   #meanmass2D=pp(file=fileAPM,var="dmass",verbose=verb,t="0,1e15",x="-180,180").getf()
-print "   -- got shape",meanu2D.shape
+print("   -- got shape",meanu2D.shape)
 
 ##########################################
 # compute metric terms (distance to axis)
@@ -85,7 +85,7 @@ massmetric = acoslat2D
 ##########################################
 if computemass:
   if vertaxis:
-    print "compute mass"
+    print("compute mass")
     ## compute mass for each considered grid mesh
     ## S dp = - rho g dz S = - g dm --> dm = - S dp / g
     meanmass2D = np.empty_like(meanv2D)
@@ -98,11 +98,11 @@ if computemass:
       meanmass2D[nl-1,i]=surf[i]*pniv[nl-1]/planet.g
     massmetric = massmetric*meanmass2D
   else:
-    print "I need a vertical dimension to compute mass! Change file or choose typevar<3"
+    print("I need a vertical dimension to compute mass! Change file or choose typevar<3")
     exit()
 ##########################################
 
-print "compute transport"
+print("compute transport")
 # ---- e.g. Lebonnois et al. 2010 equation 19
 # [(vq)bar] : total meridional transport
 # [qbar][vbar]: by mean meridional circulation
@@ -147,7 +147,7 @@ dETdy = dETdy / np.cos(lat*np.pi/180.)
 
 ### PLOTS
 ### -- \langle q \rangle = \left[ \overline{q} \right]
-print "plots"
+print("plots")
 
 ### 1D plots
 if not vertaxis:
@@ -223,7 +223,7 @@ if not vertaxis:
 ### 2D plots
 else:
 
- print "make plot"
+ print("make plot")
 
  fig = ppplot.figuref(x=20,y=6)
  subv,subh = ppplot.definesubplot(2, fig)

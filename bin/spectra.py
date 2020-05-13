@@ -107,7 +107,7 @@ if opt.ymin is None:
 
 ## function for Doppler shift
 if opt.zonalwind is not None:
-    print "ASSUMING ZONAL WIND:",opt.zonalwind
+    print("ASSUMING ZONAL WIND:",opt.zonalwind)
     import planets
     mypl = planets.Saturn
     # transform u in degree per day
@@ -119,7 +119,7 @@ if opt.zonalwind is not None:
     def intrinsic(sigma,s):
         sigmahat = sigma - np.sign(s)*utransform
         if np.sign(sigmahat) == -1:
-            print "reversal !",sigma,sigmahat
+            print("reversal !",sigma,sigmahat)
             shat = -s
             sigmahat = -sigmahat
         else:
@@ -150,7 +150,7 @@ else:
 if opt.tmin is not None and opt.tmax is not None:
     ind = (t >= opt.tmin)*(t <= opt.tmax)
     tab = tab[ind]
-    print t[ind]
+    print(t[ind])
 
 ## MAKE X=LON Y=TIME
 tab = np.transpose(tab)
@@ -290,7 +290,7 @@ while itit <= opt.ndom:
 fifi.write("---------------------------------------\n")
 fifi.close()
 # -- print results
-print(open(txtfile, "r").read())
+print((open(txtfile, "r").read()))
 
 ## COMPUTE FREQUENCY/PERIOD AXIS
 if not opt.period:
@@ -326,7 +326,7 @@ if (opt.reldis):
   try: 
     import planets
   except: 
-    print "please install the module planets"
+    print("please install the module planets")
   mypl = planets.Saturn
   #mypl = planets.Jupiter
 
@@ -355,10 +355,10 @@ if (opt.reldis):
     m = np.sqrt(term2-term1)
     lz = 2.*np.pi / m
     c = np.sqrt(mypl.g*hache)
-    print "EQUIVALENT HEIGHT", hache
-    print "vertical wavelength [km] ", lz / 1000.
-    print "phase speed KW [m/s] ", c
-    print "equat Rossby rad [deg] ", np.sqrt(c/mypl.beta()) / 1e6
+    print("EQUIVALENT HEIGHT", hache)
+    print("vertical wavelength [km] ", lz / 1000.)
+    print("phase speed KW [m/s] ", c)
+    print("equat Rossby rad [deg] ", np.sqrt(c/mypl.beta()) / 1e6)
 
 
   # ensure number of points 
@@ -416,4 +416,4 @@ if opt.output is not None:
     f = open(opt.output+'.sh', 'w')
     f.write(command)
   except IOError:
-    print "!! WARNING !! not saved. Probably do not have permission to write here."
+    print("!! WARNING !! not saved. Probably do not have permission to write here.")

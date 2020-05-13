@@ -21,7 +21,7 @@ R = 192.
 foo1,foo2,foo3,z,t = pp(file=files[0],var="T",x=0,y=0).getfd()
 nz,nt = z.size,t.size
 nf = len(files)
-print nf
+print(nf)
 ntt = nt*nf
 
 ## arrays for time series
@@ -36,12 +36,12 @@ indt = -1
 
 for ff in files:
 
- print "### PROCESSING FILE:",ff
- print "### --> T"
+ print("### PROCESSING FILE:",ff)
+ print("### --> T")
  t = pp(file=ff,var="T").getf() + t0
- print "### --> W"
+ print("### --> W")
  w = pp(file=ff,var="W").getf()
- print "### --> PHTOT"
+ print("### --> PHTOT")
  geop = pp(file=ff,var="PHTOT").getf()
  geop = geop - np.mean(geop[:,0,:,:])
  
@@ -68,7 +68,7 @@ for ff in files:
   ## method 1: potential temperature profile
   diff = np.abs(tmean[indt,2:]-tmean[indt,1])
   wheremin = np.argmin(diff) + 2
-  print indt, tt
+  print(indt, tt)
   pblh1[indt] = np.mean(geop[tt,wheremin,:,:]) / grav #Height of the geopotential of the boundary layer
  
   ###########

@@ -38,7 +38,7 @@ for case in tabcase:
  ##
  count = 1
  for ttt in range(nn):
-  print count
+  print(count)
   ww.t = ttt
   ############################
   ff = pp(file=ww.file,var="TIME_COUNTER",useindex="1111",x=0,y=0,z=0,t=ttt).getf()
@@ -47,7 +47,7 @@ for case in tabcase:
   day = day + 1
   ww.title = "day %02i @ %02i00 UTC" % (day,hour)
   ww.title = "July %i" % (day)
-  print ww.title
+  print(ww.title)
   ############################
   ww.filename = "mov_"+case+"_%03d"%(count)
   ww.get()

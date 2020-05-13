@@ -24,7 +24,7 @@ for fff in ffftab:
    tabt = tabtabt[n]
    n=n+1
 
-   print fff
+   print(fff)
    fp = pp()
    #fp.quiet = True
    fp.verbose = True

@@ -27,7 +27,7 @@ use_spline = False
 ####################################################
 def etape(charvar,time0):
   ttt = round(time.time()-time0,2)
-  print "TIME=",ttt,"... ... done: "+charvar
+  print("TIME=",ttt,"... ... done: "+charvar)
 
 ####################################################
 def interpolate(targetp1d,sourcep3d,fieldsource3d,spline=False):
@@ -89,7 +89,7 @@ for kk in range(nz):
   press[kk,yy] = aps[kk]+bps[kk]*psbc[yy]
 
 ####################################################
-print "... getting fields from file !"
+print("... getting fields from file !")
 ubc,xdim,ydim,zdim,tdim = pp(file=fileAP,var="u"    ,t="0,1e10",x=charx).getfd() ; etape("ubc",time0)
 vbc                     = pp(file=fileAP,var="v"    ,t="0,1e10",x=charx).getf()  ; etape("vbc",time0)
 #tbc                     = pp(file=fileAP,var=vartemp,t="0,1e10",x=charx).getf()  ; etape("tbc",time0)
@@ -115,10 +115,10 @@ dudt = (uend - ustart) / (1000.*38052.)
 
 ##
 up  = pp(file=fileAP,var="u"    ,compute="pert_t").getf() ; etape("up",time0)
-print up.shape
+print(up.shape)
 vp  = pp(file=fileAP,var="v"    ,compute="pert_t").getf() ; etape("vp",time0)
 upvpb  = ppcompute.mean(up*vp ,axis=0) ; etape("upvpb" ,time0) ; del up ; del vp
-print upvpb.shape
+print(upvpb.shape)
 upvpbc = ppcompute.mean(upvpb ,axis=2) ; etape("upvpbc",time0) ; del upvpb
 
 ### stationary: negligible
@@ -131,7 +131,7 @@ upvpbc = ppcompute.mean(upvpb ,axis=2) ; etape("upvpbc",time0) ; del upvpb
 
 
 ####################################################
-print "... interpolating !"
+print("... interpolating !")
 ubc    = interpolate(targetp1d,press,ubc)    ; etape("ubc"   ,time0) ; addvar(outfile,nam4,'ubc',ubc)
 vbc    = interpolate(targetp1d,press,vbc)    ; etape("vbc"   ,time0) ; addvar(outfile,nam4,'vbc',vbc)
 #tbc    = interpolate(targetp1d,press,tbc)    ; etape("tbc"   ,time0)
@@ -147,7 +147,7 @@ cosphi2d = acosphi2d / myp.a
 latrad,lat2drad = ydim*np.pi/180.,lat2d*np.pi/180.
 beta = myp.beta(lat=lat2d)
 f = myp.fcoriolis(lat=lat2d)
-print f
+print(f)
 tanphia = myp.tanphia(lat=lat2d)
 etape("coordinates",time0)
 

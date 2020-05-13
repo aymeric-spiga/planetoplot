@@ -25,7 +25,7 @@ for yeah in [tttall]:
   dval = 0.05
   bins = np.arange(zemin,zemax,dval)
   hh = mpl.hist(np.ravel(ustm),bins,log=True)
-  print hh
+  print(hh)
   mpl.title("$\mu$=%.2f / m=%.2f / M=%.2f" % (zemean,zemin,zemax))
   mpl.xlabel('Friction velocity $u_{\star}$ (m s$^{-1}$)')
   ppplot.save(mode="png",filename="roughness_hist")

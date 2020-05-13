@@ -56,9 +56,9 @@ for i in range(nb_dataset):
         bornemin=np.amin([romin,bornemin])
         #
         
-        print 'minval,maxval=',minval,romax
-        print 'romin,romax=',romin,romax
-	print 'bornemin,bornemax=',bornemin,bornemax
+        print('minval,maxval=',minval,romax)
+        print('romin,romax=',romin,romax)
+	print('bornemin,bornemax=',bornemin,bornemax)
         
 # bins definition:
 bins=np.arange(bornemin,bornemax+1,step)
