@@ -44,7 +44,7 @@ try:
     for stuff in lines[14].strip().split(';'): glob_listt.append(stuff)
     for stuff in lines[17].strip().split(';'): glob_listarea.append(stuff)
 except IOError: 
-    print "PPCLASS warning: "+zefile+" not in "+whereset+" ; no presets."
+    print("PPCLASS warning: "+zefile+" not in "+whereset+" ; no presets.")
 
 ##################################
 #### USEFUL GENERIC FUNCTIONS ####
@@ -52,35 +52,35 @@ except IOError:
 
 # inspect variables and dimensions in a netCDF file
 def inspect(filename):
-    print "---------------------------------------------------------------"
-    print "**** INSPECT FILE",filename
+    print("---------------------------------------------------------------")
+    print("**** INSPECT FILE",filename)
     test = netCDF4.Dataset(filename)
-    print "---------------------------------------------------------------"
-    print "**** DIMENSIONS:"
-    for obj in test.dimensions.values(): print obj
-    print "---------------------------------------------------------------"
-    print "**** VARIABLES: ",test.variables.keys()
-    print "---------------------------------------------------------------"
+    print("---------------------------------------------------------------")
+    print("**** DIMENSIONS:")
+    for obj in list(test.dimensions.values()): print(obj)
+    print("---------------------------------------------------------------")
+    print("**** VARIABLES: ",list(test.variables.keys()))
+    print("---------------------------------------------------------------")
     findinlist(test,glob_listx,"**** FOUND X-AXIS ---> ")
     findinlist(test,glob_listy,"**** FOUND Y-AXIS ---> ")
     findinlist(test,glob_listz,"**** FOUND Z-AXIS ---> ")
     findinlist(test,glob_listt,"**** FOUND T-AXIS ---> ")
-    print "**** ( according to settings in "+whereset+zefile+" )"
-    print "---------------------------------------------------------------"
+    print("**** ( according to settings in "+whereset+zefile+" )")
+    print("---------------------------------------------------------------")
 # -- function defined for the above function inspect
 def findinlist(netcdfobj,extlist,message):
     found = False
     for c in extlist:
-      if c in netcdfobj.variables.keys():
+      if c in list(netcdfobj.variables.keys()):
         found = True
         output = message+str(c)
-        if c in netcdfobj.dimensions.keys():
+        if c in list(netcdfobj.dimensions.keys()):
           output = output+" ---- has "+str(len(netcdfobj.dimensions[c]))+" values"
           try: output = output + " ---- from "+str(netcdfobj.variables[c][0])+" to "+str(netcdfobj.variables[c][-1])
           except: pass
-        print output ; output = "" 
+        print(output) ; output = "" 
     if not found:
-      print message+"not found. will simply use index (check out dimensions)."
+      print(message+"not found. will simply use index (check out dimensions).")
 
 # request a given attribute (and test if it is here)
 def ncattr(filename,char):
@@ -92,7 +92,7 @@ def ncattr(filename,char):
 # (if allownumber, convert this into a string).
 def checktab(tab,mess="",allownone=False,allownumber=False):
     if tab is None: 
-      if not allownone:  print "pp.define: no "+mess ; exit()
+      if not allownone:  print("pp.define: no "+mess) ; exit()
       else: pass
     else:
       if not isinstance(tab, list):
@@ -101,14 +101,14 @@ def checktab(tab,mess="",allownone=False,allownumber=False):
         elif (isinstance(tab, int) or isinstance(tab, float)) and allownumber: 
             tab = [str(tab)] 
         else: 
-            print "pp.define: "+mess+" should be either a string or a list of strings!" ; exit()
+            print("pp.define: "+mess+" should be either a string or a list of strings!") ; exit()
       elif isinstance(tab, list):
         if isinstance(tab[0],str): 
             pass
         elif (isinstance(tab[0], int) or isinstance(tab[0], float)) and allownumber:
             for iii in range(len(tab)): tab[iii] = str(tab[iii])
         else: 
-            print "pp.define: "+mess+" should be either a string or a list of strings!" ; exit()
+            print("pp.define: "+mess+" should be either a string or a list of strings!") ; exit()
     return tab
 
 # determine which method is to be applied to a given dimension
@@ -299,12 +299,12 @@ class pp():
     # print status
     def printstatus(self):
       if not self.quiet:
-        print "**** PPCLASS. Done step: " + self.status
+        print("**** PPCLASS. Done step: " + self.status)
 
     # print attributes
     def printme(self):
-        for k, v in vars(self).items():
-            print k,v
+        for k, v in list(vars(self).items()):
+            print(k,v)
 
     #####################################################
     # EMULATE OPERATORS + - * / ** << FOR PP() OBJECTS  #
@@ -373,7 +373,7 @@ class pp():
             self.logy = other.logy
             self.svx = other.svx ; self.svy = other.svy
         else:
-            print "!! ERROR !! argument must be a pp object." ; exit()
+            print("!! ERROR !! argument must be a pp object.") ; exit()
 
     # check the compatibility of two objects for operations
     # --> if other is a pp class, test sizes and return isnum = False
@@ -383,19 +383,19 @@ class pp():
         if other.__class__.__name__ == "pp":
           isnum = False
           if self.status in ["init","defined"] or other.status in ["init","define"]: 
-             print "!! ERROR !! Please use .retrieve to get fields for plots with one of your pp operands." ; exit()
+             print("!! ERROR !! Please use .retrieve to get fields for plots with one of your pp operands.") ; exit()
           if self.nfin   != other.nfin   or \
              self.nvin   != other.nvin   or \
              self.nplott != other.nplott or \
              self.nplotz != other.nploty or \
              self.nploty != other.nploty or \
              self.nplotx != other.nplotx :
-               print "!! ERROR !! The two operands do not have the same number of files, variables, t z y x requests."
+               print("!! ERROR !! The two operands do not have the same number of files, variables, t z y x requests.")
                exit()
         elif isinstance(other,int) or isinstance(other,float):
           isnum = True
         else:
-          print "!! ERROR !! The operand is neither a pp class nor an integer or a float." ; exit()
+          print("!! ERROR !! The operand is neither a pp class nor an integer or a float.") ; exit()
         return isnum
 
     # define a selective copy of a pp() object for operations
@@ -407,9 +407,9 @@ class pp():
     # - field attribute of the onerequest() objects
     def selective_copy(self):
         if self.status in ["init","defined"]:
-            print "!! ERROR !! Please use .retrieve to get fields for the object you want to copy from." ; exit()
+            print("!! ERROR !! Please use .retrieve to get fields for the object you want to copy from.") ; exit()
         the_clone = pp()
-        for k, v in vars(self).items():
+        for k, v in list(vars(self).items()):
            if k != "request":
                setattr(the_clone,k,v)
         the_clone.verbose = False
@@ -423,7 +423,7 @@ class pp():
              for x in range(self.nplotx):
               obj_ref = self.request[i][j][t][z][y][x]
               obj = the_clone.request[i][j][t][z][y][x]
-              for k, v in vars(obj_ref).items():
+              for k, v in list(vars(obj_ref).items()):
                if k != "field":
                 setattr(obj,k,v)
         the_clone.status = "retrieved"
@@ -448,13 +448,13 @@ class pp():
                   if ope.ndim == 0: 
                     ope = float(ope) # if no dimension then this means that ope is a single value (not to be kept as an array)
                   elif obj_ref.field.shape != ope.shape:
-                    print "!! ERROR !! The two fields for operation do not have the same shape.",obj_ref.field.shape,ope.shape
+                    print("!! ERROR !! The two fields for operation do not have the same shape.",obj_ref.field.shape,ope.shape)
                     exit()
               else:           
                   ope = other
               goal = self.vargoal[j] + self.filegoal[i]
               if ("vector" in goal) or ("contour" in goal):
-                  if self.verbose: print "!! WARNING !! No operation was made on contours and vectors. This can be debatted actually."
+                  if self.verbose: print("!! WARNING !! No operation was made on contours and vectors. This can be debatted actually.")
                   obj.field = obj_ref.field
               else:
                   obj.field = obj_ref.field + ope
@@ -478,13 +478,13 @@ class pp():
                   if ope.ndim == 0: 
                     ope = float(ope) # if no dimension then this means that ope is a single value (not to be kept as an array)
                   elif obj_ref.field.shape != ope.shape:
-                    print "!! ERROR !! The two fields for operation do not have the same shape.",obj_ref.field.shape,ope.shape
+                    print("!! ERROR !! The two fields for operation do not have the same shape.",obj_ref.field.shape,ope.shape)
                     exit()
               else:
                   ope = other
               goal = self.vargoal[j] + self.filegoal[i]
               if ("vector" in goal) or ("contour" in goal):
-                  if self.verbose: print "!! WARNING !! No operation was made on contours and vectors. This can be debatted actually."
+                  if self.verbose: print("!! WARNING !! No operation was made on contours and vectors. This can be debatted actually.")
                   obj.field = obj_ref.field
               else:
                   obj.field = obj_ref.field - ope
@@ -508,13 +508,13 @@ class pp():
                   if ope.ndim == 0: 
                     ope = float(ope) # if no dimension then this means that ope is a single value (not to be kept as an array)
                   elif obj_ref.field.shape != ope.shape:
-                    print "!! ERROR !! The two fields for operation do not have the same shape.",obj_ref.field.shape,ope.shape
+                    print("!! ERROR !! The two fields for operation do not have the same shape.",obj_ref.field.shape,ope.shape)
                     exit()
               else:
                   ope = other
               goal = self.vargoal[j] + self.filegoal[i]
               if ("vector" in goal) or ("contour" in goal):
-                  if self.verbose: print "!! WARNING !! No operation was made on contours and vectors. This can be debatted actually."
+                  if self.verbose: print("!! WARNING !! No operation was made on contours and vectors. This can be debatted actually.")
                   obj.field = obj_ref.field
               else:
                   obj.field = obj_ref.field * ope
@@ -538,13 +538,13 @@ class pp():
                   if ope.ndim == 0: 
                     ope = float(ope) # if no dimension then this means that ope is a single value (not to be kept as an array)
                   elif obj_ref.field.shape != ope.shape:
-                    print "!! ERROR !! The two fields for operation do not have the same shape.",obj_ref.field.shape,ope.shape
+                    print("!! ERROR !! The two fields for operation do not have the same shape.",obj_ref.field.shape,ope.shape)
                     exit()
               else:
                   ope = other
               goal = self.vargoal[j] + self.filegoal[i]
               if ("vector" in goal) or ("contour" in goal):
-                  if self.verbose: print "!! WARNING !! No operation was made on contours and vectors. This can be debatted actually."
+                  if self.verbose: print("!! WARNING !! No operation was made on contours and vectors. This can be debatted actually.")
                   obj.field = obj_ref.field
               else:
                   obj.field = obj_ref.field / ope
@@ -553,25 +553,25 @@ class pp():
     # define the reverse operation float/int + object
     def __radd__(self,other):
         isnum = self.checktwo(other)
-        if not isnum: print "!! ERROR !! Operand should be a number" ; exit()
+        if not isnum: print("!! ERROR !! Operand should be a number") ; exit()
         return self.__add__(other)
 
     # define the reverse operation float/int - object
     def __rsub__(self,other):
         isnum = self.checktwo(other)
-        if not isnum: print "!! ERROR !! Operand should be a number" ; exit()
+        if not isnum: print("!! ERROR !! Operand should be a number") ; exit()
         return self.__sub__(other)
 
     # define the reverse operation float/int * object
     def __rmul__(self,other):
         isnum = self.checktwo(other)
-        if not isnum: print "!! ERROR !! Operand should be a number" ; exit()
+        if not isnum: print("!! ERROR !! Operand should be a number") ; exit()
         return self.__mul__(other)
 
     # define the reverse operation float/int / object
     def __rdiv__(self,other):
         isnum = self.checktwo(other)
-        if not isnum: print "!! ERROR !! Operand should be a number" ; exit()
+        if not isnum: print("!! ERROR !! Operand should be a number") ; exit()
         return self.__div__(other)
 
     # define the operation ** on one object.
@@ -589,12 +589,12 @@ class pp():
                   obj_ref = self.request[i][j][t][z][y][x]
                   goal = self.vargoal[j] + self.filegoal[i]
                   if ("vector" in goal) or ("contour" in goal):
-                      if self.verbose: print "!! WARNING !! No operation was made on contours and vectors. This can be debatted actually."
+                      if self.verbose: print("!! WARNING !! No operation was made on contours and vectors. This can be debatted actually.")
                       obj.field = obj_ref.field
                   else:
                       obj.field = obj_ref.field ** num
         else:
-            print "!! ERROR !! To define a power, either an int or a float is needed." ; exit()
+            print("!! ERROR !! To define a power, either an int or a float is needed.") ; exit()
         return the_clone
 
     ### TBD: reverse power? for exponentials?
@@ -630,8 +630,8 @@ class pp():
         if self.vargoal is None:  self.vargoal  = ["main"]*self.nvin
         self.filegoal = checktab(self.filegoal, mess="filegoal")
         self.vargoal  = checktab(self.vargoal,  mess="vargoal")
-        if len(self.filegoal) != self.nfin:  print "!! ERROR !! filegoal must be the same size as file." ; exit()
-        if len(self.vargoal)  != self.nvin:  print "!! ERROR !! vargoal must be the same size as var." ; exit()
+        if len(self.filegoal) != self.nfin:  print("!! ERROR !! filegoal must be the same size as file.") ; exit()
+        if len(self.vargoal)  != self.nvin:  print("!! ERROR !! vargoal must be the same size as var.") ; exit()
         # variables: initial check
         self.x = checktab(self.x,mess="x",allownone=True,allownumber=True)
         self.y = checktab(self.y,mess="y",allownone=True,allownumber=True)
@@ -645,15 +645,15 @@ class pp():
         mx = findmethod(sx) ; my = findmethod(sy)
         mz = findmethod(sz) ; mt = findmethod(st)
         # get number of plots to be done
-        if mx in ["fixed","comp"]: self.nplotx = sx.size/2
+        if mx in ["fixed","comp"]: self.nplotx = sx.size//2
         else:                      self.nplotx = 1
-        if my in ["fixed","comp"]: self.nploty = sy.size/2
+        if my in ["fixed","comp"]: self.nploty = sy.size//2
         else:                      self.nploty = 1
-        if mz in ["fixed","comp"]: self.nplotz = sz.size/2
+        if mz in ["fixed","comp"]: self.nplotz = sz.size//2
         else:                      self.nplotz = 1
-        if mt in ["fixed","comp"]: self.nplott = st.size/2
+        if mt in ["fixed","comp"]: self.nplott = st.size//2
         else:                      self.nplott = 1
-        if self.verbose:  print "**** OK. Plots over x,y,z,t -->",self.nplotx,self.nploty,self.nplotz,self.nplott
+        if self.verbose:  print("**** OK. Plots over x,y,z,t -->",self.nplotx,self.nploty,self.nplotz,self.nplott)
         # create the list of onerequest() objects
         self.request = [[[[[[ \
                        onerequest() \
@@ -724,7 +724,7 @@ class pp():
     def retrieve(self):
         self.printstatus()
         # check if things were done OK before
-        if self.status != "defined": print "!! ERROR !! Please use .define() to define your pp object." ; exit()
+        if self.status != "defined": print("!! ERROR !! Please use .define() to define your pp object.") ; exit()
         ## create the list of f() and l() objects
         ## --> so that the user can easily access values (and labels for easy exploration)
         ## --> see example easy_get_field
@@ -820,8 +820,8 @@ class pp():
     ## TBD: smooth not OK with masked array in the end of retrieve()
     def smooth(self,window):
         if self.verbose: 
-            print "!! WARNING !! Performing a smoothing with a window size",window
-            print "!! WARNING !! To come back to unsmoothed file, use .get() again"
+            print("!! WARNING !! Performing a smoothing with a window size",window)
+            print("!! WARNING !! To come back to unsmoothed file, use .get() again")
         for i in range(self.nfin):
          for j in range(self.nvin):
           for t in range(self.nplott):
@@ -830,7 +830,7 @@ class pp():
              for x in range(self.nplotx):
               obj = self.request[i][j][t][z][y][x]
               if obj.field.ndim == 1:
-                  print "!! ERROR !! 1D smoothing not supported yet because reduces array sizes."
+                  print("!! ERROR !! 1D smoothing not supported yet because reduces array sizes.")
                   exit()
                   # TBD TBD TBD
                   #obj.field = ppcompute.smooth1d(obj.field,window=window)
@@ -855,7 +855,7 @@ class pp():
         # -----------------------------------------------------
         if loadfile is not None:
             try: filehandler = open(loadfile, 'r') ; self.p = pickle.load(filehandler) 
-            except IOError: print "!! ERROR !! Cannot find object file to load." ; exit()
+            except IOError: print("!! ERROR !! Cannot find object file to load.") ; exit()
             self.status = "definedplot" ; self.plotin = None
             self.nplot = len(self.p) ; self.howmanyplots = self.nplot
             ## [BUG FIX: apparently info about missing values is not saved correctly]
@@ -870,14 +870,14 @@ class pp():
         self.printstatus()
         # check if things were done OK before
         if self.status in ["init","defined"]: 
-            print "!! ERROR !! Please use .retrieve() to get fields for plots with your pp object." ; exit()
+            print("!! ERROR !! Please use .retrieve() to get fields for plots with your pp object.") ; exit()
         # check self.plotin (an existing fig on which to add plots afterwards)
         if self.plotin.__class__.__name__ == "pp":
             if self.plotin.fig is None:
                 self.plotin = None # this is an additional security in case 
                                    #   a pp object is given without figure opened yet.
         elif self.plotin is not None:
-            print "!! ERROR !! plotin argument must be a pp object." ; exit()
+            print("!! ERROR !! plotin argument must be a pp object.") ; exit()
         # initialize the array of subplot objects
         # either something new or attributes coming from plotin object
         if self.plotin is None:  self.p = [ ]
@@ -899,8 +899,8 @@ class pp():
                 dp = obj.dimplot
                 if dp == 1 or self.forcedimplot == 1:    plobj = ppplot.plot1d()
                 elif dp == 2 or self.forcedimplot == 2:  plobj = ppplot.plot2d()
-                elif dp == 0: print "**** OK. VALUES VALUES VALUES",obj.field
-                else:         print "!! ERROR !! 3D or 4D plots not supported" ; exit()
+                elif dp == 0: print("**** OK. VALUES VALUES VALUES",obj.field)
+                else:         print("!! ERROR !! 3D or 4D plots not supported") ; exit()
                 # load abscissa and ordinate in obj
                 obj.definecoord()
                 # we start to define things here before appending
@@ -968,7 +968,7 @@ class pp():
                     if self.xmax is not None: plobj.xmax = self.xmax
                     if self.ymin is not None: plobj.ymin = self.ymin
                     if self.ymax is not None: plobj.ymax = self.ymax
-		    if self.cbticks is not None: plobj.cbticks = self.cbticks
+                    if self.cbticks is not None: plobj.cbticks = self.cbticks
                     # -- 1D specific
                     if dp == 1:
                         if self.linestyle is not None: plobj.linestyle = self.linestyle
@@ -980,9 +980,9 @@ class pp():
                         if self.vmin is not None: plobj.vmin = self.vmin
                         if self.vmax is not None: plobj.vmax = self.vmax
                         if self.trans is not None: plobj.trans = self.trans
-			if self.back is not None: plobj.back = self.back
-			if self.clev is not None: plobj.clev = self.clev
-			if self.cfmt is not None: plobj.cfmt = self.cfmt
+                        if self.back is not None: plobj.back = self.back
+                        if self.clev is not None: plobj.clev = self.clev
+                        if self.cfmt is not None: plobj.cfmt = self.cfmt
                         if self.clab is not None: plobj.clab = self.clab
 
                     # finally append plot object
@@ -1040,7 +1040,7 @@ class pp():
         # self.howmanyplots is self.nplot + possible extraplots 
         self.howmanyplots = self.nplot + extraplot
         if self.howmanyplots > 0:
-            if self.verbose: print "**** OK. expect %i plots" % (self.howmanyplots)
+            if self.verbose: print("**** OK. expect %i plots" % (self.howmanyplots))
         else:
             pass # because this means that we only had 0D values !
         # final status
@@ -1061,7 +1061,7 @@ class pp():
         # a few initial operations
         # ------------------------
         if "definedplot" not in self.status: 
-            print "!! ERROR !! Please use .defineplot() before .makeplot() can be used with your pp object." ; exit()
+            print("!! ERROR !! Please use .defineplot() before .makeplot() can be used with your pp object.") ; exit()
         # open a figure and define subplots          
         # ---------------------------------
         if self.plotin is None:  
@@ -1108,7 +1108,7 @@ class pp():
                     # possibility to color lines according to a color map
                     # ... made so that all plots span the whole color map automatically.
                     if self.colorbar is not None: 
-                        if self.verbose: print "**** OK. We make a rainbow spaghetti plot with color map ",self.colorbar
+                        if self.verbose: print("**** OK. We make a rainbow spaghetti plot with color map ",self.colorbar)
                         ppplot.rainbow(cb=self.colorbar,num=self.howmanyplots)
                 else: 
                     pl.invert = False # don't invert again axis
@@ -1130,13 +1130,13 @@ class pp():
                         pl.title = prev_plot.title ; pl.swaplab = prev_plot.swaplab
             else:
                 self.fig.add_subplot(self.subv,self.subh,self.n+1) #,axisbg=pl.axisbg)
-            if self.verbose: print "**** Done subplot %i / %i " %( self.n+1,self.howmanyplots ) 
+            if self.verbose: print("**** Done subplot %i / %i " %( self.n+1,self.howmanyplots )) 
             # finally make the plot
             pl.fig = self.fig
             pl.make()
             # possibly print results in a text file
             if self.savtxt:
-                if self.verbose: print "**** Printing results in a text file"
+                if self.verbose: print("**** Printing results in a text file")
                 name = pl.var + "%04d" % self.n
                 ppplot.writeascii(field=pl.f,absc=pl.x,name=name) 
             # increment plot count (and propagate this in plotin)
@@ -1144,20 +1144,20 @@ class pp():
             if self.plotin is not None: self.plotin.n = self.n
         # once completed show the plot (cannot show intermediate plotin)
         # ... added a fix (customplot=True) for the label problem in basemap
-        if not self.quiet: print "**** PPCLASS. Done step: makeplot"
+        if not self.quiet: print("**** PPCLASS. Done step: makeplot")
         if (self.n == self.howmanyplots):
             ppplot.save(mode=self.out,filename=self.filename,folder=self.folder,custom=self.customplot,includedate=self.includedate,res=self.res,fig=self.fig)
             mpl.close()
         # SAVE A PICKLE FILE WITH THE self.p ARRAY OF OBJECTS
         if not self.nopickle:
          if self.filename is not None:
-          if self.verbose: print "**** Saving session in "+self.filename + ".ppobj"
+          if self.verbose: print("**** Saving session in "+self.filename + ".ppobj")
           savfile = self.folder + "/" + self.filename + ".ppobj"
           try: 
               filehandler = open(savfile, 'w')
               pickle.dump(self.p, filehandler)
           except IOError: 
-              if self.verbose: print "!! WARNING !! Saved object file not written. Probably do not have permission to write here."
+              if self.verbose: print("!! WARNING !! Saved object file not written. Probably do not have permission to write here.")
         return self
 
     ###########################################################
@@ -1193,29 +1193,29 @@ class pp():
     def func(self,other):
         # preamble: for this operation to work, defineplot() must have been done
         if self.status != "definedplot":
-            if self.verbose: print "!! WARNING !! performing defineplot on operand"
+            if self.verbose: print("!! WARNING !! performing defineplot on operand")
             self.defineplot()
         if other.status != "definedplot":
-            if self.verbose: print "!! WARNING !! performing defineplot on operand"
+            if self.verbose: print("!! WARNING !! performing defineplot on operand")
             other.defineplot()
         # check total number of plots
         if self.howmanyplots != other.howmanyplots:
-               print "!! ERROR !! The two operands do not have the same number of subplots."
+               print("!! ERROR !! The two operands do not have the same number of subplots.")
                exit()
         # and now operation. 
         count = 0
         while count < self.howmanyplots:
            sobj = self.p[count] ; oobj = other.p[count]
            if sobj.f.ndim !=1 or oobj.f.ndim !=1:
-               if self.verbose: print "!! WARNING !! Flattening arrays because more than one-dimensional."
+               if self.verbose: print("!! WARNING !! Flattening arrays because more than one-dimensional.")
                sobj.f = np.ravel(sobj.f)
                oobj.f = np.ravel(oobj.f)
            sobj.x = oobj.f
            sobj.xlabel = oobj.ylabel
            if sobj.x.size > sobj.f.size:
                if self.verbose:
-                   print "!! WARNING !! Trying to define y=f(x) with x and y not at the same size.",sobj.x.size,sobj.f.size
-                   print "!! WARNING !! Modifying x to fit y size but please check." 
+                   print("!! WARNING !! Trying to define y=f(x) with x and y not at the same size.",sobj.x.size,sobj.f.size)
+                   print("!! WARNING !! Modifying x to fit y size but please check.") 
                sobj.x = sobj.x[0:sobj.f.size]
            count = count + 1
         return self
@@ -1456,13 +1456,13 @@ class onerequest():
     # check that self.var is inside.
     # -------------------------------
     def openfile(self):
-        if not os.path.exists(self.file): print '!! ERROR !! I could not find the following file: '+self.file ; exit()
-        if not os.path.isfile(self.file): print '!! ERROR !! This does not appear to be a file: '+self.file ; exit()
+        if not os.path.exists(self.file): print('!! ERROR !! I could not find the following file: '+self.file) ; exit()
+        if not os.path.isfile(self.file): print('!! ERROR !! This does not appear to be a file: '+self.file) ; exit()
         self.f = netCDF4.Dataset(self.file)
-        if self.verbose: print "**** OK. Opened file "+self.file
-        if self.var not in self.f.variables.keys(): 
-            print '!! ERROR !! File '+self.file+' does not contain variable: '+self.var
-            print '..... try instead with ',self.f.variables.keys() ; exit()
+        if self.verbose: print("**** OK. Opened file "+self.file)
+        if self.var not in list(self.f.variables.keys()): 
+            print('!! ERROR !! File '+self.file+' does not contain variable: '+self.var)
+            print('..... try instead with ',list(self.f.variables.keys())) ; exit()
 
     # close a file
     # ------------
@@ -1472,7 +1472,7 @@ class onerequest():
     # copy attributes from another existing object
     # --------------------------------------------
     def copy(self,source):
-        for k, v in vars(source).items():
+        for k, v in list(vars(source).items()):
             setattr(self,k,v)
 
     # get x,y,z,t dimensions from NETCDF file
@@ -1487,80 +1487,80 @@ class onerequest():
     ##
     def getdimsize(self):
           # GET SIZES OF EACH DIMENSION
-          if self.verbose: print "**** OK. Found variable "+self.var
+          if self.verbose: print("**** OK. Found variable "+self.var)
           shape = self.f.variables[self.var].shape
           self.dim = len(shape)
           if self.dim == 1:
-              if self.verbose: print "**** OK. 1D field. I assume this varies with time."
+              if self.verbose: print("**** OK. 1D field. I assume this varies with time.")
               self.dim_x = 1 ; self.dim_y = 1 ; self.dim_z = 1 ; self.dim_t = shape[0]
           elif self.dim == 2:
-              if self.verbose: print "**** OK. 2D field. I assume this is not-time-varying lat-lon map."
+              if self.verbose: print("**** OK. 2D field. I assume this is not-time-varying lat-lon map.")
               self.dim_x = shape[1] ; self.dim_y = shape[0] ; self.dim_z = 1 ; self.dim_t = 1
           elif self.dim == 3:
-              if self.verbose: print "**** OK. 3D field. I assume this is time-varying lat-lon map."
+              if self.verbose: print("**** OK. 3D field. I assume this is time-varying lat-lon map.")
               ## see below for comment
               if self.kind3d == "tyx":
                 self.dim_x = shape[2] ; self.dim_y = shape[1] ; self.dim_z = 1 ; self.dim_t = shape[0]
               elif self.kind3d == "tzy":
                 self.dim_x = 1 ; self.dim_y = shape[2] ; self.dim_z = shape[1] ; self.dim_t = shape[0]
               else:
-                print "!! ERROR !! This kind of 3D field is not supported. Please send feedback."
-                print self.kind3d
+                print("!! ERROR !! This kind of 3D field is not supported. Please send feedback.")
+                print(self.kind3d)
                 exit() 
           elif self.dim == 4:
-              if self.verbose: print "**** OK. 4D field."
+              if self.verbose: print("**** OK. 4D field.")
               self.dim_x = shape[3] ; self.dim_y = shape[2] ; self.dim_z = shape[1] ; self.dim_t = shape[0]
     ##
     def getdimhor(self):
           # LONGITUDE. If not defined by user, try preset fields. If still not present set grid points axis.
           # Check user-defined
           if self.name_x is not None:
-              if self.name_x not in self.f.variables.keys():
-                print "!! WARNING !! Unknown user-defined name_x. Trying preset values..."
+              if self.name_x not in list(self.f.variables.keys()):
+                print("!! WARNING !! Unknown user-defined name_x. Trying preset values...")
                 self.name_x=None
           # If failed try preset
           if self.name_x is None:
             if self.useindex[3] == "0":
              for c in glob_listx:
-              if c in self.f.variables.keys():
+              if c in list(self.f.variables.keys()):
                self.name_x = c
           # If failed set grid points
           if self.name_x is None:
-            self.field_x = np.array(range(self.dim_x))
+            self.field_x = np.array(list(range(self.dim_x)))
             self.name_x = "x grid points"
           else:
             self.field_x = self.f.variables[self.name_x]
           # LATITUDE. If not defined by user, try preset fields. If still not present set grid points axis.
           # Check user-defined
           if self.name_y is not None:
-              if self.name_y not in self.f.variables.keys():
-                print "!! WARNING !! Unknown user-defined name_y. Trying preset values..."
+              if self.name_y not in list(self.f.variables.keys()):
+                print("!! WARNING !! Unknown user-defined name_y. Trying preset values...")
                 self.name_y=None
           # If failed try preset
           if self.name_y is None:
             if self.useindex[2] == "0":
              for c in glob_listy:
-              if c in self.f.variables.keys():
+              if c in list(self.f.variables.keys()):
                self.name_y = c
           # If failed set grid points
           if self.name_y is None:
-            self.field_y = np.array(range(self.dim_y))
+            self.field_y = np.array(list(range(self.dim_y)))
             self.name_y = "y grid points"
           else:
             self.field_y = self.f.variables[self.name_y]
           # ensure that lon and lat are 2D fields
           # 1. simple 1D case (not time-varying)
           if len(self.field_x.shape)*len(self.field_y.shape) == 1:
-               if self.verbose: print "**** OK. recasting lon and lat as 2D fields."  
+               if self.verbose: print("**** OK. recasting lon and lat as 2D fields.")  
                [self.field_x,self.field_y] = np.meshgrid(self.field_x,self.field_y)
           # 2. complex 3D case (time-varying, actually just copied over time axis)
           elif len(self.field_x.shape)*len(self.field_y.shape) == 9:
-               if self.verbose: print "**** OK. reducing lon and lat as 2D fields. get rid of time."
+               if self.verbose: print("**** OK. reducing lon and lat as 2D fields. get rid of time.")
                # if longitudes are crossing 180 deg limit, then modify longitude vector
-	       self.field_x = self.field_x[0,:,:]
+               self.field_x = self.field_x[0,:,:]
                for j in range(self.field_x[0,:].size-1):
-	       		if (self.field_x[0,j+1]-self.field_x[0,j] < 0.):
-				self.field_x[:,j+1]=self.field_x[:,j+1]+360.
+                        if (self.field_x[0,j+1]-self.field_x[0,j] < 0.):
+                                self.field_x[:,j+1]=self.field_x[:,j+1]+360.
                self.field_y = self.field_y[0,:,:]
           # if xy axis are apparently undefined, set 2D grid points axis.
           if "grid points" not in self.name_x:
@@ -1568,31 +1568,31 @@ class onerequest():
              and (np.all(self.field_x == self.field_x[0,0]) \
              or self.field_x.min() == self.field_x.max() \
              or self.field_y.min() == self.field_y.max()):
-               if self.verbose: print "!! WARNING !! xy axis look undefined. creating non-dummy ones."
-               self.field_x = np.array(range(self.dim_x)) ; self.name_x = "x grid points"
-               self.field_y = np.array(range(self.dim_y)) ; self.name_y = "y grid points"
+               if self.verbose: print("!! WARNING !! xy axis look undefined. creating non-dummy ones.")
+               self.field_x = np.array(list(range(self.dim_x))) ; self.name_x = "x grid points"
+               self.field_y = np.array(list(range(self.dim_y))) ; self.name_y = "y grid points"
                [self.field_x,self.field_y] = np.meshgrid(self.field_x,self.field_y)
           if self.dim_x > 1: 
-               if self.verbose: print "**** OK. x axis %4.0f values [%5.1f,%5.1f]" % (self.dim_x,self.field_x.min(),self.field_x.max())
+               if self.verbose: print("**** OK. x axis %4.0f values [%5.1f,%5.1f]" % (self.dim_x,self.field_x.min(),self.field_x.max()))
           if self.dim_y > 1: 
-               if self.verbose: print "**** OK. y axis %4.0f values [%5.1f,%5.1f]" % (self.dim_y,self.field_y.min(),self.field_y.max())
+               if self.verbose: print("**** OK. y axis %4.0f values [%5.1f,%5.1f]" % (self.dim_y,self.field_y.min(),self.field_y.max()))
     ##
     def getdimz(self):
           # ALTITUDE. If not defined by user try preset fields. If still not present set grid points axis.
           # Check user-defined
           if self.name_z is not None:
-              if self.name_z not in self.f.variables.keys():
-                print "!! WARNING !! Unknown user-defined name_z. Trying preset values..."
+              if self.name_z not in list(self.f.variables.keys()):
+                print("!! WARNING !! Unknown user-defined name_z. Trying preset values...")
                 self.name_z=None
           # If failed try preset
           if self.name_z is None:
             if self.useindex[1] == "0":
              for c in glob_listz:
-              if c in self.f.variables.keys():
+              if c in list(self.f.variables.keys()):
                self.name_z = c
           # If failed set grid points
           if self.name_z is None:
-            self.field_z = np.array(range(self.dim_z))
+            self.field_z = np.array(list(range(self.dim_z)))
             self.name_z = "z grid points"
           else:
             tabalt = self.f.variables[self.name_z]
@@ -1605,31 +1605,31 @@ class onerequest():
                     # -- and try to use horizontal indices
                 except:
                     self.field_z = tabalt[0,:,0,0]
-                if self.verbose: print "!! WARNING !! "+self.name_z+" is 4D var. We made it 1D."
+                if self.verbose: print("!! WARNING !! "+self.name_z+" is 4D var. We made it 1D.")
             else: 
                 self.field_z = self.f.variables[self.name_z][:] # specify dimension
             # TBD: problems when self.dim_z != self.field_z.size
             if self.field_z.size != self.dim_z:
-                if self.verbose: print "!! WARNING !! Cannot use this z coordinate. Not enough points. Use simple z axis."
-                self.field_z = np.array(range(self.dim_z))
+                if self.verbose: print("!! WARNING !! Cannot use this z coordinate. Not enough points. Use simple z axis.")
+                self.field_z = np.array(list(range(self.dim_z)))
                 self.name_z = "z grid points"
           if self.dim_z > 1: 
-               if self.verbose: print "**** OK. z axis %4.0f values [%5.1f,%5.1f]" % (self.dim_z,self.field_z.min(),self.field_z.max())
+               if self.verbose: print("**** OK. z axis %4.0f values [%5.1f,%5.1f]" % (self.dim_z,self.field_z.min(),self.field_z.max()))
     ##
     def getdimt(self):
           # TIME. If not defined by user try preset fields. If still not present set grid points axis.
           # Check user-defined
           if self.name_t is not None:
-              if self.name_t not in self.f.variables.keys():
-                print "!! WARNING !! Unknown user-defined name_t. Trying preset values..."
+              if self.name_t not in list(self.f.variables.keys()):
+                print("!! WARNING !! Unknown user-defined name_t. Trying preset values...")
                 self.name_t=None
           # If failed try preset
           if self.name_t is None:
             if self.useindex[0] == "0":
              for c in glob_listt:
-              if c in self.f.variables.keys():
+              if c in list(self.f.variables.keys()):
                self.name_t = c
-               if self.verbose: print "**** OK. Found time variable: ",c
+               if self.verbose: print("**** OK. Found time variable: ",c)
           try:
             self.tabtime = self.f.variables[self.name_t]
             # (consider the case where tabtime is not dim 1)
@@ -1652,18 +1652,18 @@ class onerequest():
                 #        print "!! WARNING !! Time axis has been recast to be monotonic",dalast,self.tabtime[self.dim_t-1]
           except:
             # ... or if a problem encountered, define a simple time axis
-            if self.verbose: print "**** OK. There is something weird. Let us go for a simple time axis."
-            self.field_t = np.array(range(self.dim_t))
+            if self.verbose: print("**** OK. There is something weird. Let us go for a simple time axis.")
+            self.field_t = np.array(list(range(self.dim_t)))
             self.name_t = "t grid points"
           if self.dim_t > 1: 
-               if self.verbose: print "**** OK. t axis %4.0f values [%5.1f,%5.1f]" % (self.dim_t,self.field_t.min(),self.field_t.max())     
+               if self.verbose: print("**** OK. t axis %4.0f values [%5.1f,%5.1f]" % (self.dim_t,self.field_t.min(),self.field_t.max()))     
 
     # change time axis
     # ... add your options here!
     # --------------------------
     def performtimechange(self):
         if self.changetime is not None:
-            if self.verbose: print "**** OK. Converting time axis:",self.changetime
+            if self.verbose: print("**** OK. Converting time axis:",self.changetime)
             ### options added by T. Navarro
             if self.changetime == "mars_sol2ls":
                 if "controle" in self.f.variables: 
@@ -1678,7 +1678,7 @@ class onerequest():
             ### options added by A. Spiga
             elif "correctls" in self.changetime:
              if self.tabtime is None:
-              print "!! WARNING !! Encountered a problem with correctls. Check your time dimension. Skipping this part."
+              print("!! WARNING !! Encountered a problem with correctls. Check your time dimension. Skipping this part.")
              else: 
               dafirst = self.tabtime[0] + 0.
               if self.dim_t == 1:
@@ -1686,7 +1686,7 @@ class onerequest():
               else:
                 if "noadd" in self.changetime:
                   self.field_t = self.tabtime[:]
-                  if self.verbose: print "!! WARNING !! Ls axis is kept as is.",self.field_t[0],self.field_t[self.dim_t-1]
+                  if self.verbose: print("!! WARNING !! Ls axis is kept as is.",self.field_t[0],self.field_t[self.dim_t-1])
                 else:
                   daint = self.tabtime[1] - dafirst
                   dalast = dafirst + (self.dim_t-1)*daint
@@ -1697,8 +1697,8 @@ class onerequest():
                     add[iii] = year*360.
                   self.field_t = add + self.tabtime
             elif "mars_meso" in self.changetime:
-                if 'Times' not in self.f.variables.keys():
-                    if self.verbose: print "!! WARNING !! Variable Times not in file. Cannot proceed to change of time axis."
+                if 'Times' not in list(self.f.variables.keys()):
+                    if self.verbose: print("!! WARNING !! Variable Times not in file. Cannot proceed to change of time axis.")
                 else:
                     # get the array of strings describing dates
                     dates = self.f.variables['Times']
@@ -1737,10 +1737,10 @@ class onerequest():
                 orig = self.f.variables['time_counter']
                 self.field_t = num2date(orig[:], units = chardate)
             else:
-                if self.verbose: print "!! WARNING !! This time change is not implemented. Nothing is done."
+                if self.verbose: print("!! WARNING !! This time change is not implemented. Nothing is done.")
             if self.verbose: 
              try:
-               print "**** OK. new t axis values [%5.1f,%5.1f]" % (self.field_t.min(),self.field_t.max())
+               print("**** OK. new t axis values [%5.1f,%5.1f]" % (self.field_t.min(),self.field_t.max()))
              except:
                pass
 
@@ -1752,20 +1752,20 @@ class onerequest():
             self.index_t = np.arange(0,self.dim_t,self.st)
             if self.dim_t > 1:  
                 self.dimplot = self.dimplot + 1 
-                if self.verbose: print "**** OK. t values. all."
+                if self.verbose: print("**** OK. t values. all.")
             else:               
                 self.method_t = "fixed"
-                if self.verbose: print "**** OK. no t dimension."
+                if self.verbose: print("**** OK. no t dimension.")
         elif self.method_t == "comp":
             start = np.argmin( np.abs( self.field_t - dalist[ind][0] ) )
             stop = np.argmin( np.abs( self.field_t - dalist[ind][1] ) )
             self.index_t = np.arange(start,stop+1,self.st)
-            if self.verbose: print "**** OK. t values. comp over interval ",self.field_t[start],self.field_t[stop]," nvalues=",self.index_t.size
+            if self.verbose: print("**** OK. t values. comp over interval ",self.field_t[start],self.field_t[stop]," nvalues=",self.index_t.size)
         elif self.method_t == "fixed":
             self.index_t.append( np.argmin( np.abs( self.field_t - dalist[ind][0] ) ))
-            if self.verbose: print "**** OK. t values",self.field_t[self.index_t]
+            if self.verbose: print("**** OK. t values",self.field_t[self.index_t])
         else:
-            print "!! ERROR !! method "+self.method_t+" not supported"
+            print("!! ERROR !! method "+self.method_t+" not supported")
         self.index_t = np.array(self.index_t)
              
     # get list of index to be retrieved for vertical axis
@@ -1776,20 +1776,20 @@ class onerequest():
             self.index_z = np.arange(0,self.dim_z,self.sz)
             if self.dim_z > 1:  
                 self.dimplot = self.dimplot + 1
-                if self.verbose: print "**** OK. z values. all."
+                if self.verbose: print("**** OK. z values. all.")
             else:               
                 self.method_z = "fixed"
-                if self.verbose: print "**** OK. no z dimension."
+                if self.verbose: print("**** OK. no z dimension.")
         elif self.method_z == "comp":
             start = np.argmin( np.abs( self.field_z - dalist[ind][0] ) )
             stop = np.argmin( np.abs( self.field_z - dalist[ind][1] ) )
             self.index_z = np.arange(start,stop+1,self.sz)
-            if self.verbose: print "**** OK. z values. comp over interval",self.field_z[start],self.field_z[stop]," nvalues=",self.index_z.size
+            if self.verbose: print("**** OK. z values. comp over interval",self.field_z[start],self.field_z[stop]," nvalues=",self.index_z.size)
         elif self.method_z == "fixed":
             self.index_z.append( np.argmin( np.abs( self.field_z - dalist[ind][0] ) ))
-            if self.verbose: print "**** OK. z values",self.field_z[self.index_z]
+            if self.verbose: print("**** OK. z values",self.field_z[self.index_z])
         else:
-            if self.verbose: print "!! ERROR !! method "+self.method_z+" not supported"
+            if self.verbose: print("!! ERROR !! method "+self.method_z+" not supported")
         self.index_z = np.array(self.index_z)
 
     # get list of index to be retrieved for horizontal grid
@@ -1808,21 +1808,21 @@ class onerequest():
         ## - LAT IS COMP AND LON IS FREE
         ## - LON IS COMP AND LAT IS FREE
         if self.method_x == "free" or test in ["compfree","compcomp"]:
-            self.index_x = range(0,self.dim_x,self.sx)
+            self.index_x = list(range(0,self.dim_x,self.sx))
             if self.dim_x > 1:  
                 if self.method_x == "free": self.dimplot = self.dimplot + 1
-                if self.verbose: print "**** OK. x values. all."
+                if self.verbose: print("**** OK. x values. all.")
             else:               
                 self.method_x = "fixed"
-                if self.verbose: print "**** OK. no x dimension."
+                if self.verbose: print("**** OK. no x dimension.")
         if self.method_y == "free" or test in ["freecomp","compcomp"]:
-            self.index_y = range(0,self.dim_y,self.sy)
+            self.index_y = list(range(0,self.dim_y,self.sy))
             if self.dim_y > 1:  
                 if self.method_y == "free": self.dimplot = self.dimplot + 1
-                if self.verbose: print "**** OK. y values. all."
+                if self.verbose: print("**** OK. y values. all.")
             else:               
                 self.method_y = "fixed"
-                if self.verbose: print "**** OK. no y dimension."
+                if self.verbose: print("**** OK. no y dimension.")
         ## CASE 0 above, this is just for continuity for free.
         ## ... for comp we have to select bounds.
         ## ... TBD: take the bool array strategy for what follows!
@@ -1878,7 +1878,7 @@ class onerequest():
                     self.index_y2d.append(idy)
         ## check index tab
         if len(self.index_x) == 0 or len(self.index_y) == 0:
-            print "!! ERROR !! no indices found. check prescribed latitudes or longitudes" ; exit()
+            print("!! ERROR !! no indices found. check prescribed latitudes or longitudes") ; exit()
         ## ensure the array is a numpy array for getfield to work
         self.index_x = np.array(self.index_x)
         self.index_y = np.array(self.index_y)
@@ -1888,18 +1888,18 @@ class onerequest():
         printx = self.field_x[np.ix_(self.index_y2d, self.index_x2d)]
         printy = self.field_y[np.ix_(self.index_y2d, self.index_x2d)]
         if self.verbose: 
-            print "**** OK. x values (min,max).", printx.min(),printx.max()
-            print "**** OK. y values (min,max).", printy.min(),printy.max()
+            print("**** OK. x values (min,max).", printx.min(),printx.max())
+            print("**** OK. y values (min,max).", printy.min(),printy.max())
 
     # get the field from the NETCDF file and perform averages
     # -------------------------------
     def getfield(self):
         ## first tell what is to be done
         if self.verbose:
-          if self.dimplot > 2:                       print "**** !! WARNING !! "+str(self.dimplot)+"D plots will not be supported!"
-          elif self.dimplot == 0 and self.verbose:   print "**** OK. 0D value requested."
-          elif self.dimplot == 1 and self.verbose:   print "**** OK. 1D plot requested."
-          elif self.verbose:                         print "**** OK. 2D section requested."
+          if self.dimplot > 2:                       print("**** !! WARNING !! "+str(self.dimplot)+"D plots will not be supported!")
+          elif self.dimplot == 0 and self.verbose:   print("**** OK. 0D value requested.")
+          elif self.dimplot == 1 and self.verbose:   print("**** OK. 1D plot requested.")
+          elif self.verbose:                         print("**** OK. 2D section requested.")
         # well, now get field from netcdf file  
         # part below is necessary otherwise there is an index error below
         if self.index_x.size == 1: self.index_x = self.index_x[0]
@@ -1924,16 +1924,16 @@ class onerequest():
                nt = self.index_t.size ; nz = self.index_z.size ; ny = self.index_y.size ; nx = 1
                tupledim = self.index_t,self.index_z,self.index_y
             else:
-               print "!! ERROR !! This kind of 3D field is not supported. Please send feedback." ; exit()
+               print("!! ERROR !! This kind of 3D field is not supported. Please send feedback.") ; exit()
             # this is far faster than retrieving each term with a loop
         elif self.dim == 4:
             nt = self.index_t.size ; nz = self.index_z.size ; ny = self.index_y.size ; nx = self.index_x.size
             tupledim = self.index_t,self.index_z,self.index_y,self.index_x
         else:
-            print "!! ERROR !! field would have more than four dimensions ?" ; exit()
+            print("!! ERROR !! field would have more than four dimensions ?") ; exit()
         # then retrieve what is requested by user!
         time0 = timelib.time()
-        if self.verbose: print "**** OK. I am getting values from files. Please wait."     
+        if self.verbose: print("**** OK. I am getting values from files. Please wait.")     
         self.field = self.f.variables[self.var][tupledim]    
         # dirty hack (AS) ref1_dirty_hack
         # waiting for more fundamental modifications. case when self.index_y is a bool array.
@@ -1946,8 +1946,8 @@ class onerequest():
         # NB: ... always 4D array but possibly with "size 1" dimensions 
         #     ... if one dimension is missing because 1D 2D or 3D requests, make it appear again
         self.field = np.reshape(self.field,(nt,nz,ny,nx))
-        if self.verbose: print "**** OK. I got %7.1e values. This took me %6.4f seconds" % (nx*ny*nz*nt,timelib.time() - time0)
-        if self.verbose: print "**** OK. I got var "+self.var+" with shape",self.field.shape
+        if self.verbose: print("**** OK. I got %7.1e values. This took me %6.4f seconds" % (nx*ny*nz*nt,timelib.time() - time0))
+        if self.verbose: print("**** OK. I got var "+self.var+" with shape",self.field.shape)
         # reduce coordinates to useful points
         # ... TBD: this should be ordered in the case of non-regular projections
         if self.method_x in ["free","comp"] and self.method_y in ["free","comp"]:
@@ -1968,7 +1968,7 @@ class onerequest():
         try: 
           self.field_t = self.field_t[self.index_t]
         except:
-          print "!!!! Time indices are not numbers. I assume you know what you are doing !!!!"
+          print("!!!! Time indices are not numbers. I assume you know what you are doing !!!!")
         # extract relevant horizontal points
         # TBD: is compfree OK with computing on irregular grid?
         test = self.method_x + self.method_y
@@ -2005,7 +2005,7 @@ class onerequest():
             for it in range(self.index_t.size):
               if what_I_am_supposed_to_do == "keepx":    self.field[it,iz,0,ix] = self.field[it,iz,iy,ix]
               elif what_I_am_supposed_to_do == "keepy":  self.field[it,iz,iy,0] = self.field[it,iz,iy,ix]
-          if self.verbose: print "**** OK. I got to pick the right values for your request. This took me %6.4f seconds" % (timelib.time() - time0)
+          if self.verbose: print("**** OK. I got to pick the right values for your request. This took me %6.4f seconds" % (timelib.time() - time0))
           # we only keep the one value that was modified on the dimension which is not free
           if what_I_am_supposed_to_do == "keepx":     self.field = self.field[:,:,0,:] ; ny = 1 ; self.field = np.reshape(self.field,(nt,nz,ny,nx))
           elif what_I_am_supposed_to_do == "keepy":   self.field = self.field[:,:,:,0] ; nx = 1 ; self.field = np.reshape(self.field,(nt,nz,ny,nx))
@@ -2026,7 +2026,7 @@ class onerequest():
         # ... this is important for computations below (see ppcompute)
         masked = np.ma.masked_where(np.abs(self.field) >= self.missing,self.field)
         if masked.mask.any() == True:
-             if self.verbose: print "!! WARNING !! Values over %5.3e are considered missing values." % self.missing
+             if self.verbose: print("!! WARNING !! Values over %5.3e are considered missing values." % self.missing)
              self.field = masked
              self.field.set_fill_value([np.NaN])
 
@@ -2043,7 +2043,7 @@ class onerequest():
             if "comp" in self.method_x+self.method_y: 
                 self.area()
             else:
-                if self.verbose: print "!! WARNING !! No area accounted for (computing on t and/or z axis)."
+                if self.verbose: print("!! WARNING !! No area accounted for (computing on t and/or z axis).")
         # prepare quadratic mean
         if "qmean" in self.compute: self.field = self.field*self.field
         # prepare and execute (possibly sequential) means
@@ -2054,10 +2054,10 @@ class onerequest():
           rrr = roll[nr]
           if "comp" in rrr:
             # a. computing
-            if self.verbose: print "**** OK. Computing over axis number ",nr
+            if self.verbose: print("**** OK. Computing over axis number ",nr)
             if (self.compute == "meanarea") and (nr>1): 
               self.field = ppcompute.sum  (self.field,axis=nr)
-              if self.verbose: print "**** This is a meanarea computation."
+              if self.verbose: print("**** This is a meanarea computation.")
             elif "mean" in self.compute:   
               self.field = ppcompute.mean (self.field,axis=nr)
             elif self.compute == "min":    
@@ -2072,7 +2072,7 @@ class onerequest():
               # calculate here the mean with those bounds
               # then gives this to ppcompute.perturbation below
             else:                          
-              print "!! ERROR !! operation not supported." ; exit()
+              print("!! ERROR !! operation not supported.") ; exit()
             # b. reshaping
             if "pert" not in self.compute:
               reshapedim[nr] = 1
@@ -2099,7 +2099,7 @@ class onerequest():
              elif "_t" in self.compute:
                 self.field, self.field_t = ppcompute.rollingmean(self.field,self.field_t,axis=zeaxis,n=nnn)
            else:
-             print "!! ERROR !! You missed setting window computation" ; exit()
+             print("!! ERROR !! You missed setting window computation") ; exit()
  
         if   "pert" in self.compute: 
            self.field = ppcompute.perturbation(self.field,axis=zeaxis,mm=mm)
@@ -2117,14 +2117,14 @@ class onerequest():
         if self.compute == "qmean": self.field = np.sqrt(self.field)
         # error handling and verbose
         if ("pert" not in self.compute or "log10" not in self.compute) and (self.field.ndim != self.dimplot): 
-            print "!! ERROR !! Problem: self.field is different than plot dimensions", self.field.ndim, self.dimplot ; exit()
+            print("!! ERROR !! Problem: self.field is different than plot dimensions", self.field.ndim, self.dimplot) ; exit()
         if self.verbose: 
-            print "**** OK. Final shape for "+self.var+" after averaging and squeezing",self.field.shape
+            print("**** OK. Final shape for "+self.var+" after averaging and squeezing",self.field.shape)
     
     # get areas for computations and ponderate self.field by area/totarea
     # -------------------------------------------------------------------
     def area(self):
-        if self.verbose: print "**** OK. Get area array for computations."
+        if self.verbose: print("**** OK. Get area array for computations.")
         # create a request object for area
         # ... and copy known attributes from self
         aire = onerequest()
@@ -2132,11 +2132,11 @@ class onerequest():
         # get area field name
         aire.var = "nothing"
         for c in glob_listarea:
-         if c in aire.f.variables.keys():
+         if c in list(aire.f.variables.keys()):
             aire.var = c
         # do not try to calculate areas automatically 
         if aire.var == "nothing":
-            print "!! ERROR !! area variable not found... needs to be added in set_ppclass.txt?"
+            print("!! ERROR !! area variable not found... needs to be added in set_ppclass.txt?")
             exit()
         # define area request dimensions
         aire.getdim()
@@ -2167,15 +2167,15 @@ class onerequest():
             aire.field = aire.field[np.ix_(self.index_y, self.index_x)] # reduce to requested indexes only
             totarea = ppcompute.sum(ppcompute.sum(aire.field,axis=1),axis=0)
         else:
-            if self.verbose: print "!! WARNING !! Not account for areas. Only averaging over z and/or t axis."
+            if self.verbose: print("!! WARNING !! Not account for areas. Only averaging over z and/or t axis.")
         # normalize by total area
-        if self.verbose: print "**** OK. I can now normalize field by areas."
+        if self.verbose: print("**** OK. I can now normalize field by areas.")
         aire.field = aire.field / totarea
         # tile area array over self t and z axis so that area field could be multiplied with self.field
         aire.field = np.tile(aire.field,(self.index_t.size,self.index_z.size,1,1))
         if self.field.shape != aire.field.shape:
-            print "!! ERROR !! Problem in area(). Check array shapes."
-            print "Field vs. aire:",self.field.shape,aire.field.shape ; exit()
+            print("!! ERROR !! Problem in area(). Check array shapes.")
+            print("Field vs. aire:",self.field.shape,aire.field.shape) ; exit()
         else:
             self.field = self.field*aire.field
 
@@ -2214,5 +2214,5 @@ class onerequest():
                 self.absc = self.field_z ; self.absclab = self.name_z
                 I_got_abs = True
                 self.swap_axes = True # says that altitude is not supposed to remain as an abscissa
-        if I_got_abs and self.verbose: print "**** OK. abscissa:",self.absclab, self.absc.shape
-        if I_got_ord and self.verbose: print "**** OK. ordinate:",self.ordilab, self.ordi.shape
+        if I_got_abs and self.verbose: print("**** OK. abscissa:",self.absclab, self.absc.shape)
+        if I_got_ord and self.verbose: print("**** OK. ordinate:",self.ordilab, self.ordi.shape)

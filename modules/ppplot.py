@@ -533,7 +533,7 @@ class plot():
       # e.g. useful in command line scripts with options 
       # ------------------------------------------------
       # for all common attributes ...
-      commonattr = [(k,v) for k,v in vars(objfrom).items() for kt,vt in vars(self).items() if k == kt]
+      commonattr = [(k,v) for k,v in list(vars(objfrom).items()) for kt,vt in list(vars(self).items()) if k == kt]
       for k,v in commonattr:
         # ... if value is not None ...
         if v is not None:
@@ -568,7 +568,7 @@ class plot():
     # -------------------------------
     def define_from_var(self):
         if self.var is not None:
-         if self.var.upper() in vl.keys():
+         if self.var.upper() in list(vl.keys()):
           self.title = vl[self.var.upper()]
           self.units = vu[self.var.upper()]
 
@@ -648,7 +648,7 @@ class plot1d(plot):
         plot.define_from_var(self)
         # add specific stuff
         if self.var is not None:
-         if self.var.upper() in vl.keys():
+         if self.var.upper() in list(vl.keys()):
           self.ylabel = vl[self.var.upper()] + " (" + vu[self.var.upper()] + ")"
           self.title = ""
           self.fmt = vf[self.var.upper()]
@@ -664,7 +664,7 @@ class plot1d(plot):
         self.ax.grid(color='grey')
         # set dummy x axis if not defined
         if self.x is None: 
-            self.x = np.array(range(self.f.shape[0]))
+            self.x = np.array(list(range(self.f.shape[0])))
             print("!! WARNING !! dummy coordinates on x axis")
         else:
             self.x = np.array(self.x) # ensure this is a numpy array
@@ -851,7 +851,7 @@ class plot2d(plot):
         plot.define_from_var(self)
         # add specific stuff
         if self.var is not None:
-         if self.var.upper() in vl.keys():
+         if self.var.upper() in list(vl.keys()):
           self.colorbar = vc[self.var.upper()]
           self.fmt = vf[self.var.upper()]
 
@@ -872,11 +872,11 @@ class plot2d(plot):
             self.mapmode = False
         # set dummy xy axis if not defined
         if self.x is None: 
-            self.x = np.array(range(self.f.shape[1]))
+            self.x = np.array(list(range(self.f.shape[1])))
             self.mapmode = False
             print("!! WARNING !! dummy coordinates on x axis")
         if self.y is None: 
-            self.y = np.array(range(self.f.shape[0]))
+            self.y = np.array(list(range(self.f.shape[0])))
             self.mapmode = False
             print("!! WARNING !! dummy coordinates on y axis")
         # check sizes
@@ -890,7 +890,7 @@ class plot2d(plot):
         shape = self.f.shape
         if shape[0] != shape[1]:
          if len(self.x) == shape[0] and len(self.y) == shape[1]:
-            #print "!! WARNING !! Transposing axes"
+            #print("!! WARNING !! Transposing axes")
             self.f = np.transpose(self.f)
             if self.c is not None: 
               self.c = np.transpose(self.c)
@@ -928,7 +928,7 @@ class plot2d(plot):
         ### MAIN PLOT
         ### NB: contour lines are done before contour shades otherwise colorar error
         ############################################################################################
-	ft = int(mpl.rcParams['font.size']*3./4.)
+        ft = int(mpl.rcParams['font.size']*3./4.)
         if not self.mapmode:
             ## A SIMPLE 2D PLOT
             ###################
@@ -975,12 +975,12 @@ class plot2d(plot):
                 self.ax.xaxis.set_major_locator(mtick.MaxNLocator(self.nxticks))
             else:
                 pass
-                #print ("!! WARNING. in logx mode, ticks are set automatically.")
+                #print("!! WARNING. in logx mode, ticks are set automatically.")
             if not self.logy:
                 self.ax.yaxis.set_major_locator(mtick.MaxNLocator(self.nyticks))
             else:
                 #pass
-                #print ("!! WARNING. in logy mode, ticks are set automatically.")
+                #print("!! WARNING. in logy mode, ticks are set automatically.")
                 self.ax.yaxis.set_minor_formatter(mtick.FuncFormatter(special_log))
                 #ax.yaxis.grid(True, which='both', color='grey')
             ## specific modulo labels
@@ -1003,7 +1003,7 @@ class plot2d(plot):
             wlat = [np.min(self.y),np.max(self.y)]
             # -- area presets are in set_area.txt
             if self.area is not None:
-             if self.area in area.keys():
+             if self.area in list(area.keys()):
                 wlon, wlat = area[self.area]
             # -- user-defined limits
             if self.xmin is not None: wlon[0] = self.xmin
@@ -1101,7 +1101,7 @@ class plot2d(plot):
             m.drawparallels(partab,labels=parlab,color='grey',linewidth=0.75,fontsize=ft,fmt=format,latmax=zelatmax)
             # define background (see set_back.txt)
             if self.back is not None:
-              if self.back in back.keys():
+              if self.back in list(back.keys()):
                  print("**** info: loading a background, please wait.",self.back)
                  if self.back not in ["coast","sea"]:
                     try: m.warpimage(back[self.back],scale=0.75)
@@ -1143,13 +1143,13 @@ class plot2d(plot):
                orientation="horizontal" ; frac = 0.04 ; pad = 0.05 ; lu = 1.0
             else: orientation = zeorientation ; frac = zefrac ; pad = 0.03 ; lu = 0.5
             if self.cbticks is None:
-                self.cbticks = min([ticks/2+1,21])
+                self.cbticks = min([ticks//2+1,21])
             zelevpal = np.linspace(zevmin,zevmax,num=self.cbticks)
             ## colorbar corresponding to contour object cont
             ## -- TBD: one colorbar for an entire figure with different subplots
             if self.vlev is None:
               if self.cbticks is None:
-                self.cbticks = min([ticks/2+1,21])
+                self.cbticks = min([ticks//2+1,21])
               zelevpal = np.linspace(zevmin,zevmax,num=self.cbticks)
               spacingval = 'proportional'
             else:
