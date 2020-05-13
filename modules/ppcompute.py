@@ -36,6 +36,18 @@ def findset(whereset,string="planetoplot"):
 #### WITH SUPPORT FOR NaN VALUES ####
 #####################################
 
+## compute log10 of field
+## author DB + JVO
+def log10(field): 
+        if field is None: return None
+        if type(field).__name__=='MaskedArray':
+              field.set_fill_value(np.NaN)
+              return np.ma.array(np.log10(field))
+#        elif (np.isnan(field) and (type(field).__name__ not in 'MaskedArray')):
+#              return np.ma.masked_invalid(np.log10(field))
+        else: return np.log10(field)
+
+## compute max
 ## compute min
 ## author AS + AC
 def min(field,axis=None): 
@@ -119,6 +131,28 @@ def meanbin(y,x,bins):
     ## RETURN A NUMPY ARRAY
     meanvalues = np.array(meanvalues)
     return meanvalues
+
+## compute rolling mean
+## author DB
+## --
+## sfield,scoord = rollingmean(field,coord)
+## --
+def rollingmean(field,coord,axis=None,n=None):
+    ret = np.cumsum(field, axis=axis, dtype=float)
+    rec = np.cumsum(coord, dtype=float)
+    rec[n:] = rec[n:] - rec[:-n]
+    if axis == 0:
+       ret[n:,:,:,:] = ret[n:,:,:,:] - ret[:-n,:,:,:]
+       return ret[n:,:,:,:] / n, rec[n:] / n
+    if axis == 1:
+       ret[:,n:,:,:] = ret[:,n:,:,:] - ret[:,:-n,:,:]
+       return ret[:,n:,:,:] / n, rec[n:] / n
+    if axis == 2:
+       ret[:,:,n:,:] = ret[:,:,n:,:] - ret[:,:,:-n,:]
+       return ret[:,:,n:,:] / n, rec[n:] / n
+    if axis == 3:
+       ret[:,:,:,n:] = ret[:,:,:,n:] - ret[:,:,:,:-n]
+       return ret[:,:,:,n:] / n, rec[n:] / n
 
 ## compute perturbation to mean
 ## -- the whole dimension must exist!
@@ -354,7 +388,7 @@ def deriv1d(field,coord=None):
   ## dfdx = deriv(f,x)
   df = np.gradient(field)
   if coord is not None:
-    dx = np.gradient(coord)
+    dx = np.gradient(coord,edge_order=2)
     return df/dx
   else:
     return df
@@ -385,16 +419,23 @@ def dxdy(lon,lat,coeff=None,lonlat=False):
     exit()
   # compute normalized gradients for lat/lon grid
   # -- cartesian differential coordinates
-  dump,dx = np.gradient(lar)
-  dy,dump = np.gradient(phr)
+  dump,dx = np.gradient(lar,edge_order=2)
+  dy,dump = np.gradient(phr,edge_order=2)
   # treat the particular case of lon/lat
   if lonlat:
     dx = dx*np.cos(phr)
   return dx,dy
  
 def deriv2d(u,coordx,coordy,coeff=None,lonlat=False,fac=1.):
+  ###
+  ### equivalent to  
+  ###   x,y = np.meshgrid(coordx,coordy)
+  ###   dx,dy = dxdy(coordx,coordy)
+  ###   du_dy,du_dx = np.gradient(u,dy,dx,edge_order=2)
+  ### though slightly more flexible
+  ###
   # compute gradients -- with normalized coordinates
-  du_y,du_x = np.gradient(u)
+  du_y,du_x = np.gradient(u,edge_order=2)
   # compute cartesian increments
   dx,dy = dxdy(coordx,coordy,coeff=coeff,lonlat=lonlat)
   # eventually compute cartesian derivatives
