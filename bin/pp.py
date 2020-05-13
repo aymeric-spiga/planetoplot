@@ -80,7 +80,7 @@ if (len(args) == 0):
 # get arguments (one or several files)
 ######################################
 if args is None:
-    print "Stop here! I need file(s) as argument(s)!" ; exit()
+    print("Stop here! I need file(s) as argument(s)!") ; exit()
 else:
     files = args
 
@@ -156,4 +156,4 @@ if opt.filename is not None:
     f = open(opt.folder+'/'+opt.filename+'.sh', 'w')
     f.write(command)	
   except IOError:
-    print "!! WARNING !! pp.py command not saved. Probably do not have permission to write here."
+    print("!! WARNING !! pp.py command not saved. Probably do not have permission to write here.")
