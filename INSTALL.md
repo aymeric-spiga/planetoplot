@@ -22,6 +22,8 @@ Do not forget to source the environment file.
 - `matplotlib`
 - `netCDF4` (not required if `ppplot` only is used)
 
+*Note* : You might want/need to use Python 3+, in this case checkout [python3 branch](https://github.com/aymeric-spiga/planetoplot/tree/python3) but all might not be working correctly. Currently master is set to work on 2.7.
+
 ## Recommended librairies
 
 - `basemap` (for mapping)
