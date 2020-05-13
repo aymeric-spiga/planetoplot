@@ -914,7 +914,7 @@ class plot2d(plot):
               zevminc, zevmaxc = calculate_bounds(self.c)
               #zevminc = np.min(self.c[np.isfinite(self.c)])
               #zevmaxc = np.max(self.c[np.isfinite(self.c)])
-              #print zevminc, zevmaxc
+              #print(zevminc, zevmaxc)
               what_I_contour = bounds(self.c,zevminc,zevmaxc)
               ticks = self.div + 1
               self.clev = np.linspace(zevminc,zevmaxc,ticks)
@@ -975,12 +975,12 @@ class plot2d(plot):
                 self.ax.xaxis.set_major_locator(mtick.MaxNLocator(self.nxticks))
             else:
                 pass
-                #print "!! WARNING. in logx mode, ticks are set automatically."
+                #print ("!! WARNING. in logx mode, ticks are set automatically.")
             if not self.logy:
                 self.ax.yaxis.set_major_locator(mtick.MaxNLocator(self.nyticks))
             else:
                 #pass
-                #print "!! WARNING. in logy mode, ticks are set automatically."
+                #print ("!! WARNING. in logy mode, ticks are set automatically.")
                 self.ax.yaxis.set_minor_formatter(mtick.FuncFormatter(special_log))
                 #ax.yaxis.grid(True, which='both', color='grey')
             ## specific modulo labels
