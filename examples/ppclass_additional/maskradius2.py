@@ -42,7 +42,7 @@ for plotobj in rad.p:
     # compute limit
     fac = 100.
     limvmr = np.mean(plotobj.c)/fac
-    print "mixing ratio limit is ", limvmr
+    print("mixing ratio limit is ", limvmr)
     # mask plotted field with contoured field
     plotobj.f[np.where(plotobj.c<limvmr)]=np.nan
     # a few plot settings 

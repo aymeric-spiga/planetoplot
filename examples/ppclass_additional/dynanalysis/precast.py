@@ -50,7 +50,7 @@ is_omega = True
 ####################################################
 def etape(charvar,time0):
   ttt = round(time.time()-time0,2)
-  print "TIME=",ttt,"... ... done: "+charvar
+  print("TIME=",ttt,"... ... done: "+charvar)
 
 ####################################################
 def interpolate(targetp1d,sourcep3d,fieldsource3d,spline=False):
@@ -145,7 +145,7 @@ def getp_fromapbp(fileAP):
     bps=pp(file=fileAP,var="bps",x=0,y=0).getf()
     nz = len(aps)
   except:
-    print "info: read apbp.txt"
+    print("info: read apbp.txt")
     ap,bp = np.loadtxt("apbp.txt",unpack=True)
     nz = len(ap)
     aps = 0.5*(ap[0:nz-1]+ap[1:nz])
@@ -179,7 +179,7 @@ def correctnearzero(field):
   removed = -val*negvalue
   w = np.where(np.abs(field) <= removed)
   field[w] = np.nan
-  print "absolute values below this value are set to NaN", removed
+  print("absolute values below this value are set to NaN", removed)
   return field
 
 
@@ -200,7 +200,7 @@ else:
 etape("pressure field",time0)
 
 ####################################################
-print "... getting fields from file !"
+print("... getting fields from file !")
 if method == 1:
  u,xdim,ydim,zdim,tdim=pp(file=fileAP,var="u",x=charx).getfd() ; etape("u",time0)
  temp=pp(file=fileAP,var=vartemp,x=charx).getf() ; etape(vartemp,time0)
@@ -221,7 +221,7 @@ if not short:
    v=pp(file=fileAP,var="v",x=charx).getf() ; etape("v",time0)
    if is_omega:
      o=pp(file=fileAP,var="omega",x=charx).getf() ; etape("omega",time0)
-   print "... coupled terms"
+   print("... coupled terms")
    if charx == "999":
      vpup=pp(file=fileAP,var="vpup",x=charx).getf() ; etape("vpup",time0)
      vptp=pp(file=fileAP,var="vptp",x=charx).getf() ; etape("vptp",time0)
@@ -243,7 +243,7 @@ if not short:
      del staru4D ; del starv4D ; del start4D
 
 ####################################################
-print "... interpolating !"
+print("... interpolating !")
 if method == 1:
   u = interpolate(targetp1d,press,u,spline=use_spline) ; etape("u",time0)
   #temp = interpolate(targetp1d,press,temp,spline=use_spline) ; etape(vartemp,time0)
@@ -295,7 +295,7 @@ elif method == 2:
   temp = tm ; del tm
 
 ####################################################
-print "... computations !"
+print("... computations !")
 
 # *** DIMENSIONS
 nt,nz,nlat = u.shape

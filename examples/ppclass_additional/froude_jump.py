@@ -42,12 +42,12 @@ potheight = pp(file=fi,var='HGT',t=ti).getf() # just to get an array the right s
 ### CALCULATE
 vel = Um**2 + Vm**2
 vel = np.sqrt(vel)
-print "searching for height of katabatic layer"
+print("searching for height of katabatic layer")
 for i in range(xx.shape[1]):
  for j in range(yy.shape[0]):
   w = np.where( PT[:,j,i] > tpottest)
   potheight[j,i] = zz[w][0]
-print "... done."
+print("... done.")
 # from pettre and andre
 denom = (deltaT/tpot)*grav*potheight
 denom = np.sqrt(denom)

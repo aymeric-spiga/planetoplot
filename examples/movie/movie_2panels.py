@@ -22,7 +22,7 @@ ww.quiet = True
 # loop
 count = 0
 for ttt in range(474):
-  print count
+  print(count)
   ww.filename = "mov"+"%03d"%(count)
   ww.t = ttt
   ww.getdefineplot()

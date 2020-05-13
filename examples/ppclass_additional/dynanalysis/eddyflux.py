@@ -72,7 +72,7 @@ for ff in ffftab:
      press = pp(var="presnivs",file=fi,x=0,y=0,changetime="correctls_noadd").getf()
    lat = np.linspace(-90.,90.,up.shape[1])
 
-   print press
+   print(press)
 
    # compute <u'v'> (zonal mean)
    vptpm = mean(vp*tp,axis=2)
