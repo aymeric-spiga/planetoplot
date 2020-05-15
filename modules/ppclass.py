@@ -2116,7 +2116,7 @@ class onerequest():
         # take root mean square for quadratic mean
         if self.compute == "qmean": self.field = np.sqrt(self.field)
         # error handling and verbose
-        if ("pert" not in self.compute or "log10" not in self.compute) and (self.field.ndim != self.dimplot): 
+        if ("pert" not in self.compute) and (self.field.ndim != self.dimplot): 
             print("!! ERROR !! Problem: self.field is different than plot dimensions", self.field.ndim, self.dimplot) ; exit()
         if self.verbose: 
             print("**** OK. Final shape for "+self.var+" after averaging and squeezing",self.field.shape)
