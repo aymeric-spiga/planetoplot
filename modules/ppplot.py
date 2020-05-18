@@ -496,6 +496,7 @@ class plot():
                  nyticks=10,\
                  cbticks=None,\
                  xdate=False,\
+                 ncol=1,\
                  title=""):
         ## what could be defined by the user
         self.fig = fig
@@ -525,6 +526,7 @@ class plot():
         self.nyticks = nyticks
         self.cbticks = cbticks
         self.xdate = xdate
+        self.ncol = ncol
         ## other useful arguments
         ## ... not used here in ppplot but need to be attached to plot object
         self.axisbg = "white"
@@ -707,7 +709,7 @@ class plot1d(plot):
         # add a label for line(s)
         if self.legend is not None:
             if self.legend != "":
-                self.ax.legend(loc="best",fancybox=True)
+                self.ax.legend(loc="best",fancybox=True,ncol=self.ncol)
 
         # format labels
         # -- on which axis?
