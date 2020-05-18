@@ -32,7 +32,7 @@ mpl.rcParams['font.family'] = "serif"
 mpl.rcParams['contour.negative_linestyle'] = "dashed" # ou "solid"
 mpl.rcParams['verbose.level'] = "silent"
 mpl.rcParams['lines.linewidth'] = 1.5
-mpl.rcParams['lines.markersize'] = 10
+mpl.rcParams['lines.markersize'] = 2 #10
 mpl.rcParams['xtick.major.pad'] = 10
 mpl.rcParams['ytick.major.pad'] = 10
 
@@ -187,6 +187,10 @@ def changefont(num):
 # a function to change markersize
 def changemarkersize(num):
     mpl.rcParams['lines.markersize'] = num
+
+# a function to change markersize
+def changelinewidth(num):
+    mpl.rcParams['lines.linewidth'] = num
 
 # continuity with matplotlib
 def close():
