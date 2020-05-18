@@ -49,6 +49,7 @@ parser.add_option('-c','--contour',action='store',dest='contour',type="string",d
 parser.add_option('-i','--vecx',action='store',dest='vecx',type="string",default=None,help="one 'variable' for wind vector x component")
 parser.add_option('-j','--vecy',action='store',dest='vecy',type="string",default=None,help="one 'variable' for wind vector y component")
 parser.add_option('-m','--mult',action='store',dest='mult',type="float",default=None,help="multiplicative factor on field")
+parser.add_option('--pow',action='store',dest='pow',type="float",default=None,help="exponent power on field")
 parser.add_option('-a','--add',action='store',dest='add',type="float",default=None,help="additive factor on field")
 parser.add_option('-o','--output',action='store',dest='filename',type="string",default=None,help="name of output files")
 parser.add_option('-d','--directory',action='store',dest='folder',type="string",default="./",help="directory of output files")
@@ -127,6 +128,7 @@ user.retrieve()
 # some possible operations
 if opt.add is not None: user = user + opt.add
 if opt.mult is not None: user = user * opt.mult
+if opt.pow is not None: user = user ** opt.pow
 # get some options
 user.superpose = opt.superpose
 user.filename = opt.filename

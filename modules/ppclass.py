@@ -2103,6 +2103,8 @@ class onerequest():
  
         if   "pert" in self.compute: 
            self.field = ppcompute.perturbation(self.field,axis=zeaxis,mm=mm)
+        if   "log10" in self.compute: 
+           self.field = ppcompute.log10(self.field)
         elif "diff" in self.compute:
            dadiff = np.diff(self.field,axis=zeaxis)
            # (diff ouput has one value less in impacted dimension. fix this.)

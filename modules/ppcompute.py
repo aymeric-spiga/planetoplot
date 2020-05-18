@@ -36,6 +36,18 @@ def findset(whereset,string="planetoplot"):
 #### WITH SUPPORT FOR NaN VALUES ####
 #####################################
 
+## compute log10 of field
+## author DB + JVO
+def log10(field): 
+        if field is None: return None
+        if type(field).__name__=='MaskedArray':
+              field.set_fill_value(np.NaN)
+              return np.ma.array(np.log10(field))
+#        elif (np.isnan(field) and (type(field).__name__ not in 'MaskedArray')):
+#              return np.ma.masked_invalid(np.log10(field))
+        else: return np.log10(field)
+
+## compute max
 ## compute min
 ## author AS + AC
 def min(field,axis=None): 
