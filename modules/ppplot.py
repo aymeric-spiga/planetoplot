@@ -1212,7 +1212,7 @@ class plot2d(plot):
                                     scale=self.wscale*reducevec,width=widthvec )
                 # make vector key.
                 #keyh = 1.025 ; keyv = 1.05 # upper right corner over colorbar
-                keyh = 0.97 ; keyv = 1.06
+                keyh = 0.93 ; keyv = 1.07
                 #keyh = 0.97 ; keyv = 1.11
                 #keyh = -0.03 ; keyv = 1.08 # upper left corner
 
