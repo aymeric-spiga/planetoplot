@@ -36,6 +36,18 @@ def findset(whereset,string="planetoplot"):
 #### WITH SUPPORT FOR NaN VALUES ####
 #####################################
 
+## compute log10 of field
+## author DB + JVO
+def log10(field): 
+        if field is None: return None
+        if type(field).__name__=='MaskedArray':
+              field.set_fill_value(np.NaN)
+              return np.ma.array(np.log10(field))
+#        elif (np.isnan(field) and (type(field).__name__ not in 'MaskedArray')):
+#              return np.ma.masked_invalid(np.log10(field))
+        else: return np.log10(field)
+
+## compute max
 ## compute min
 ## author AS + AC
 def min(field,axis=None): 
@@ -119,6 +131,28 @@ def meanbin(y,x,bins):
     ## RETURN A NUMPY ARRAY
     meanvalues = np.array(meanvalues)
     return meanvalues
+
+## compute rolling mean
+## author DB
+## --
+## sfield,scoord = rollingmean(field,coord)
+## --
+def rollingmean(field,coord,axis=None,n=None):
+    ret = np.cumsum(field, axis=axis, dtype=float)
+    rec = np.cumsum(coord, dtype=float)
+    rec[n:] = rec[n:] - rec[:-n]
+    if axis == 0:
+       ret[n:,:,:,:] = ret[n:,:,:,:] - ret[:-n,:,:,:]
+       return ret[n:,:,:,:] / n, rec[n:] / n
+    if axis == 1:
+       ret[:,n:,:,:] = ret[:,n:,:,:] - ret[:,:-n,:,:]
+       return ret[:,n:,:,:] / n, rec[n:] / n
+    if axis == 2:
+       ret[:,:,n:,:] = ret[:,:,n:,:] - ret[:,:,:-n,:]
+       return ret[:,:,n:,:] / n, rec[n:] / n
+    if axis == 3:
+       ret[:,:,:,n:] = ret[:,:,:,n:] - ret[:,:,:,:-n]
+       return ret[:,:,:,n:] / n, rec[n:] / n
 
 ## compute perturbation to mean
 ## -- the whole dimension must exist!
