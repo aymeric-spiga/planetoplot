@@ -41,6 +41,7 @@ parser.add_option('--period',action='store_true',dest='period',default=False,hel
 parser.add_option('--ndom',action='store',dest='ndom',type="int",default=10,help="print info for the NDOM dominant modes (default:10)")
 parser.add_option('--noplot',action='store_true',dest='noplot',default=False,help="do not plot anything, just output dominant modes")
 parser.add_option('--nutab',action='store',dest='nutab',type="int",default=1,help="dispersion relation to include (0,1,2 ; default:1)")
+parser.add_option('--cycle',action='store_true',dest='cycle',default=False,help="use unit cycle instead of degree for longitude")
 
 ## get planetoplot-like options
 parser = ppplot.opt(parser) # common options for plots
@@ -51,6 +52,13 @@ parser = ppplot.opt2d(parser) # common options for plots
 infile = args[0]
 
 ## customize default behaviour for this script
+if opt.cycle:
+  fac = 1.
+  unitlon = "cy"
+else:
+  fac = 360.
+  unitlon = "^{\circ}"
+#
 if opt.colorbar is None: 
   opt.colorbar = "CMRmap"
 else: 
@@ -58,7 +66,7 @@ else:
 #
 if opt.ylabel is None: 
  if not opt.period:
-  opt.ylabel = r"frequency $\sigma$ ($^{\circ}$ "+opt.unit+"$^{-1}$)"
+  opt.ylabel = r"frequency $\sigma$ ($"+unitlon+"$ "+opt.unit+"$^{-1}$)"
  else:
   opt.ylabel = r"period ("+opt.unit+")"
 #
@@ -137,8 +145,8 @@ dx = 1./nx
 # data points each opt.dt time units --> result in (time unit)^-1
 lowerperiod = 4.*opt.dt # Nyquist rate
 if opt.ymax is not None: 
-  lowerperiod = 360./opt.ymax
-higherperiod = opt.dt*float(nt-1)/2. # half size of sample
+  lowerperiod = fac/opt.ymax
+higherperiod = opt.dt*float(nt-1)/2.2 # half size of sample (and 10% not to be at limit)
 
 ## PERFORM 2D FFT
 ## http://docs.scipy.org/doc/scipy/reference/fftpack.html
@@ -203,7 +211,7 @@ else:
 fifi = open(txtfile, "w")
 fifi.write(opt.title+"\n")
 fifi.write("---------------------------------------\n")
-fifi.write("%4s & %8s & %8s & %8s \\\\ \hline \n" % ("$s$","$\sigma \, (^{\circ}$/"+opt.unit+")","period ("+opt.unit+")","log(SP)"))
+fifi.write("%4s & %8s & %8s & %8s \\\\ \hline \n" % ("$s$","$\sigma \, ("+unitlon+"$/"+opt.unit+")","period ("+opt.unit+")","log(SP)"))
 #fifi.write("---------------------------------------\n")
 # -- initialize while loop
 search = np.empty_like(spec) ; search[:,:] = spec[:,:]
@@ -224,7 +232,7 @@ while itit <= opt.ndom:
   else: reliable = "o"
   # -- print result
   if reliable == "o":
-    fifi.write("%+4.0f & %8.1f & %8.0f & %8.1f \\\\ \n" % (dominant_wn,360.*dominant_fq,1./dominant_fq,np.log10(spower)))
+    fifi.write("%+4.0f & %8.1f & %8.1f & %8.1f \\\\ \n" % (dominant_wn,fac*dominant_fq,1./dominant_fq,np.log10(spower)))
     search[ij[0],:] = -9999. # remove wavenumber found (otherwise loop could find other maxima for this wn)
     if spower > spowermax: spowermax = spower
   # -- iterate
@@ -240,9 +248,9 @@ print(open(txtfile, "r").read())
 ## COMPUTE FREQUENCY/PERIOD AXIS
 if not opt.period:
   # frequency: longitude degree per UNIT
-  spect = 360.*spect
-  if opt.ymax is None: opt.ymax = 360./lowerperiod
-  elif opt.ymin is None: opt.ymin = 360./higherperiod
+  spect = fac*spect
+  if opt.ymax is None: opt.ymax = fac/lowerperiod
+  elif opt.ymin is None: opt.ymin = fac/higherperiod
 else:
   # period: UNIT
   spect = 1./(spect)
@@ -311,7 +319,7 @@ if (opt.reldis):
   n = 500
   specx = np.linspace(limxmin,limxmax,2*n)
   spect = np.linspace(spect.min(),spect.max(),n)
-  spect = spect / 360. # convert back from deglon/unit to cycle/unit
+  spect = spect / fac # convert back from deglon/unit to cycle/unit
   s,sigma = np.meshgrid(specx,spect)
 
   # a few general settings for plots
@@ -323,7 +331,7 @@ if (opt.reldis):
   ## COMPUTE FREQUENCY/PERIOD AXIS
   if not opt.period:
     # frequency: longitude degree per UNIT
-    p.y = 360.*spect
+    p.y = fac*spect
   else:
     # period: UNIT
     p.y = 1./(spect)
