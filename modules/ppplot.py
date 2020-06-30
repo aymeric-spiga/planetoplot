@@ -306,15 +306,15 @@ def bounds(what_I_plot,zevmin,zevmax,miss=9e+10):
 # ---------------------------------------
 def labelmodulo(ax,mod):
     mpl.draw()
-    strtab = []
-    for tick in ax.get_xaxis().get_ticklabels():
-        onetick = tick.get_text()
-        if len(onetick) > 0:
-          num = float(onetick)
-          strtab.append(str(num % mod))
-        elif len(onetick)==0:
-          strtab.append('')
-    ax.get_xaxis().set_ticklabels(strtab)
+    strtab=ax.get_xticks().tolist()
+    print(strtab)
+    for t,tick in enumerate(strtab):
+        if len(str(tick)) > 0:
+          strtab[t] = str(tick % mod)
+        elif len(str(tick))==0:
+          strtab[t]=''
+    ax.set_xticklabels(strtab)
+    print(strtab)
     return ax
 
 # a function to output an ascii file
@@ -762,7 +762,7 @@ class plot1d(plot):
             pass
         ## specific modulo labels
         if self.modx is not None:
-            self.ax = labelmodulo(ax,self.modx)
+            self.ax = labelmodulo(self.ax,self.modx)
 
     # makeshow = make + show
     # -------------------------------
@@ -991,7 +991,7 @@ class plot2d(plot):
                 #ax.yaxis.grid(True, which='both', color='grey')
             ## specific modulo labels
             if self.modx is not None:
-                self.ax = labelmodulo(ax,self.modx)
+                self.ax = labelmodulo(self.ax,self.modx)
         else:
             ax = mpl.gca()
             ## A 2D MAP USING PROJECTIONS (basemap)
