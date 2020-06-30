@@ -307,14 +307,12 @@ def bounds(what_I_plot,zevmin,zevmax,miss=9e+10):
 def labelmodulo(ax,mod):
     mpl.draw()
     strtab=ax.get_xticks().tolist()
-    print(strtab)
     for t,tick in enumerate(strtab):
         if len(str(tick)) > 0:
           strtab[t] = str(tick % mod)
         elif len(str(tick))==0:
           strtab[t]=''
     ax.set_xticklabels(strtab)
-    print(strtab)
     return ax
 
 # a function to output an ascii file
