@@ -199,7 +199,7 @@ class pp():
                       fmt=None,\
                       xp=10,yp=6,\
                       missing=1.e25,\
-                      nopickle=False,\
+                      nopickle=True,\
                       trans=None,back=None,\
                       showcb=None,\
                       logy=None,\
