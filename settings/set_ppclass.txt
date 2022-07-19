@@ -9,7 +9,7 @@ longitude;longi;Longitude;lon;XLONG;XLONG_M;LON
 latitude;lati;Latitude;lat;XLAT;XLAT_M;LAT
   # z-axis: possible names to search for. add in the line with a separating ;
   #
-altitude;Alt;presnivs;bottom_top;altitude_abg;lev;PTOT;vert;p
+altitude;Alt;presnivs;bottom_top;altitude_abg;lev;PTOT;vert;p;level
   # t-axis: possible names to search for. add in the line with a separating ;
   #
 Times;time;Time;Ls;time_counter
