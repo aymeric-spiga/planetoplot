@@ -186,6 +186,7 @@ class pp():
                       res=150.,\
                       xlabel=None,ylabel=None,\
                       xcoeff=None,ycoeff=None,\
+                      xoffset=None,\
                       xmin=None,ymin=None,\
                       xmax=None,ymax=None,\
                       nxticks=10,nyticks=10,\
@@ -268,7 +269,7 @@ class pp():
         self.nopickle = nopickle
         ## here are user-defined plot settings 
         ## -- if not None, valid on all plots in the pp() objects
-        self.xlabel = xlabel ; self.xcoeff = xcoeff
+        self.xlabel = xlabel ; self.xcoeff = xcoeff ; self.xoffset = xoffset
         self.ylabel = ylabel ; self.ycoeff = ycoeff
         self.xmin = xmin ; self.xmax = xmax
         self.ymin = ymin ; self.ymax = ymax
@@ -338,7 +339,7 @@ class pp():
             self.out = other.out
             self.filename = other.filename
             self.folder = other.folder
-            self.xlabel = other.xlabel ; self.xcoeff = other.xcoeff
+            self.xlabel = other.xlabel ; self.xcoeff = other.xcoeff ; self.xoffset = other.xoffset
             self.ylabel = other.ylabel ; self.ycoeff = other.ycoeff
             self.proj = other.proj
             self.blat = other.blat ; self.blon = other.blon
@@ -953,6 +954,8 @@ class pp():
                     if self.div is not None: plobj.div = self.div
                     if self.xlabel is not None: plobj.xlabel = self.xlabel
                     if self.xcoeff is not None: plobj.xcoeff = self.xcoeff
+                    if self.xoffset is not None: plobj.xoffset = self.xoffset
+                    if self.xoffset is not None: plobj.xoffset = self.xoffset
                     if self.ylabel is not None: plobj.ylabel = self.ylabel
                     if self.ycoeff is not None: plobj.ycoeff = self.ycoeff
                     if self.title is not None: plobj.title = self.title
@@ -1100,7 +1103,7 @@ class pp():
                 if self.n == 0: 
                     self.fig.add_subplot(1,1,1) #,axisbg=pl.axisbg) # define one subplot (still needed for user-defined font sizes)
                     sav = pl.xlabel,pl.ylabel,\
-                          pl.xcoeff,pl.ycoeff,\
+                          pl.xcoeff,pl.ycoeff,pl.xoffset,\
                           pl.nxticks,pl.nyticks,\
                           pl.xmin,pl.xmax,\
                           pl.ymin,pl.ymax,\
@@ -1115,7 +1118,7 @@ class pp():
                     # set saved titles and labels
                     if self.plotin is None:
                         pl.xlabel,pl.ylabel,\
-                        pl.xcoeff,pl.ycoeff,\
+                        pl.xcoeff,pl.ycoeff,pl.xoffset,\
                         pl.nxticks,pl.nyticks,\
                         pl.xmin,pl.xmax,\
                         pl.ymin,pl.ymax,\
@@ -1123,7 +1126,7 @@ class pp():
                     else:
                         prev_plot = self.plotin.p[self.n-1]
                         pl.xlabel = prev_plot.xlabel ; pl.ylabel = prev_plot.ylabel
-                        pl.xcoeff = prev_plot.xcoeff ; pl.ycoeff = prev_plot.ycoeff
+                        pl.xcoeff = prev_plot.xcoeff ; pl.ycoeff = prev_plot.ycoeff ; pl.xoffset = prev_plot.xoffset,
                         pl.nxticks = prev_plot.nxticks ; pl.nyticks = prev_plot.nyticks
                         pl.xmin = prev_plot.xmin ; pl.xmax = prev_plot.xmax
                         pl.ymin = prev_plot.ymin ; pl.ymax = prev_plot.ymax
@@ -1348,6 +1351,11 @@ class pp():
             try: self.p[iii].xcoeff = opt.xcoeff[iii]
             except:
                 try: self.p[iii].xcoeff = opt.xcoeff[0]
+                except: pass
+            ###
+            try: self.p[iii].xoffset = opt.xoffset[iii]
+            except:
+                try: self.p[iii].xoffset = opt.xoffset[0]
                 except: pass
             ###
             try: self.p[iii].ycoeff = opt.ycoeff[iii]

@@ -414,6 +414,7 @@ def opt(parser):
   parser.add_option('-U','--units',action='append',dest='units',type="string",default=None,help="units for the field")
   parser.add_option('-F','--fmt',action='append',dest='fmt',type="string",default=None,help="values formatting. ex: '%.0f' '%3.1e'")
   parser.add_option('--xcoeff',action='append',dest='xcoeff',type="float",default=None,help="multiply x axis [not for 2D map]")
+  parser.add_option('--xoffset',action='append',dest='xoffset',type="float",default=None,help="add offset to x axis [not for 2D map]")
   parser.add_option('--ycoeff',action='append',dest='ycoeff',type="float",default=None,help="multiply y axis [not for 2D map]")
   parser.add_option('--xmin',action='append',dest='xmin',type="float",default=None,help="min bound x axis [not for 2D map]")
   parser.add_option('--ymin',action='append',dest='ymin',type="float",default=None,help="min bound y axis [not for 2D map]")
@@ -481,6 +482,7 @@ class plot():
                  swaplab=True,\
                  invert=False,\
                  xcoeff=None,\
+                 xoffset=None,\
                  ycoeff=None,\
                  fmt=None,\
                  colorbar="jet",\
@@ -511,6 +513,7 @@ class plot():
         self.swaplab = swaplab # NB: swaplab only used if swap=True
         self.invert = invert
         self.xcoeff = xcoeff
+        self.xoffset = xoffset
         self.ycoeff = ycoeff
         self.fmt = fmt
         self.units = units
@@ -677,6 +680,7 @@ class plot1d(plot):
         else:          x = self.x ; y = self.f
         # coefficients on axis
         if self.xcoeff is not None: x=x*self.xcoeff
+        if self.xoffset is not None: x=x+self.xoffset
         if self.ycoeff is not None: y=y*self.ycoeff
         # check axis
         if x.size != y.size:
@@ -941,6 +945,7 @@ class plot2d(plot):
             else:          x = self.x ; y = self.y
             # coefficients on axis
             if self.xcoeff is not None: x=x*self.xcoeff
+            if self.xoffset is not None: x=x+self.xoffset
             if self.ycoeff is not None: y=y*self.ycoeff
             # make shaded and line contours
             if self.c is not None: 
