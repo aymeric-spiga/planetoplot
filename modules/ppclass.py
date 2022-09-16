@@ -1159,7 +1159,8 @@ class pp():
           try: 
               filehandler = open(savfile, 'w')
               pickle.dump(self.p, filehandler)
-          except IOError: 
+          #except IOError: 
+          except:
               if self.verbose: print("!! WARNING !! Saved object file not written. Probably do not have permission to write here.")
         return self
 
